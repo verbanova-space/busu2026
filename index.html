@@ -170,6 +170,12 @@ table.ex td{padding:6px 10px;border:1px solid var(--line);background:#fff}
 .linkhow>div{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:.9rem}
 .linkhow span{display:block;color:var(--seal);font-weight:700;margin-top:2px}
 @media (max-width:640px){.linkhow{grid-template-columns:1fr}}
+.whybox ol{margin:8px 0 10px;padding-left:22px;font-size:.92rem;line-height:1.6}
+.whyq{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px}
+.whyq>div{border-radius:12px;padding:8px 10px;font-size:.9rem;border:1px solid var(--line)}
+.whyq b{display:block}
+.whyq .ans{display:block;color:var(--seal);font-weight:700;margin-top:2px}
+@media (max-width:640px){.whyq{grid-template-columns:1fr}}
 .cblock pre{white-space:pre-wrap;font-family:inherit;margin:6px 0 8px;background:var(--bg);border-radius:8px;padding:10px;font-size:.95rem}
 .cblock .kw{font-size:.85rem;color:var(--sub)}
 .launch{text-align:center;border:2px solid var(--jade)}
@@ -245,7 +251,7 @@ table.ex td{padding:6px 10px;border:1px solid var(--line);background:#fff}
       </div>
       <div class="grid2">
         <div class="callout gold"><b>가족 한자란?</b><br><b>같은 부수를 가진 한자</b>예요. 부수가 같으면 뜻도 서로 닮아서 한 가족 같아요. 부수 1개마다 <b>2개</b>를 찾아요.<br><span class="muted">예) <span class="hj">足</span>(발 족) 가족: <span class="hj">蹴</span> 찰 축, <span class="hj">路</span> 길 로</span></div>
-        <div class="callout gold"><b>연결 문장이란?</b><br><b>"왜 이 한자에 이 부수가 들어갔을까?"</b>의 답을 쓰는 문장이에요.<br>① 한자 뜻 쓰기 → ② 부수 뜻 쓰기 → ③ 두 뜻을 이어 까닭 쓰기<br><span class="muted">예) <span class="hj">蹴</span>에 <span class="hj">足</span> 부수가 들어간 까닭은 공을 차는 일은 발로 하는 일이기 때문이다.</span></div>
+        <div class="callout gold"><b>연결 문장이란?</b><br><b>"왜 이 한자에 이 부수가 들어갔을까?"</b>의 답을 쓰는 문장이에요.<br>① 한자 뜻 쓰기 → ② 부수 뜻 쓰기 → ③ 두 뜻을 이어 까닭 쓰기<br><b>까닭 찾는 법:</b> 사전 뜻·글자 풀이 읽기 → 부수 뜻 적기 → "무엇으로 해요? / 어떤 움직임? / 무엇의 종류? / 무엇으로 만들어요?" 물어보기<br><span class="muted">예) <span class="hj">蹴</span>에 <span class="hj">足</span> 부수가 들어간 까닭은 공을 차는 일은 발로 하는 일이기 때문이다.</span></div>
       </div>
       <div class="callout red"><b>금지!</b> 입 구(<span class="hj">口</span>)와 부수표 첫째 줄 <span class="hj">一 丨 丶 丿 乙 亅 二 亠 人 儿</span>은 고를 수 없어요. AI가 쓴 내용이나 캔바 AI 기능(매직 미디어 등)도 쓰면 안 돼요.</div>
     </div>
@@ -909,6 +915,21 @@ function renderNote(){
 
     <div class="sec-title"><h3>연결 문장: 왜 이 한자에 이 부수가 들어 있을까?</h3></div>
     <div class="linkhow"><div><b>①</b> 가족 한자 하나 고르고 <b>뜻</b> 떠올리기<span>蹴 = 차다</span></div><div><b>②</b> 부수의 <b>뜻</b> 떠올리기<span>足 = 발</span></div><div><b>③</b> 두 뜻을 이어 <b>까닭</b> 쓰기<span>차는 일은 발로 하니까!</span></div></div>
+    <details class="exbox whybox"><summary>🔎 까닭이 안 떠올라요? 까닭 찾는 법 보기</summary>
+      <ol>
+        <li>사전에서 한자를 눌러 <b>뜻</b>을 읽어요. <b>[자원·글자 풀이]</b>가 있으면 꼭 읽기<br><span class="muted"><span class="hj">蹴</span> = <span class="hj">足</span>(뜻을 맡음) + <span class="hj">就</span>(소리를 맡음) → <b>부수 쪽이 뜻의 힌트!</b></span></li>
+        <li>부수의 <b>본래 의미</b>를 옆에 적어요 <span class="muted">(<span class="hj">足</span> = 발)</span></li>
+        <li>두 뜻을 나란히 두고 아래 <b>질문 카드</b>로 물어봐요</li>
+        <li>찾은 답을 <b>까닭</b> 칸에 써요</li>
+      </ol>
+      <div class="whyq">
+        <div style="background:var(--blue-soft)"><b>① 무엇으로 해요?</b><span class="hj">蹴</span> 차다 ← <span class="hj">足</span> 발<span class="ans">→ 발로 차니까</span></div>
+        <div style="background:var(--jade-soft)"><b>② 어떤 움직임에서 나와요?</b><span class="hj">超</span> 뛰어넘다 ← <span class="hj">走</span> 달리다<span class="ans">→ 달려서 뛰어넘으니까</span></div>
+        <div style="background:var(--gold-soft)"><b>③ 무엇의 한 종류예요?</b><span class="hj">鯉</span> 잉어 ← <span class="hj">魚</span> 물고기<span class="ans">→ 잉어는 물고기니까</span></div>
+        <div style="background:var(--seal-soft)"><b>④ 무엇으로 만들어요?</b><span class="hj">硯</span> 벼루 ← <span class="hj">石</span> 돌<span class="ans">→ 벼루는 돌로 만드니까</span></div>
+      </div>
+      <div class="callout" style="background:#fff;border:1px solid var(--line);margin:0"><b>막혔을 때</b> ① 뜻이 여러 개면 부수와 가까운 뜻 고르기 ② 그 한자가 들어간 낱말 뜻에서 힌트 찾기 ③ 그래도 안 보이면 <b>다른 가족 한자로 바꾸기</b> (모양만 빌린 한자도 있어요) ④ 지어내지 말고 <b>사전 풀이에 근거</b>하기</div>
+    </details>
     <div class="fgrid">
       <div><label class="f" for="lH">한자 고르기</label><select class="in" id="lH" data-l="h"><option value="">고르기</option>${hOpts.map(c => `<option value="${esc(c)}" ${n.link.h===c?'selected':''}>${esc(c)}</option>`).join('')}</select></div>
       <div class="span4" style="grid-column:2/-1"><label class="f" for="lWhy">까닭</label><input class="in" id="lWhy" data-l="why" value="${esc(n.link.why)}" placeholder="예: 공을 차는 일은 발로 하는 일이기"></div>
