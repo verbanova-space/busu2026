@@ -329,6 +329,18 @@ const LINK_OX = `<div class="okx" style="grid-template-columns:1fr 1fr 1fr;margi
   <div class="x"><b>X 까닭이 없어요</b><br>蹴에 足이 들어간 까닭은 足 부수이기 때문이다.</div>
   <div class="x"><b>X 뜻만 썼어요</b><br>蹴은 '찰 축'이다.</div>
   <div class="o"><b>O 두 뜻을 이었어요</b><br>차는 일은 발로 하기 때문이다.</div></div>`;
+// 까닭 찾는 법: 순서 4단계 + 질문 카드 4장 + 막혔을 때
+const WHY_STEPS = `
+  <div class="step"><i>1</i><p>사전에서 한자를 눌러 <b>뜻</b>을 읽어요. <b>[자원·글자 풀이]</b>가 있으면 꼭 읽기<br><span class="sub">蹴 = 足(뜻을 맡음) + 就(소리를 맡음) → <b>부수 쪽이 뜻의 힌트</b></span></p></div>
+  <div class="step"><i>2</i><p>부수의 <b>본래 의미</b>를 옆에 적어요 <span class="sub">足 = 발</span></p></div>
+  <div class="step"><i>3</i><p>두 뜻을 나란히 두고 <b>질문 카드</b>로 물어봐요<br><span class="sub">"차다는 무엇으로 해요?" → "발로!"</span></p></div>
+  <div class="step"><i>4</i><p>찾은 답을 <b>문장 틀</b>에 넣어요<br><span class="sub">(한자)에 (부수) 부수가 들어간 까닭은 (답) 때문이다.</span></p></div>`;
+const WHY_Q = (sz='1em') => `<div class="grid g2" style="gap:.5em;font-size:${sz}">
+  <div class="box blue" style="padding:.45em .75em"><b class="t">① 무엇으로 해요?</b>${H('蹴')} 차다 ← ${H('足')} 발<br><b>→ 발로 차니까</b></div>
+  <div class="box green" style="padding:.45em .75em"><b class="t">② 어떤 움직임에서 나와요?</b>${H('超')} 뛰어넘다 ← ${H('走')} 달리다<br><b>→ 달려서 뛰어넘으니까</b></div>
+  <div class="box gold" style="padding:.45em .75em"><b class="t">③ 무엇의 한 종류예요?</b>${H('鯉')} 잉어 ← ${H('魚')} 물고기<br><b>→ 잉어는 물고기니까</b></div>
+  <div class="box red" style="padding:.45em .75em"><b class="t">④ 무엇으로 만들어요?</b>${H('硯')} 벼루 ← ${H('石')} 돌<br><b>→ 벼루는 돌로 만드니까</b></div></div>`;
+const WHY_STUCK = `<div class="box" style="padding:.45em .9em;margin-top:.5em"><b>막혔을 때</b> &nbsp;① 뜻이 여러 개면 <b>부수와 가까운 뜻</b>을 골라요 &nbsp;② 그 한자가 들어간 <b>낱말 뜻</b>에서 힌트 찾기 &nbsp;③ 그래도 안 보이면 <b>다른 가족 한자로 바꾸기</b> (모양만 빌린 한자도 있어요) &nbsp;④ 지어내지 말고 <b>사전 풀이에 근거</b>해요</div>`;
 
 const L = [
 /* ---------- 1차시 ---------- */
@@ -393,6 +405,10 @@ const L = [
    <p style="margin:0 0 .2em">가족 한자의 뜻과 부수의 뜻을 <b>이어서 까닭</b>을 쓰는 문장이에요. 3단계로 만들어요.</p>
    ${LINK_HOW}${LINK_OX}`,
   n:'정답이 하나가 아닙니다. "한자 뜻 ↔ 부수 뜻"이 이어지면 OK. 학생에게 走(달릴 주)-超(뛰어넘을 초)로 함께 만들어 보게 해도 좋아요: 뛰어넘으려면 힘껏 달려야 하니까.'},
+ {t:180, ex:'note', hl:['fam','link'], h: `<div class="kicker">예시로 배우기 · 「축구하는 나」 6 / 8 (이어서)</div>${stepper(6)}<h1 style="margin:0 0 .25em;font-size:2.05em">까닭은 어떻게 찾을까? — 4단계 + 질문 카드</h1>
+   <div class="grid" style="grid-template-columns:1fr 1.05fr;gap:1.1em;align-items:start"><div>${WHY_STEPS}</div>
+   <div><p style="margin:0 0 .3em;font-weight:900">질문 카드: 한자 뜻과 부수 뜻은 어떤 사이일까?</p>${WHY_Q('.95em')}</div></div>${WHY_STUCK}`,
+  n:'핵심: 대부분의 한자는 "뜻을 맡은 부분(부수) + 소리를 맡은 부분"으로 되어 있어(형성자), 부수가 뜻의 힌트입니다. 질문 카드 4장 중 하나만 맞아도 까닭이 나옵니다. 네이버 한자사전에서 한자를 누른 뒤 아래쪽 글자 풀이(자원)를 함께 보여 주세요. 까닭이 안 보이는 한자는 억지로 지어내지 말고 다른 가족 한자로 바꾸게 합니다.'},
  {t:90, ex:'note', hl:['src'], h: stepSlide(7, '출처 2개 이상 쓰기', `
    <div class="step"><i>1</i><p><b>부수표</b> + <b>네이버 한자사전</b>처럼 2곳 이상</p></div>
    <div class="step"><i>2</i><p>두 자료에서 부수가 <b>같은지 비교</b>해요</p></div>
@@ -458,6 +474,13 @@ const L = [
   ${LINK_HOW}${LINK_OX}
   <p style="margin:.6em 0 0;font-size:1.1em">함께 해 봐요: ${H('超')}(뛰어넘을 초) + ${H('走')}(달릴 주) → <b>?</b></p>`,
   n:'함께 해 보기 정답 예: 超에 走 부수가 들어간 까닭은 뛰어넘으려면 힘껏 달려야 하기 때문이다. 정답은 하나가 아닙니다.'},
+ {t:180, ex:'note', hl:['link'], h:`<div class="kicker">까닭 찾기 연습 · 질문 카드로 물어봐요</div><h1 style="margin:.05em 0 .3em">까닭이 안 떠오르면 이렇게!</h1>
+  <div class="grid" style="grid-template-columns:1.15fr 1fr;gap:1.1em;align-items:start">
+   <div>${WHY_Q('.95em')}</div>
+   <div><div class="box blue" style="padding:.5em .9em"><b class="t">찾는 순서</b><p style="margin:0">① 사전에서 한자 <b>뜻</b> + <b>[자원·글자 풀이]</b><br>② 부수의 <b>본래 의미</b> 적기<br>③ <b>질문 카드</b>로 두 뜻 잇기<br>④ <b>문장 틀</b>에 넣기</p></div>
+    <div class="frame" style="margin-top:.5em;font-size:1.15em">함께 해 봐요<br>${H('跳')}(뛸 도) + ${H('足')}(발) → <b>?</b><br>${H('睡')}(잘 수) + ${H('目')}(눈) → <b>?</b></div></div></div>
+  ${WHY_STUCK}`,
+  n:'연습 정답 예: 跳에 足 부수가 들어간 까닭은 뛰는 일은 발로 하기 때문이다(질문 ①). 睡에 目 부수가 들어간 까닭은 잠을 잘 때 눈을 감기 때문이다(질문 ②). 학생이 노트를 쓰다 막히면 이 화면을 다시 띄워 두세요.'},
  {t:180, h:`<div class="kicker">감점 막기</div><h1 style="margin-bottom:.4em">한자는 모양 · 뜻 · 음 모두!</h1>
   <div class="okx"><div class="o"><b>O</b><br><span class="hj" style="font-size:1.6em">路</span> 길 로</div><div class="x"><b>X 뜻 빠짐</b><br><span class="hj" style="font-size:1.6em">路</span> 로</div><div class="x"><b>X 모양 빠짐</b><br>길 로</div><div class="x"><b>X 명칭 칸에 한자만</b><br>명칭: <span class="hj">足</span> → '발 족'</div></div>
   <div class="grid g2" style="margin-top:1em"><div class="box red"><b class="t">부수 함정 조심</b><p style="margin:0">足 칸에 <span class="hj">促</span>? → <b>亻부</b>! &nbsp;木 칸에 <span class="hj">休</span>? → <b>亻부</b>!<br>모양이 들어 있어도 부수는 다를 수 있어요. 웹앱이 알려 줘요.</p></div>
@@ -606,7 +629,7 @@ function renderPanel(){
   document.querySelectorAll('[data-extab]').forEach(b => b.classList.toggle('on', b.dataset.extab === exTab));
   $('exBody').innerHTML = exTab === 'note'
     ? `<p class="sub" style="margin:0 0 6px">테마 <b>축구하는 나</b> · 부수 3개 足·走·目 중 <b>足</b>을 채운 탐구 노트</p>${exSheet(exHl)}
-       <div class="box gold" style="margin-top:8px;padding:8px 10px;font-size:.92em"><b>가족 한자</b> = 같은 부수를 가진 한자 (부수마다 2개)<br><b>연결 문장</b> = 한자 뜻 + 부수 뜻 → 까닭 <span class="sub">예) 蹴(차다)+足(발) → 차는 일은 발로 하니까</span></div>`
+       <div class="box gold" style="margin-top:8px;padding:8px 10px;font-size:.92em"><b>가족 한자</b> = 같은 부수를 가진 한자 (부수마다 2개)<br><b>연결 문장</b> = 한자 뜻 + 부수 뜻 → 까닭 <span class="sub">예) 蹴(차다)+足(발) → 차는 일은 발로 하니까</span><br><b>까닭 찾기</b> = 사전 뜻·글자 풀이 → 부수 뜻 → 질문 "무엇으로 해요? / 어떤 움직임? / 무엇의 종류? / 무엇으로 만들어요?"</div>`
     : `<p class="sub" style="margin:0 0 6px">캔바 카드뉴스 4쪽 · 1쪽 표지 + 2~4쪽 카드 (한 쪽에 부수 1개)</p>${deckMock(exHl)}`;
   const first = $('exBody').querySelector('.hl');
   if (first) first.scrollIntoView({block:'nearest', behavior:'smooth'});
