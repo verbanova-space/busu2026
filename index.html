@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>부수 캐릭터 카드 연구소</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&family=Noto+Serif+KR:wght@700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#f5f1e8;--paper:#fffdf8;--ink:#24211c;--sub:#6d675c;--line:#e3dccd;--line2:#cfc6b3;
+  --seal:#b3362c;--seal-soft:#f8e4df;--jade:#2a6b58;--jade-soft:#dff0e8;--gold:#94650a;--gold-soft:#fbefd2;
+  --blue:#2b5aa0;--blue-soft:#e4ecf8;--shadow:0 1px 2px rgba(40,30,10,.06),0 4px 14px rgba(40,30,10,.06);
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1b1a17;--paper:#25231f;--ink:#efe9dc;--sub:#b3ab9b;--line:#3a3630;--line2:#4a453c;
+    --seal:#e0685d;--seal-soft:#3b2421;--jade:#62b89c;--jade-soft:#1f3530;--gold:#e0b04f;--gold-soft:#3a3020;
+    --blue:#7fa6e6;--blue-soft:#1f2a3c;--shadow:0 1px 2px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1b1a17;--paper:#25231f;--ink:#efe9dc;--sub:#b3ab9b;--line:#3a3630;--line2:#4a453c;
+  --seal:#e0685d;--seal-soft:#3b2421;--jade:#62b89c;--jade-soft:#1f3530;--gold:#e0b04f;--gold-soft:#3a3020;
+  --blue:#7fa6e6;--blue-soft:#1f2a3c;--shadow:0 1px 2px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+html{font-size:16px}
+html.big{font-size:19px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans KR',sans-serif;line-height:1.6;-webkit-text-size-adjust:100%}
+.hj{font-family:'Noto Serif KR','Batang',serif;font-weight:900}
+.hidden{display:none!important}
+button{font:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:var(--ink)}
+a{color:var(--blue)}
+
+/* header */
+.top{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--line);box-shadow:var(--shadow)}
+.top-in{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;gap:12px;align-items:center;min-width:0}
+.logo{width:44px;height:44px;flex:0 0 44px;border-radius:10px;background:var(--seal);color:#fff;display:grid;place-items:center;font-family:'Noto Serif KR',serif;font-weight:900;font-size:26px;transform:rotate(-4deg)}
+.eyebrow{font-size:.75rem;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+h1{font-size:1.2rem;margin:0;line-height:1.3}
+.top-actions{display:flex;gap:8px;align-items:center}
+.mini-timer{font-variant-numeric:tabular-nums;font-weight:800;background:var(--ink);color:var(--paper);padding:4px 10px;border-radius:8px}
+.steps{max-width:1100px;margin:0 auto;padding:0 16px 10px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.steps::-webkit-scrollbar{display:none}
+.step-btn{flex:0 0 auto;border:1px solid var(--line);background:var(--bg);color:var(--sub);border-radius:999px;padding:6px 14px;font-size:.88rem;font-weight:700;display:flex;gap:6px;align-items:center}
+.step-btn .n{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--line);color:var(--ink);font-size:.75rem}
+.step-btn .tagline{font-weight:500;font-size:.75rem;opacity:.8}
+.step-btn.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.step-btn.on .n{background:var(--seal);color:#fff}
+.step-btn.done .n{background:var(--jade);color:#fff}
+
+/* layout */
+main{max-width:1100px;margin:0 auto;padding:20px 16px 110px}
+.panel{display:none}
+.panel.on{display:block}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);margin-bottom:16px}
+h2{font-size:1.35rem;margin:0 0 4px;line-height:1.35}
+h3{font-size:1.05rem;margin:0 0 8px}
+.lead{color:var(--sub);margin:0 0 14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--sub);font-size:.88rem}
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:2px 10px;font-size:.78rem;font-weight:700}
+.p-red{background:var(--seal-soft);color:var(--seal)} .p-green{background:var(--jade-soft);color:var(--jade)} .p-gold{background:var(--gold-soft);color:var(--gold)} .p-blue{background:var(--blue-soft);color:var(--blue)}
+.btn{border:0;border-radius:10px;padding:10px 16px;font-weight:700;background:var(--ink);color:var(--paper);min-height:42px}
+.btn.seal{background:var(--seal);color:#fff}
+.btn.jade{background:var(--jade);color:#fff}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line2)}
+.btn.sm{padding:6px 12px;min-height:34px;font-size:.88rem}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+label.f{display:block;font-size:.82rem;font-weight:700;margin:0 0 4px;color:var(--sub)}
+.in{width:100%;border:1px solid var(--line2);background:var(--paper);border-radius:10px;padding:9px 11px;min-height:42px}
+.in:focus{outline:2px solid var(--blue);outline-offset:1px;border-color:transparent}
+textarea.in{min-height:70px;resize:vertical}
+.in.hjin{font-family:'Noto Serif KR',serif;font-weight:900;font-size:1.3rem;text-align:center;padding:4px}
+.callout{border-radius:12px;padding:12px 14px;font-size:.92rem;margin:10px 0}
+.callout.red{background:var(--seal-soft)} .callout.green{background:var(--jade-soft)} .callout.gold{background:var(--gold-soft)} .callout.blue{background:var(--blue-soft)}
+
+/* step 0 quiz */
+.quiz{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.qcard{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--paper);text-align:center}
+.qcard .big{font-size:3.2rem;line-height:1.1;margin:4px 0}
+.qcard .opts{display:flex;gap:8px;justify-content:center;margin:8px 0}
+.qopt{font-family:'Noto Serif KR',serif;font-weight:900;font-size:1.5rem;width:72px;min-height:56px;line-height:1.2;padding:4px 0;border-radius:12px;border:2px solid var(--line2);background:var(--bg);color:var(--ink)}
+.qopt.right{border-color:var(--jade);background:var(--jade-soft)}
+.qopt.wrong{border-color:var(--seal);background:var(--seal-soft)}
+.qexp{font-size:.85rem;text-align:left;margin-top:6px}
+
+/* step 1 */
+.themes{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line2);background:var(--paper);color:var(--ink);border-radius:999px;padding:7px 14px;font-weight:700;font-size:.9rem;min-height:40px}
+.chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tray{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0}
+.slot{border:2px dashed var(--line2);border-radius:12px;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;padding:8px;text-align:center}
+.slot.full{border-style:solid;border-color:var(--ink);background:var(--paper)}
+.slot .hj{font-size:2.6rem;line-height:1}
+.slot .x{position:absolute;top:4px;right:6px;border:0;background:transparent;color:var(--seal);font-weight:900;font-size:1.1rem}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;max-height:420px;overflow:auto;padding:2px}
+.rtile{border:1px solid var(--line);background:var(--paper);border-radius:12px;padding:8px 4px;text-align:center;color:var(--ink)}
+.rtile .hj{font-size:1.9rem;line-height:1.15;display:block}
+.rtile .nm{font-size:.74rem;color:var(--sub);display:block;line-height:1.3}
+.rtile.sel{border:2px solid var(--seal);background:var(--seal-soft)}
+.rtile.forb{opacity:.45;position:relative;background:var(--bg)}
+.rtile.forb::after{content:'금지';position:absolute;top:3px;right:4px;font-size:.62rem;font-weight:800;color:var(--seal)}
+.check-res{margin-top:8px}
+
+/* step 2 */
+.rtabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.rtab{border:1px solid var(--line2);background:var(--paper);border-radius:12px;padding:8px 14px;display:flex;align-items:center;gap:10px;color:var(--ink)}
+.rtab .hj{font-size:1.6rem}
+.rtab.on{border:2px solid var(--ink)}
+.prog{font-size:.75rem;font-weight:800;color:var(--sub)}
+.prog.full{color:var(--jade)}
+.fgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.fgrid .span2{grid-column:span 2}
+.fgrid .span4{grid-column:1/-1}
+.hrow{display:grid;grid-template-columns:34px 76px 1fr 90px;gap:8px;align-items:center;margin-bottom:6px}
+.hrow .num{font-weight:800;text-align:center}
+.hstat{grid-column:2/-1;font-size:.82rem;margin:-2px 0 8px}
+.hstat .ok{color:var(--jade);font-weight:700}.hstat .bad{color:var(--seal);font-weight:700}.hstat .q{color:var(--gold);font-weight:700}
+.srcs{display:flex;flex-wrap:wrap;gap:6px 16px}
+.srcs label{display:flex;gap:6px;align-items:center;font-size:.92rem;min-height:34px}
+.srcs input{width:20px;height:20px}
+.sec-title{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:18px 0 8px;padding-top:12px;border-top:1px dashed var(--line2)}
+.sec-title h3{margin:0}
+.sentence{background:var(--bg);border-radius:10px;padding:10px 12px;margin-top:8px;font-size:.95rem}
+
+/* step 3 cards */
+.deck{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:#fff;border:1px solid #d9d2c3;border-radius:12px;padding:12px;color:#24211c}
+.pc{border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;border:2px solid var(--pc,#b3362c);background:#fff;min-height:330px}
+.pc .bar{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:.85rem}
+.pc .art{flex:0 0 auto;aspect-ratio:1/0.78;border-radius:10px;background:var(--pcs,#f8e4df);display:grid;place-items:center;position:relative;overflow:hidden}
+.pc .art .hj{font-size:5rem;color:var(--pc,#b3362c);opacity:.9}
+.pc .art .idea{position:absolute;left:6px;right:6px;bottom:6px;font-size:.7rem;background:rgba(255,255,255,.85);border-radius:6px;padding:2px 6px;text-align:center}
+.pc .intro{font-size:.82rem;font-weight:700}
+.pc .fam{display:flex;gap:6px;flex-wrap:wrap;font-size:.8rem}
+.pc .fam span{background:#f4f1ea;border-radius:6px;padding:1px 6px}
+.pc .fam b{font-family:'Noto Serif KR',serif;font-weight:900}
+.pc .link{font-size:.75rem;color:#5d574c}
+.pc.cover{justify-content:center;text-align:center;background:var(--pcs,#f8e4df)}
+.pc.cover .ttl{font-size:1.2rem;font-weight:800}
+.pc.cover .rads{font-family:'Noto Serif KR',serif;font-weight:900;font-size:2.6rem;letter-spacing:.2em;color:var(--pc)}
+.swatches{display:flex;gap:6px}
+.sw{width:30px;height:30px;border-radius:50%;border:2px solid transparent}
+.sw.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--paper) inset}
+
+/* step 4 */
+.checklist li{list-style:none;display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px dashed var(--line)}
+.checklist{padding:0;margin:0}
+.ck{flex:0 0 26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:.85rem}
+.ck.y{background:var(--jade);color:#fff}.ck.n{background:var(--line);color:var(--sub)}
+.traplog{background:var(--gold-soft);border-radius:10px;padding:10px 12px;font-size:.92rem}
+
+.cflow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.cflow div{background:var(--bg);border-radius:12px;padding:10px;font-size:.88rem}
+.cflow b{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--jade);color:#fff;margin-right:6px;font-size:.8rem}
+.cblock{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:var(--paper)}
+.exbox{border:2px dashed var(--line);border-radius:14px;padding:10px 14px;margin:0 0 14px;background:var(--bg)}
+.exbox summary{cursor:pointer;font-weight:800}
+table.ex{width:100%;border-collapse:collapse;font-size:.93rem}
+table.ex th{text-align:left;white-space:nowrap;padding:6px 10px;background:#fff6dc;border:1px solid var(--line);width:1%}
+table.ex td{padding:6px 10px;border:1px solid var(--line);background:#fff}
+.linkhow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 10px}
+.linkhow>div{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:.9rem}
+.linkhow span{display:block;color:var(--seal);font-weight:700;margin-top:2px}
+@media (max-width:640px){.linkhow{grid-template-columns:1fr}}
+.cblock pre{white-space:pre-wrap;font-family:inherit;margin:6px 0 8px;background:var(--bg);border-radius:8px;padding:10px;font-size:.95rem}
+.cblock .kw{font-size:.85rem;color:var(--sub)}
+.launch{text-align:center;border:2px solid var(--jade)}
+.feas{margin-top:6px;font-size:.85rem}
+@media (max-width:760px){.cflow{grid-template-columns:1fr}}
+
+/* pager */
+.pager{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--line);z-index:15}
+.pager-in{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+#stepLabel{font-size:.85rem;color:var(--sub);text-align:center}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(20,16,10,.6);z-index:40;display:flex;align-items:flex-start;justify-content:center;padding:24px 12px;overflow:auto}
+.modal-box{background:var(--paper);border-radius:16px;max-width:760px;width:100%;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.timer-big{font-size:4.4rem;font-weight:900;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:.04em;margin:6px 0}
+#qrBox{width:220px;height:220px;background:#fff;border-radius:12px;display:grid;place-items:center;padding:8px;margin:0 auto}
+#qrBox svg{width:100%;height:100%}
+#exportImg{max-width:100%;border:1px solid var(--line);border-radius:10px;background:#fff}
+.toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:10px;font-weight:700;z-index:60;font-size:.92rem;max-width:90vw;text-align:center}
+
+@media (max-width:760px){
+  .grid2,.deck{grid-template-columns:1fr}
+  .fgrid{grid-template-columns:1fr 1fr}
+  .hrow{grid-template-columns:28px 64px 1fr 72px}
+  h1{font-size:1.05rem}
+  .eyebrow{display:none}
+  .step-btn .tagline{display:none}
+}
+@media (max-width:420px){
+  .tray{grid-template-columns:repeat(3,1fr);gap:6px}
+  .slot .hj{font-size:2rem}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <div class="logo">部</div>
+      <div style="min-width:0">
+        <div class="eyebrow">1학년 한문 수행평가 · 나만의 부수 카드 만들기 (1·2단계)</div>
+        <h1>부수 캐릭터 카드 연구소</h1>
+      </div>
+    </div>
+    <div class="top-actions">
+      <span id="miniTimer" class="mini-timer hidden" title="남은 시간"></span>
+      <button id="teacherBtn" class="btn ghost sm" type="button">교사 도구</button>
+    </div>
+  </div>
+  <nav class="steps" id="steps" aria-label="활동 단계"></nav>
+</header>
+
+<main>
+  <!-- STEP 0 -->
+  <section class="panel" data-panel="0">
+    <div class="card">
+      <span class="pill p-gold">도입 · 모두 함께</span>
+      <h2>부수 탐정 훈련: 이 한자의 부수는?</h2>
+      <p class="lead">모양이 들어 있다고 모두 그 부수는 아니에요. 두 글자 중 진짜 부수를 골라 보세요. 헷갈리면 네이버 한자사전에서 확인!</p>
+      <div class="quiz" id="quiz"></div>
+      <div class="row" style="margin-top:12px;justify-content:space-between">
+        <span id="quizScore" class="muted"></span>
+        <button class="btn ghost sm" type="button" id="quizReset">다시 풀기</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>이번 수행평가는 이렇게 진행해요</h3>
+      <div class="grid2">
+        <div class="callout blue"><b>1단계 · 부수 탐정 탐구 노트</b><br>나만의 테마 정하기 → 부수 3개 고르기 → 명칭·의미·가족 한자 2개·생활 속 낱말·연결 문장·출처 조사<br><span class="muted">평가: 자료의 적절성</span></div>
+        <div class="callout green"><b>2단계 · 부수 캐릭터 카드 (캔바)</b><br>탐구 노트로 캐릭터를 설계하고, 캔바 <b>카드뉴스 4쪽</b>(1쪽 표지 + 2~4쪽 캐릭터 카드) 완성<br><span class="muted">평가: 내용 구성력, 표현력</span></div>
+      </div>
+      <div class="grid2">
+        <div class="callout gold"><b>가족 한자란?</b><br><b>같은 부수를 가진 한자</b>예요. 부수가 같으면 뜻도 서로 닮아서 한 가족 같아요. 부수 1개마다 <b>2개</b>를 찾아요.<br><span class="muted">예) <span class="hj">足</span>(발 족) 가족: <span class="hj">蹴</span> 찰 축, <span class="hj">路</span> 길 로</span></div>
+        <div class="callout gold"><b>연결 문장이란?</b><br><b>"왜 이 한자에 이 부수가 들어갔을까?"</b>의 답을 쓰는 문장이에요.<br>① 한자 뜻 쓰기 → ② 부수 뜻 쓰기 → ③ 두 뜻을 이어 까닭 쓰기<br><span class="muted">예) <span class="hj">蹴</span>에 <span class="hj">足</span> 부수가 들어간 까닭은 공을 차는 일은 발로 하는 일이기 때문이다.</span></div>
+      </div>
+      <div class="callout red"><b>금지!</b> 입 구(<span class="hj">口</span>)와 부수표 첫째 줄 <span class="hj">一 丨 丶 丿 乙 亅 二 亠 人 儿</span>은 고를 수 없어요. AI가 쓴 내용이나 캔바 AI 기능(매직 미디어 등)도 쓰면 안 돼요.</div>
+    </div>
+  </section>
+
+  <!-- STEP 1 -->
+  <section class="panel" data-panel="1">
+    <div class="card">
+      <span class="pill p-blue">1단계</span>
+      <h2>나만의 테마를 정하고 부수 3개 고르기</h2>
+      <p class="lead">내가 좋아하는 것과 이어지는 부수를 고르면 카드가 훨씬 재미있어져요.</p>
+      <div class="grid2" style="grid-template-columns:repeat(3,1fr)">
+        <div><label class="f" for="stClass">반</label><input class="in" id="stClass" inputmode="numeric" placeholder="예: 2"></div>
+        <div><label class="f" for="stNo">번호</label><input class="in" id="stNo" inputmode="numeric" placeholder="예: 15"></div>
+        <div><label class="f" for="stName">이름</label><input class="in" id="stName" placeholder="이름"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>① 테마 고르기</h3>
+      <div class="themes" id="themes"></div>
+      <div class="grid2" style="margin-top:12px">
+        <div><label class="f" for="themeTitle">나의 테마 이름</label><input class="in" id="themeTitle" placeholder="예: 축구하는 나, 우리 집 강아지, 요리왕"></div>
+        <div><label class="f" for="themeWhy">이 테마를 고른 이유</label><input class="in" id="themeWhy" placeholder="예: 매주 축구를 해서 발과 손을 많이 쓰니까"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>② 부수 3개 고르기</h3>
+      <div class="callout blue" style="margin-bottom:10px"><b>예시</b> 테마 <b>축구하는 나</b> → 공을 <b>차는 발</b> <span class="hj">足</span>(발 족) · 경기장을 <b>달리는</b> <span class="hj">走</span>(달릴 주) · 공을 <b>보는 눈</b> <span class="hj">目</span>(눈 목)<br><span class="muted">테마에서 떠오르는 몸·물건·행동을 부수로 바꿔 보세요. 예시 테마와 부수는 그대로 쓰지 않아요!</span></div>
+      <div class="tray" id="tray"></div>
+      <div class="row" style="margin:6px 0 10px">
+        <input class="in" id="radSearch" placeholder="부수 글자나 이름으로 찾기 (예: 水, 나무)" style="flex:1;min-width:180px">
+        <button class="chip" type="button" id="filterTheme">테마 추천만</button>
+        <button class="chip on" type="button" id="filterAll">전체</button>
+      </div>
+      <div class="rgrid" id="rgrid"></div>
+      <div class="callout gold" style="margin-top:12px">
+        <b>목록에 없는 부수를 쓰고 싶다면?</b> 부수표(학습지 1면)에 있는 부수인지 판별해 보세요.
+        <div class="row" style="margin-top:8px">
+          <input class="in" id="customRad" placeholder="부수 글자 또는 이름 (예: 冫, 사람 인)" style="flex:1;min-width:160px">
+          <button class="btn sm" type="button" id="customCheck">판별하기</button>
+        </div>
+        <div class="check-res" id="customRes"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="panel" data-panel="2">
+    <div class="card">
+      <span class="pill p-blue">1단계 · 자료의 적절성</span>
+      <h2>부수 탐정 탐구 노트</h2>
+      <p class="lead">부수마다 칸을 채워요. 앱은 답을 알려 주지 않아요. <b>부수표와 사전에서 찾고</b>, 앱으로는 실수만 점검해요.</p>
+      <details class="exbox" open>
+        <summary>📘 예시 먼저 보기: 「축구하는 나」의 <span class="hj">足</span>(발 족) 탐구 노트</summary>
+        <p class="muted" style="margin:6px 0">예시 테마의 부수 3개: <span class="hj">足</span>(발 족) · <span class="hj">走</span>(달릴 주) · <span class="hj">目</span>(눈 목) — 그중 <span class="hj">足</span>을 이렇게 채웠어요.</p>
+        <table class="ex">
+          <tr><th>부수 · 명칭 · 획수</th><td><span class="hj">足</span> · 발 족 · 7획 <span class="muted">(왼쪽에 올 때 아랫부분이 짧아져요)</span></td></tr>
+          <tr><th>본래 의미</th><td>무릎부터 발까지의 모양을 본뜬 글자 → 발, 걷기·뛰기와 관련</td></tr>
+          <tr><th>가족 한자 2개</th><td><span class="hj">蹴</span> 찰 축 &nbsp;·&nbsp; <span class="hj">路</span> 길 로 <span class="muted">(둘 다 사전에서 足부 확인!)</span></td></tr>
+          <tr><th>생활 속 낱말</th><td><span class="hj">蹴球</span>(축구) - 공을 발로 차서 겨루는 경기</td></tr>
+          <tr><th>연결 문장</th><td><span class="hj">蹴</span>에 <span class="hj">足</span> 부수가 들어간 까닭은 <b>공을 차는 일은 발로 하는 일이기</b> 때문이다.</td></tr>
+          <tr><th>출처</th><td>부수표, 네이버 한자사전</td></tr>
+        </table>
+      </details>
+      <div class="rtabs" id="rtabs"></div>
+      <div id="noteForm"></div>
+    </div>
+    <div class="card">
+      <h3>네이버 한자사전에서 가족 한자 찾는 법</h3>
+      <ol style="margin:0;padding-left:20px">
+        <li>위의 <b>[사전에서 찾기]</b>를 누르거나 네이버 한자사전에 부수를 검색해요.</li>
+        <li><b>[부수·모양자]</b>를 누르고, 아래에서 반드시 <b>[● 부수]</b>를 골라요. (모양자를 고르면 다른 부수의 한자가 섞여요.)</li>
+        <li>한자를 눌러 <b>뜻과 음</b>, 그리고 <b>부수</b> 표시를 확인해요.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="panel" data-panel="3">
+    <div class="card">
+      <span class="pill p-green">3차시 · 2단계 준비</span>
+      <h2>캐릭터 설계: 캔바 열기 전에 정하기</h2>
+      <p class="lead">캐릭터 이름·소개·그림 아이디어를 정하면, 앱이 <b>캔바로 만들 수 있는 아이디어인지</b> 점검하고 캔바 검색어를 알려 줘요. 아래 미리보기는 배치 참고용이에요.</p>
+      <div id="designForm"></div>
+    </div>
+    <div class="card">
+      <div class="row" style="justify-content:space-between;margin-bottom:8px">
+        <h3 style="margin:0">미리보기 (카드뉴스 4쪽 = 1쪽 표지 + 2~4쪽 카드)</h3>
+        <a id="canvaLink" class="btn jade sm hidden" target="_blank" rel="noopener">캔바 템플릿 열기</a>
+      </div>
+      <div class="deck" id="deck"></div>
+    </div>
+    <div class="card">
+      <h3>캔바 규칙</h3>
+      <div class="grid2">
+        <div class="callout green"><b>써도 돼요</b><br>일반 요소(도형·스티커·선), 그리기 도구, 글꼴·색 바꾸기, 내가 찍은 사진</div>
+        <div class="callout red"><b>안 돼요</b><br>매직 미디어(AI 이미지)·매직 라이트(AI 글쓰기) 등 AI 기능, 인터넷의 부수 그림 통째로 가져오기, 부수 글자 빼기</div>
+      </div>
+      <p class="muted" style="margin:6px 0 0">부수 글자는 꼭 <b>텍스트로 크게</b> 넣고, 그 글자 위에 의미가 보이는 요소를 얹어요. 다 만들면 [공유] → [다운로드] → PNG로 저장해 클래스룸에 올려요.</p>
+    </div>
+  </section>
+
+  <!-- STEP 4: CANVA -->
+  <section class="panel" data-panel="4">
+    <div class="card">
+      <span class="pill p-green">3~4차시 · 캔바</span>
+      <h2>캔바로 출발하기 전에</h2>
+      <p class="lead">준비가 다 됐는지 확인하고, 카드에 넣을 글은 <b>복사해서 캔바에 붙여 넣으면</b> 한자를 다시 칠 필요가 없어요.</p>
+      <ul class="checklist" id="readyList"></ul>
+      <div id="readyMsg"></div>
+    </div>
+    <div class="card">
+      <h3>캔바에서는 이 순서로!</h3>
+      <div class="cflow">
+        <div><b>1</b>아래 [캔바 템플릿 열기] → <b>[템플릿 편집]</b>을 누르면 내 사본이 생겨요 (제목에 반·번호·이름)</div>
+        <div><b>2</b><b>1쪽 표지</b>: 이름, 테마, 이유, 부수 3개 (5분) · <b>2쪽 예시</b>(사람 인 亻)를 보고 방법 익히기</div>
+        <div><b>3</b><b>카드 1~3쪽</b>: 한 쪽에 부수 1개씩! 회색 글자를 지우고 아래 글을 붙여 넣기</div>
+        <div><b>4</b>큰 부수 글자 위에 [요소]에서 찾은 그림을 얹어 꾸미기 (카드당 8분)</div>
+        <div><b>5</b><b>예시 쪽 삭제</b> → [공유] → [다운로드] → PNG(4쪽 모두) → 클래스룸에 제출</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>카드에 붙여 넣을 글</h3>
+      <div id="copyBlocks"></div>
+    </div>
+    <div class="card launch">
+      <div class="hj" style="font-size:2.6rem;line-height:1" id="launchRads">部</div>
+      <h2 style="margin:6px 0">준비 완료! 캔바로 가요</h2>
+      <p class="muted" style="margin:0 0 12px">캔바 AI 기능(매직 미디어·매직 라이트)은 쓰지 않기. 부수 글자는 지우지 말고 그 위에 꾸미기!</p>
+      <a id="canvaGo" class="btn seal" style="font-size:1.15rem;padding:14px 28px;text-decoration:none;display:inline-block" target="_blank" rel="noopener">캔바 템플릿 열기 ↗</a>
+      <p class="muted hidden" id="canvaNoLink" style="margin-top:10px">선생님이 칠판에 띄운 QR이나 클래스룸 링크로 캔바 템플릿을 열어 주세요.</p>
+    </div>
+  </section>
+
+  <!-- STEP 5 -->
+  <section class="panel" data-panel="5">
+    <div class="card">
+      <span class="pill p-gold">점검 · 제출</span>
+      <h2>마지막 점검과 성찰</h2>
+      <p class="lead">초록 동그라미가 모두 켜지면 탐구 노트를 이미지로 저장해 제출해요.</p>
+      <ul class="checklist" id="checklist"></ul>
+      <label class="row" style="margin-top:10px;font-weight:700;gap:10px"><input type="checkbox" id="pledge" style="width:22px;height:22px"> AI가 만든 내용을 쓰지 않고 내가 직접 조사했어요.</label>
+      <div class="callout green" style="margin-top:12px"><b>캔바 카드 제출 점검</b> (직접 체크)
+        <div class="srcs" style="margin-top:6px" id="subChecks">
+          <label><input type="checkbox" data-sub="cover"> 1쪽 표지 완성</label>
+          <label><input type="checkbox" data-sub="cards"> 2~4쪽 카드 3장 모두 완성</label>
+          <label><input type="checkbox" data-sub="big"> 부수 글자가 그림 속에 크게 보임</label>
+          <label><input type="checkbox" data-sub="noai"> 캔바 AI 기능 안 씀</label>
+          <label><input type="checkbox" data-sub="png"> 예시 쪽 삭제 후 PNG로 다운로드</label>
+          <label><input type="checkbox" data-sub="submit"> 클래스룸에 제출</label>
+        </div>
+      </div>
+    </div>
+    <div class="card send" id="sendCard">
+      <h3>📮 선생님께 탐구 노트 보내기</h3>
+      <p class="muted" style="margin:0 0 8px">반·번호·이름과 탐구 노트(부수 3개), 캐릭터 설계, 착각한 한자, 성찰이 선생님 구글 시트로 전달돼요. <b>고친 뒤 다시 보내면 새 내용으로 바뀌어요.</b></p>
+      <div id="sendWho" class="callout gold" style="margin:0 0 10px"></div>
+      <button class="btn seal" type="button" id="sendBtn" style="font-size:1.05rem;padding:12px 22px">📮 선생님께 보내기</button>
+      <div id="sendMsg" style="margin-top:8px"></div>
+    </div>
+    <div class="card">
+      <h3>탐정 기록: 내가 처음에 착각한 한자</h3>
+      <div id="trapLog" class="traplog"></div>
+      <label class="f" for="trapNote" style="margin-top:10px">착각했던 한자와 알게 된 점 (직접 쓰기)</label>
+      <input class="in" id="trapNote" placeholder="예: 明을 月부로 생각했는데 사전에서 日부인 것을 확인했다">
+    </div>
+    <div class="card">
+      <h3>성찰</h3>
+      <label class="f" for="ref1">1. 부수를 알면 처음 보는 한자의 뜻을 짐작할 수 있을까요? 내가 조사한 한자로 예를 들어 보세요.</label>
+      <textarea class="in" id="ref1" placeholder="예: 泣은 처음 봤지만 氵가 있어서 물과 관련된 뜻이라고 짐작했고, 실제로 '울 읍'이었다."></textarea>
+      <label class="f" for="ref2" style="margin-top:10px">2. 가장 새롭게 알게 된 점, 또는 내 카드에서 가장 자랑하고 싶은 점은?</label>
+      <textarea class="in" id="ref2"></textarea>
+      <div class="row" style="margin-top:14px">
+        <button class="btn seal" type="button" id="exportBtn">탐구 노트 이미지로 저장</button>
+        <button class="btn ghost sm" type="button" id="resetAll">처음부터 다시 (모두 지우기)</button>
+      </div>
+      <p class="muted" style="margin:8px 0 0">입력한 내용은 이 기기의 브라우저에 저장돼요. 선생님께는 위의 [📮 선생님께 보내기]를 눌러야 전달돼요.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="pager">
+  <div class="pager-in">
+    <button class="btn ghost" type="button" id="prevBtn">◀ 이전</button>
+    <span id="stepLabel"></span>
+    <button class="btn" type="button" id="nextBtn">다음 ▶</button>
+  </div>
+</footer>
+
+<!-- teacher modal -->
+<div class="modal hidden" id="teacherModal" role="dialog" aria-modal="true" aria-labelledby="tmTitle">
+  <div class="modal-box">
+    <div class="modal-head"><h2 id="tmTitle" style="margin:0">교사 도구</h2><button class="btn ghost sm" type="button" data-close>닫기</button></div>
+    <div class="grid2">
+      <div class="card" style="margin:0">
+        <h3>활동 타이머</h3>
+        <div class="row">
+          <select class="in" id="timerPreset" style="flex:1">
+            <option value="300">5분 · 도입 퀴즈</option>
+            <option value="420">7분 · 테마·부수 고르기</option>
+            <option value="1380" selected>23분 · 탐구 노트</option>
+            <option value="480">8분 · 캔바 카드 1장</option>
+            <option value="1800">30분 · 캔바 제작 전체</option>
+            <option value="180">3분 · 피드백 고치기</option>
+          </select>
+        </div>
+        <div class="timer-big" id="timerBig">23:00</div>
+        <div class="row" style="justify-content:center">
+          <button class="btn jade" type="button" id="timerStart">시작</button>
+          <button class="btn ghost" type="button" id="timerReset">초기화</button>
+        </div>
+      </div>
+      <div class="card" style="margin:0">
+        <h3>학생 접속 QR</h3>
+        <label class="f" for="appUrl">이 웹앱을 올린 주소</label>
+        <input class="in" id="appUrl" placeholder="https://...">
+        <label class="f" for="canvaUrl" style="margin-top:8px">캔바 템플릿 링크 (선택)</label>
+        <input class="in" id="canvaUrl" placeholder="https://www.canva.com/design/...">
+        <div class="row" style="margin:8px 0"><button class="btn sm" type="button" id="qrMake">QR 만들기</button><button class="btn ghost sm" type="button" id="qrCopy">링크 복사</button></div>
+        <div id="qrBox"><span class="muted">주소를 넣고 [QR 만들기]</span></div>
+        <p class="muted" style="margin:6px 0 0">캔바 링크를 넣으면 학생 화면의 2단계에 [캔바 템플릿 열기] 버튼이 생겨요.</p>
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn ghost sm" type="button" id="bigToggle">칠판 확대 모드 켜기</button>
+    </div>
+  </div>
+</div>
+
+<!-- export modal -->
+<div class="modal hidden" id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exTitle">
+  <div class="modal-box">
+    <div class="modal-head"><h2 id="exTitle" style="margin:0">탐구 노트 이미지</h2><button class="btn ghost sm" type="button" data-close>닫기</button></div>
+    <div class="callout blue">아래 버튼으로 저장하거나, 태블릿에서는 이미지를 <b>길게 눌러 [이미지 저장]</b>을 고르세요. 저장한 파일을 클래스룸에 올리면 제출 끝!</div>
+    <div class="row" style="margin-bottom:10px"><a class="btn seal" id="exportDl" download="부수탐구노트.png">PNG로 저장</a></div>
+    <img id="exportImg" alt="탐구 노트 미리보기">
+  </div>
+</div>
+
+<div class="toast hidden" id="toast" role="status"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ================= DATA ================= */
+const FORBIDDEN = [
+  {c:'口',alt:[],n:'입 구',why:'선생님 예시에 이미 쓰인 부수라서 고를 수 없어요.'},
+  {c:'一',alt:[],n:'한 일'},{c:'丨',alt:[],n:'뚫을 곤'},{c:'丶',alt:[],n:'점 주'},{c:'丿',alt:[],n:'삐침 별'},
+  {c:'乙',alt:['乚'],n:'새 을'},{c:'亅',alt:[],n:'갈고리 궐'},{c:'二',alt:[],n:'두 이'},{c:'亠',alt:[],n:'돼지해머리 두'},
+  {c:'人',alt:['亻'],n:'사람 인'},{c:'儿',alt:[],n:'어진사람 인'}
+];
+FORBIDDEN.forEach(f => { if(!f.why) f.why = '부수표 첫째 줄(一~儿)에 있는 부수라서 고를 수 없어요.'; });
+
+// c: 부수, n: 명칭, a: 인정하는 다른 명칭, s: 획수, v: 변형(위치), t: 테마, m: 확인용 소속 한자(화면에 표시하지 않음)
+const RADS = [
+  {c:'刀',n:'칼 도',a:['선칼도방'],s:2,v:'刂 (선칼도방 · 오른쪽)',t:['life'],m:'分切初前利別列刻到制則'},
+  {c:'力',n:'힘 력',a:['힘역'],s:2,t:['body','sport'],m:'功加助努勇動務勝勞勉勢'},
+  {c:'又',n:'또 우',a:['오른손우'],s:2,t:['body'],m:'友反取受叔及'},
+  {c:'囗',n:'큰입구몸',a:['에운담','나라국몸'],s:3,t:['life'],m:'四回因困固國圍園圓圖團'},
+  {c:'土',n:'흙 토',s:3,t:['nature'],m:'地在坐城場基堂報增壁均'},
+  {c:'夕',n:'저녁 석',s:3,t:['nature'],m:'外多夜夢'},
+  {c:'大',n:'큰 대',s:3,t:['body'],m:'天太夫失央奉奇'},
+  {c:'女',n:'계집 녀',a:['여자녀','계집여'],s:3,t:['body','family'],m:'好如妹姉姊始姓妻婦婚委'},
+  {c:'子',n:'아들 자',s:3,t:['family','study'],m:'字存孝季孫學孔'},
+  {c:'宀',n:'집 면',a:['갓머리'],s:3,t:['life','family'],m:'安守宅宇完定官室家宮害寒富實客宿'},
+  {c:'寸',n:'마디 촌',s:3,t:['body'],m:'寺射將尊對導專封'},
+  {c:'山',n:'메 산',s:3,t:['nature'],m:'岩岸島峰崇嶺'},
+  {c:'巾',n:'수건 건',s:3,t:['life'],m:'市布希帝師席帶常帽'},
+  {c:'广',n:'집 엄',a:['엄호'],s:3,t:['life'],m:'店府度庫庭康廣序底'},
+  {c:'弓',n:'활 궁',s:3,t:['sport'],m:'引弟弱強强張彈'},
+  {c:'彳',n:'조금 걸을 척',a:['두인변','중인변'],s:3,t:['sport'],m:'往待後律徒得德從復'},
+  {c:'心',n:'마음 심',a:['심방변'],s:4,v:'忄 (심방변 · 왼쪽), 㣺 (밑마음심 · 아래)',t:['body','mind'],m:'必忘忠念思性急恩息悲情想意愛感怒慶快'},
+  {c:'戈',n:'창 과',s:4,t:['sport'],m:'成我戒戰'},
+  {c:'手',n:'손 수',a:['재방변'],s:4,v:'扌 (재방변 · 왼쪽)',t:['body','sport'],m:'才打投技指持拾授探接掌招抱拜擧'},
+  {c:'攴',n:'칠 복',a:['등글월문'],s:4,v:'攵 (등글월문 · 오른쪽)',t:['study'],m:'收改放政故效敎教救敗散數敬敵'},
+  {c:'日',n:'날 일',a:['해일'],s:4,t:['nature'],m:'早明易昔星春昨是時晩晚晝景暑暗暖暴曜晴'},
+  {c:'曰',n:'가로 왈',s:4,t:['study'],m:'書最會曲更曾'},
+  {c:'月',n:'달 월',s:4,t:['nature'],m:'有服朋望朝期朗'},
+  {c:'木',n:'나무 목',s:4,t:['nature'],m:'本未末李材村林東松果枝根校案植業樂橋樹機森柱板桃査'},
+  {c:'欠',n:'하품 흠',s:4,t:['body'],m:'次歌欲歡'},
+  {c:'止',n:'그칠 지',s:4,t:['sport'],m:'正此步武歲歷歸'},
+  {c:'水',n:'물 수',a:['삼수변'],s:4,v:'氵 (삼수변 · 왼쪽), 氺 (아래)',t:['nature','food'],m:'永氷江決法油河泉洋洗活海流消浴淸清深湖溫漢港滿演泣波注淚'},
+  {c:'火',n:'불 화',a:['연화발'],s:4,v:'灬 (연화발 · 아래)',t:['nature','food'],m:'災炎烈無然煙熱燈照燒'},
+  {c:'牛',n:'소 우',s:4,v:'牜 (소우변 · 왼쪽)',t:['animal'],m:'牧物特牽'},
+  {c:'犬',n:'개 견',a:['개사슴록변'],s:4,v:'犭 (개사슴록변 · 왼쪽)',t:['animal'],m:'犯狀狗猫獨獸猛'},
+  {c:'玉',n:'구슬 옥',a:['구슬옥변'],s:5,v:'王 (구슬옥변 · 왼쪽)',t:['life'],m:'王珍班現球理環'},
+  {c:'田',n:'밭 전',s:5,t:['nature','food'],m:'由甲申男界留畫番異當'},
+  {c:'疒',n:'병들 녁',a:['병질엄','병질안'],s:5,t:['body'],m:'病疲痛症'},
+  {c:'白',n:'흰 백',s:5,t:['nature'],m:'百的皆皇'},
+  {c:'目',n:'눈 목',s:5,t:['body'],m:'直相省看眠眼眉盲睡'},
+  {c:'石',n:'돌 석',s:5,t:['nature'],m:'砂研硏破碑確磨碧'},
+  {c:'示',n:'보일 시',s:5,v:'礻 (보일시변 · 왼쪽)',t:['mind'],m:'社祖神祝票祭福禮禁'},
+  {c:'禾',n:'벼 화',s:5,t:['food','nature'],m:'私秀科秋移稅種穀'},
+  {c:'立',n:'설 립',a:['설입'],s:5,t:['sport'],m:'章童端競'},
+  {c:'竹',n:'대 죽',a:['대나무죽','대죽머리'],s:6,v:'⺮ (대죽머리 · 위)',t:['nature','study'],m:'笑第筆等答算節管箱'},
+  {c:'米',n:'쌀 미',s:6,t:['food'],m:'粉精糖糧'},
+  {c:'糸',n:'실 사',a:['가는실멱'],s:6,t:['life'],m:'紀約紅紙級細終結給統經綠線練'},
+  {c:'羊',n:'양 양',s:6,t:['animal'],m:'美群義'},
+  {c:'羽',n:'깃 우',s:6,t:['animal'],m:'習翁翼'},
+  {c:'耳',n:'귀 이',s:6,t:['body'],m:'聖聞聲聽職'},
+  {c:'肉',n:'고기 육',a:['육달월'],s:6,v:'月 (육달월 · 왼쪽이나 아래)',t:['body','food'],m:'肝肥育胃背能脈腦腸胸肺'},
+  {c:'舟',n:'배 주',s:6,t:['life'],m:'航般船'},
+  {c:'艸',n:'풀 초',a:['초두머리','초두'],s:6,v:'艹 (초두머리 · 위)',t:['nature','food'],m:'花苦英茶草荷菜落葉著萬藥藝'},
+  {c:'虫',n:'벌레 훼',a:['벌레충'],s:6,t:['animal'],m:'蚊蛇蜂蝶蟲'},
+  {c:'衣',n:'옷 의',a:['옷의변'],s:6,v:'衤 (옷의변 · 왼쪽)',t:['life'],m:'表衰被袖裁裝補複製'},
+  {c:'見',n:'볼 견',s:7,t:['body','study'],m:'規視親覺觀覽'},
+  {c:'言',n:'말씀 언',s:7,t:['study','mind'],m:'計記訓許設試詩話語說讀誠談課調論謝識議護請'},
+  {c:'貝',n:'조개 패',s:7,t:['life'],m:'貞負財貧貨責貴買賣費貿賀賞質賢'},
+  {c:'走',n:'달릴 주',a:['달아날주'],s:7,t:['sport'],m:'起超越趣'},
+  {c:'足',n:'발 족',s:7,v:'⻊ (발족변 · 왼쪽)',t:['body','sport'],m:'距跡路跳踏'},
+  {c:'車',n:'수레 거',a:['수레차'],s:7,t:['life','sport'],m:'軍軒軟載較輕輪輸轉'},
+  {c:'辵',n:'쉬엄쉬엄 갈 착',a:['책받침'],s:7,v:'辶 (책받침 · 왼쪽 아래)',t:['sport'],m:'近返送逃追退通速造連進過道達遊運遠適選還'},
+  {c:'金',n:'쇠 금',s:8,t:['life'],m:'針銀銅錢鐵鏡鐘'},
+  {c:'門',n:'문 문',s:8,t:['life'],m:'閉開間閑關閣'},
+  {c:'阜',n:'언덕 부',a:['좌부방','좌부변'],s:8,v:'阝 (좌부방 · 왼쪽)',t:['nature'],m:'防降限院陸陰陽隊階際障'},
+  {c:'隹',n:'새 추',s:8,t:['animal'],m:'雀集雄雅雙雜難離'},
+  {c:'雨',n:'비 우',s:8,t:['nature'],m:'雪雲電雷零需震霜霧露'},
+  {c:'頁',n:'머리 혈',s:9,t:['body'],m:'頂順須頭題額顔願類'},
+  {c:'食',n:'밥 식',a:['먹을식','밥식변'],s:9,v:'飠 (밥식변 · 왼쪽)',t:['food'],m:'飯飮飼養餘館飢'},
+  {c:'馬',n:'말 마',s:10,t:['animal','sport'],m:'騎驗驚驛驅'},
+  {c:'魚',n:'물고기 어',a:['고기어'],s:11,t:['animal','food'],m:'鮮鯨鯉魯'},
+  {c:'鳥',n:'새 조',s:11,t:['animal'],m:'鳳鳴鶴鷄鳩'}
+];
+const RAD_BY = {}; RADS.forEach(r => RAD_BY[r.c] = r);
+
+// 금지 부수 소속 한자 (함정 판별용)
+const EXTRA_OF = {
+  '人':'休信今以仁代位住作使便保修個億他健',
+  '口':'問和名品古右同吉向君告味命唱善喜器單句史各合',
+  '丶':'主丹','亠':'京交亡','儿':'兄元光先充兒','一':'三上下不世丁七','乙':'九也乳','二':'五井云','亅':'事'
+};
+const NAME_OF = {}; FORBIDDEN.forEach(f => NAME_OF[f.c] = f.n); RADS.forEach(r => NAME_OF[r.c] = r.n);
+const RADICAL_OF = {};
+RADS.forEach(r => [...r.m].forEach(ch => RADICAL_OF[ch] = r.c));
+Object.keys(EXTRA_OF).forEach(rc => [...EXTRA_OF[rc]].forEach(ch => RADICAL_OF[ch] = rc));
+
+const TRAP_HINT = {
+  '休':'木이 들어 있지만 부수는 人(亻)이에요. 사람이 나무 옆에서 쉬는 모습!',
+  '明':'月이 들어 있지만 부수는 日이에요.',
+  '問':'門이 들어 있지만 부수는 口예요. 묻는 건 입으로! 門은 소리(문)를 알려 줘요.',
+  '聞':'門이 들어 있지만 부수는 耳예요. 듣는 건 귀로!',
+  '間':'日이 들어 있지만 부수는 門이에요.',
+  '岩':'石이 들어 있지만 부수는 山이에요.',
+  '好':'子가 들어 있지만 부수는 女예요.',
+  '字':'宀이 들어 있지만 부수는 子예요.',
+  '安':'女가 들어 있지만 부수는 宀이에요.',
+  '看':'手가 들어 있지만 부수는 目이에요.',
+  '鳴':'口가 들어 있지만 부수는 鳥예요.',
+  '相':'木이 들어 있지만 부수는 目이에요.',
+  '想':'木과 目이 들어 있지만 부수는 心이에요.',
+  '思':'위쪽이 田처럼 보이지만 부수는 心이에요.',
+  '東':'日이 들어 있지만 부수는 木이에요.',
+  '朝':'日이 들어 있지만 부수는 月이에요.',
+  '最':'日처럼 보이지만 부수는 曰(가로 왈)이에요.',
+  '書':'日처럼 보이지만 부수는 曰(가로 왈)이에요.',
+  '和':'禾가 들어 있지만 부수는 口예요.',
+  '秋':'火가 들어 있지만 부수는 禾예요.',
+  '無':'부수는 아래쪽의 灬(불 화)예요.',
+  '然':'犬과 月이 들어 있지만 부수는 아래쪽 灬(불 화)예요.',
+  '胃':'田이 들어 있지만 부수는 肉(月, 육달월)이에요.',
+  '李':'子가 들어 있지만 부수는 木이에요.',
+  '季':'禾가 들어 있지만 부수는 子예요.',
+  '信':'言이 들어 있지만 부수는 人(亻)이에요.',
+  '息':'自가 들어 있지만 부수는 心이에요.',
+  '取':'耳가 들어 있지만 부수는 又예요.',
+  '男':'力이 들어 있지만 부수는 田이에요.',
+  '加':'口가 들어 있지만 부수는 力이에요.',
+  '功':'工이 들어 있지만 부수는 力이에요.',
+  '美':'大가 들어 있지만 부수는 羊이에요.',
+  '集':'木이 들어 있지만 부수는 隹예요.',
+  '夢':'위쪽이 艹처럼 보이지만 부수는 夕이에요.',
+  '星':'生이 들어 있지만 부수는 日이에요.',
+  '姓':'生이 들어 있지만 부수는 女예요.',
+  '性':'生이 들어 있지만 부수는 心(忄)이에요.',
+  '晴':'靑이 들어 있지만 부수는 日이에요.',
+  '情':'靑이 들어 있지만 부수는 心(忄)이에요.',
+  '請':'靑이 들어 있지만 부수는 言이에요.',
+  '精':'靑이 들어 있지만 부수는 米예요.',
+  '洋':'羊이 들어 있지만 부수는 水(氵)예요.',
+  '國':'口가 아니라 囗(큰입구몸)이에요.',
+  '名':'夕이 들어 있지만 부수는 口예요.',
+  '主':'王처럼 보이지만 부수는 丶(점 주)예요.',
+  '意':'音이 들어 있지만 부수는 心이에요.',
+  '章':'音처럼 보이지만 부수는 立이에요.',
+  '道':'首가 들어 있지만 부수는 辵(辶)이에요.',
+  '初':'衤(옷)가 들어 있지만 부수는 刀예요.',
+  '前':'月이 들어 있지만 부수는 刀(刂)예요.',
+  '草':'早가 들어 있지만 부수는 艸(艹)예요.',
+  '歌':'口가 들어 있지만 부수는 欠이에요.',
+  '數':'女와 米가 들어 있지만 부수는 攴(攵)이에요.',
+  '敎':'子가 들어 있지만 부수는 攴(攵)이에요.','教':'子가 들어 있지만 부수는 攴(攵)이에요.'
+};
+['肝','腦','胸','肺','腸','育','能','背','脈','肥'].forEach(c => TRAP_HINT[c] = '月처럼 보이지만 부수는 肉(고기 육)이에요. 몸과 관련된 月은 육달월!');
+
+const VAR = {'氵':'水','氺':'水','灬':'火','忄':'心','㣺':'心','扌':'手','刂':'刀','犭':'犬','礻':'示','衤':'衣','艹':'艸','⺾':'艸','辶':'辵','⻌':'辵','⻍':'辵','攵':'攴','飠':'食','⺮':'竹','⻊':'足','牜':'牛','亻':'人','乚':'乙'};
+
+const THEMES = [
+  {id:'nature',ic:'🌿',n:'자연과 날씨'},{id:'animal',ic:'🐾',n:'동물 친구'},{id:'body',ic:'🧍',n:'몸과 감각'},
+  {id:'sport',ic:'⚽',n:'운동과 움직임'},{id:'food',ic:'🍚',n:'음식과 요리'},{id:'life',ic:'🏠',n:'집과 생활'},
+  {id:'study',ic:'📚',n:'배움과 말'},{id:'mind',ic:'💗',n:'마음과 감정'},{id:'family',ic:'👪',n:'가족'},{id:'custom',ic:'✨',n:'나만의 테마'}
+];
+
+const QUIZ = [
+  {h:'休',o:['木','人'],a:'人',e:'사람(亻)이 나무(木) 옆에서 쉬는 모습이에요. 부수는 사람 쪽!'},
+  {h:'明',o:['月','日'],a:'日',e:'해(日)와 달(月)이 함께 있지만, 사전에서 찾으면 日부예요.'},
+  {h:'江',o:['水','工'],a:'水',e:'뜻(물)을 알려 주는 氵가 부수, 工은 소리(강)를 알려 줘요.'},
+  {h:'問',o:['門','口'],a:'口',e:'묻는 건 입(口)으로! 門은 소리(문)를 알려 주는 부분이에요.'},
+  {h:'國',o:['口','囗'],l:['입 구','큰입구몸'],a:'囗',e:'바깥을 둘러싼 큰입구몸(囗)이 부수예요. 큰입구몸은 입 구(口)와 다른 부수라서 수행평가에 써도 돼요.'},
+  {h:'男',o:['力','田'],a:'田',e:'밭(田)에서 힘(力)쓰는 사람. 사전에서는 田부예요.'}
+];
+
+const COLORS = [
+  {pc:'#b3362c',pcs:'#f8e4df'},{pc:'#2a6b58',pcs:'#dff0e8'},{pc:'#2b5aa0',pcs:'#e4ecf8'},{pc:'#94650a',pcs:'#fbefd2'},{pc:'#6b3fa0',pcs:'#ede4f7'}
+];
+const STEPS = [
+  {n:'탐정 훈련',tag:'1차시'},{n:'테마·부수',tag:'1차시'},{n:'탐구 노트',tag:'1~2차시'},{n:'캐릭터 설계',tag:'3차시'},{n:'캔바로 출발',tag:'3~4차시'},{n:'점검·제출',tag:'4차시'}
+];
+// 캔바 템플릿 기본 주소 (선생님이 바꿔 넣기). ?canva= 주소가 있으면 그것을 우선 사용
+const DEFAULT_CANVA = 'https://canva.link/g11bkrld1191zvz';
+// 선생님 구글 시트(Apps Script 웹 앱) 주소 — ?sheet= 로 바꿀 수 있어요
+const DEFAULT_SHEET = 'https://script.google.com/macros/s/AKfycbwdLKmI5Abz3wamP7CoN5soRYyliMogLwLa7Z_IaE83j-nuiIkbpXfw3qboffCIGbZl/exec';
+// 캔바 [요소] 검색어 추천
+const CANVA_KW = {
+  '刀':'칼, 가위, 자르기','力':'근육, 역도, 힘','又':'손, 악수, 하이파이브','囗':'울타리, 테두리, 지도','土':'흙, 땅, 새싹',
+  '夕':'초승달, 노을, 밤','大':'팔 벌린 사람, 거인','女':'여자아이, 엄마','子':'아기, 어린이','宀':'지붕, 집',
+  '寸':'손가락, 자(ruler)','山':'산, 봉우리, 등산','巾':'수건, 깃발','广':'처마, 가게, 건물','弓':'활, 화살, 과녁',
+  '彳':'발자국, 길, 걷기','心':'하트, 심장, 표정','戈':'창, 기사, 방패','手':'손바닥, 손가락, 장갑','攴':'막대기, 두드리기, 북',
+  '日':'해, 햇살, 달력','曰':'말풍선, 입, 책','月':'달, 별, 밤하늘','木':'나무, 나뭇잎, 숲','欠':'하품, 입 벌린 얼굴, 노래',
+  '止':'발, 정지 표지판','水':'물방울, 파도, 강','火':'불꽃, 캠프파이어, 장작','牛':'소, 뿔, 목장','犬':'강아지, 개, 발바닥',
+  '玉':'구슬, 보석, 왕관','田':'논밭, 농장, 벼','疒':'병원, 침대, 반창고','白':'흰색, 빛, 구름','目':'눈, 눈동자, 안경',
+  '石':'돌, 바위, 광물','示':'촛불, 제단, 별','禾':'벼, 이삭, 곡식','立':'서 있는 사람, 땅','竹':'대나무, 판다',
+  '米':'쌀, 밥, 곡식','糸':'실, 실타래, 바느질','羊':'양, 양털, 목장','羽':'깃털, 날개','耳':'귀, 음표, 헤드폰',
+  '肉':'고기, 근육, 몸','舟':'배, 돛단배, 노','艸':'풀, 새싹, 꽃','虫':'벌레, 나비, 애벌레','衣':'옷, 한복, 셔츠',
+  '見':'눈, 망원경, 돋보기','言':'말풍선, 확성기, 대화','貝':'조개, 동전, 보물상자','走':'달리기, 운동화, 결승선','足':'발, 운동화, 축구공',
+  '車':'바퀴, 수레, 자동차','辵':'길, 발자국, 화살표','金':'금, 동전, 금속','門':'문, 대문, 열쇠','阜':'언덕, 계단, 산길',
+  '隹':'작은 새, 참새','雨':'비, 구름, 우산','頁':'머리, 얼굴, 모자','食':'밥그릇, 음식, 숟가락','馬':'말, 말발굽, 경주',
+  '魚':'물고기, 비늘, 어항','鳥':'새, 깃털, 둥지'
+};
+const SOURCES = ['부수표(학습지 1면)','네이버 한자사전','종이 자전','교과서','기타'];
+
+/* ================= STATE ================= */
+const KEY = 'busu-lab-2026-v1';
+function blankNote(){
+  return {name:'',strokes:'',variant:'',pos:'',meaning:'',
+    hanja:[{c:'',m:'',s:'',ok:false},{c:'',m:'',s:'',ok:false}],
+    word:{h:'',r:'',m:''},link:{h:'',why:''},src:[],compared:false,
+    char:{name:'',intro:'',idea:'',color:0}};
+}
+let S = {step:0,quiz:{},student:{cls:'',no:'',name:''},theme:{id:'',title:'',why:''},
+  rads:[],custom:{},notes:{},active:0,traps:[],trapNote:'',ref1:'',ref2:'',pledge:false,coverColor:0};
+function load(){
+  try { const raw = localStorage.getItem(KEY); if (raw) { const o = JSON.parse(raw); S = Object.assign(S, o); } } catch(e){}
+}
+let saveT = null;
+function save(){
+  clearTimeout(saveT);
+  saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }, 250);
+}
+function note(rc){ if(!S.notes[rc]) S.notes[rc] = blankNote(); const n = S.notes[rc]; if (n.hanja && n.hanja.length > 2) n.hanja = n.hanja.slice(0,2); return n; }
+
+/* ================= HELPERS ================= */
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const norm = s => String(s||'').replace(/\(.*?\)/g,'').replace(/[\s·.,()]/g,'');
+const CJK = /[⺀-⿟㐀-䶿一-鿿豈-﫿]/;
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.remove('hidden'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.add('hidden'), 2400); }
+function radInfo(rc){ return RAD_BY[rc] || S.custom[rc] || {c:rc,n:NAME_OF[rc]||'',s:null,t:[]}; }
+
+/* 부수 입력 판별 */
+function judgeRadical(input){
+  const s = String(input||'').trim();
+  if (!s) return {st:'empty'};
+  const m = s.match(CJK);
+  if (m){
+    const raw = m[0];
+    if (raw === '阝') return {st:'ambig',msg:'阝는 위치에 따라 달라요. 왼쪽에 붙으면 阜(언덕 부, 좌부방), 오른쪽에 붙으면 邑(고을 읍, 우부방)이에요. 어느 쪽인지 정해서 다시 입력해 보세요.'};
+    const main = VAR[raw] || raw;
+    const f = FORBIDDEN.find(x => x.c === main || x.alt.includes(raw));
+    if (f) return {st:'forbidden',rad:f.c,msg:`${f.c}(${f.n}) → ${f.why}`};
+    if (RAD_BY[main]){
+      const r = RAD_BY[main];
+      const extra = raw !== main ? ` (${raw} 모양 = ${main}의 변신 모습 → ${main} 부수로 골라요.)` : '';
+      const kuk = main === '囗' ? ' 큰입구몸(囗)은 입 구(口)와 다른 부수라서 써도 돼요.' : '';
+      const yuk = main === '月' ? ' 몸과 관련된 한자(肝, 胸 등)의 月은 肉(육달월)이니 조심!' : '';
+      return {st:'ok',rad:main,msg:`${main}(${r.n}) → 고를 수 있어요!${extra}${kuk}${yuk}`};
+    }
+    return {st:'unknown',rad:main,msg:`${main} → 앱 목록에 없는 부수예요. 부수표(학습지 1면)에 있는 부수가 맞다면 명칭을 적고 추가할 수 있어요.`};
+  }
+  const q = norm(s);
+  const f = FORBIDDEN.find(x => norm(x.n) === q);
+  if (f) return {st:'forbidden',rad:f.c,msg:`${f.c}(${f.n}) → ${f.why}`};
+  const r = RADS.find(x => norm(x.n) === q || (x.a||[]).some(a => norm(a) === q));
+  if (r) return {st:'ok',rad:r.c,msg:`${r.c}(${r.n}) → 고를 수 있어요!`};
+  return {st:'notfound',msg:'찾지 못했어요. 부수 글자를 직접 입력하거나 부수표의 명칭 그대로 써 보세요.'};
+}
+
+/* 가족 한자 점검 */
+function judgeHanja(rc, h, others){
+  const res = {complete:false, parts:[]};
+  const c = (h.c||'').trim(), mm = (h.m||'').trim(), ss = (h.s||'').trim();
+  if (!c && !mm && !ss) return {complete:false, parts:[{k:'q',t:'아직 비어 있어요.'}]};
+  if (!c) res.parts.push({k:'bad',t:'한자(모양)를 써요.'});
+  else if ([...c].length !== 1 || !CJK.test(c)) res.parts.push({k:'bad',t:'한자 한 글자만 써요.'});
+  if (!mm) res.parts.push({k:'bad',t:'뜻이 빠졌어요.'});
+  else if (!/[가-힣]/.test(mm)) res.parts.push({k:'bad',t:'뜻은 한글로 써요.'});
+  if (!ss) res.parts.push({k:'bad',t:'음이 빠졌어요.'});
+  else if (!/^[가-힣]$/.test(ss)) res.parts.push({k:'bad',t:'음은 한글 한 글자예요. (예: 해)'});
+  let radOk = null;
+  if (c && [...c].length === 1){
+    const main = VAR[c] || c;
+    if (main === rc) { res.parts.push({k:'bad',t:'부수 글자 자신 말고, 이 부수가 들어간 다른 한자를 찾아요.'}); radOk = false; }
+    else if (others.includes(c)) { res.parts.push({k:'bad',t:'같은 한자를 두 번 썼어요.'}); radOk = false; }
+    else {
+      const act = RADICAL_OF[c] || ((RAD_BY[main] || NAME_OF[main]) ? main : undefined);
+      if (act === rc){ radOk = true; res.parts.unshift({k:'ok',t:`부수 일치 ✓ ${rc}부 한자가 맞아요.`}); }
+      else if (act){
+        radOk = false; res.trap = {c, chose:rc, act};
+        const why = TRAP_HINT[c] || (act === main ? `${c} 자체가 하나의 부수(${NAME_OF[act]||''})라서 ${rc}부가 아니에요.` : `이 한자의 부수는 ${act}(${NAME_OF[act]||''}) 쪽이에요.`);
+        res.parts.unshift({k:'bad',t:`부수 함정! ${why} 사전에서 다시 확인해 보세요.`});
+      }
+      else { res.parts.unshift({k:'q',t:'앱 목록에 없는 한자예요. 사전에서 부수가 맞는지 직접 확인하고 아래 칸에 체크해요.'}); }
+    }
+  }
+  const threeOk = c && [...c].length === 1 && CJK.test(c) && /[가-힣]/.test(mm) && /^[가-힣]$/.test(ss);
+  res.complete = !!(threeOk && radOk !== false && (radOk === true || h.ok));
+  res.radOk = radOk;
+  return res;
+}
+
+function noteProgress(rc){
+  const n = note(rc), info = radInfo(rc);
+  const items = [];
+  items.push(!!n.name.trim());
+  items.push(!!String(n.strokes).trim());
+  items.push(n.meaning.trim().length >= 4);
+  const hs = n.hanja.map((h,i) => judgeHanja(rc, h, n.hanja.filter((_,j) => j!==i).map(x => (x.c||'').trim()).filter(Boolean)));
+  items.push(hs.every(x => x.complete));
+  items.push(!!(n.word.h.trim() && n.word.m.trim()));
+  items.push(!!(n.link.h && n.link.why.trim().length >= 3));
+  items.push(n.src.length >= 2);
+  return {done: items.filter(Boolean).length, total: items.length, hs, items};
+}
+
+/* ================= RENDER: STEPS ================= */
+function renderSteps(){
+  $('steps').innerHTML = STEPS.map((s,i) => `<button type="button" class="step-btn ${i===S.step?'on':''} ${stepDone(i)?'done':''}" data-go="${i}"><span class="n">${stepDone(i)&&i!==S.step?'✓':i+1}</span>${esc(s.n)} <span class="tagline">${esc(s.tag)}</span></button>`).join('');
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', +p.dataset.panel === S.step));
+  $('prevBtn').disabled = S.step === 0;
+  $('nextBtn').textContent = S.step === STEPS.length-1 ? '처음으로' : '다음 ▶';
+  $('stepLabel').textContent = `${S.step+1} / ${STEPS.length} · ${STEPS[S.step].n}`;
+}
+function stepDone(i){
+  if (i===0) return Object.keys(S.quiz).length === QUIZ.length;
+  if (i===1) return S.rads.length === 3 && !!S.theme.title.trim();
+  if (i===2) return S.rads.length === 3 && S.rads.every(rc => { const p = noteProgress(rc); return p.done === p.total; });
+  if (i===3) return S.rads.length === 3 && S.rads.every(rc => { const c = note(rc).char; return c.name.trim() && c.intro.trim(); });
+  if (i===4) return !!S.canvaOpened;
+  if (i===5) return S.pledge && !!S.ref1.trim();
+  return false;
+}
+function go(i){
+  if (i < 0 || i >= STEPS.length) return;
+  if ((i === 2 || i === 3 || i === 4) && S.rads.length < 3){ toast('먼저 부수 3개를 골라 주세요.'); i = 1; }
+  S.step = i; save(); renderAll(); window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ================= STEP 0: QUIZ ================= */
+function renderQuiz(){
+  $('quiz').innerHTML = QUIZ.map((q,i) => {
+    const ans = S.quiz[i];
+    return `<div class="qcard"><div class="muted">Q${i+1}. 부수는?</div><div class="big hj">${q.h}</div>
+      <div class="opts">${q.o.map((o,k) => { let cls=''; if(ans){ if(o===q.a) cls='right'; else if(o===ans) cls='wrong'; } return `<button type="button" class="qopt ${cls}" data-q="${i}" data-o="${o}" ${ans?'disabled':''}>${o}${q.l?`<small style="display:block;font:700 .62rem 'Noto Sans KR',sans-serif">${q.l[k]}</small>`:''}</button>`; }).join('')}</div>
+      ${ans ? `<div class="qexp"><b style="color:${ans===q.a?'var(--jade)':'var(--seal)'}">${ans===q.a?'정답!':'아쉬워요!'}</b> ${esc(q.e)}</div>` : ''}</div>`;
+  }).join('');
+  const n = Object.keys(S.quiz).length, r = QUIZ.filter((q,i) => S.quiz[i] === q.a).length;
+  $('quizScore').textContent = n ? `${n}문제 중 ${r}개 정답` : '';
+}
+
+/* ================= STEP 1 ================= */
+let filterMode = 'all';
+function renderStep1(){
+  $('stClass').value = S.student.cls; $('stNo').value = S.student.no; $('stName').value = S.student.name;
+  $('themeTitle').value = S.theme.title; $('themeWhy').value = S.theme.why;
+  $('themes').innerHTML = THEMES.map(t => `<button type="button" class="chip ${S.theme.id===t.id?'on':''}" data-theme="${t.id}">${t.ic} ${esc(t.n)}</button>`).join('');
+  renderTray(); renderGrid();
+}
+function renderTray(){
+  let h = '';
+  for (let i=0;i<3;i++){
+    const rc = S.rads[i];
+    if (rc){ const r = radInfo(rc); h += `<div class="slot full"><button type="button" class="x" data-unpick="${esc(rc)}" aria-label="${esc(rc)} 빼기">✕</button><span class="hj">${esc(rc)}</span><span class="muted">${i+1}번 부수</span></div>`; }
+    else h += `<div class="slot"><span class="muted">${i+1}번 부수</span><span class="muted" style="font-size:.75rem">아래에서 골라요</span></div>`;
+  }
+  $('tray').innerHTML = h;
+}
+function renderGrid(){
+  const q = norm($('radSearch').value);
+  const qc = ($('radSearch').value.match(CJK)||[])[0];
+  let list = RADS.slice();
+  if (filterMode === 'theme' && S.theme.id && S.theme.id !== 'custom') list = list.filter(r => r.t.includes(S.theme.id));
+  if (q) list = list.filter(r => (qc && (r.c === (VAR[qc]||qc))) || norm(r.n).includes(q) || (r.a||[]).some(a => norm(a).includes(q)));
+  const forb = (!q && filterMode==='all') ? FORBIDDEN.map(f => `<div class="rtile forb" title="${esc(f.why)}"><span class="hj">${f.c}</span><span class="nm">${esc(f.n)}</span></div>`).join('') : '';
+  const customs = Object.values(S.custom).map(r => `<button type="button" class="rtile ${S.rads.includes(r.c)?'sel':''}" data-pick="${esc(r.c)}"><span class="hj">${esc(r.c)}</span><span class="nm">${esc(r.n)} · 직접 추가</span></button>`).join('');
+  $('rgrid').innerHTML = customs + list.map(r => `<button type="button" class="rtile ${S.rads.includes(r.c)?'sel':''}" data-pick="${r.c}"><span class="hj">${r.c}</span><span class="nm">${esc(r.n)} · ${r.s}획</span></button>`).join('') + forb
+    || '<p class="muted">찾는 부수가 없어요. 아래 [판별하기]를 써 보세요.</p>';
+  $('filterTheme').classList.toggle('on', filterMode==='theme');
+  $('filterAll').classList.toggle('on', filterMode==='all');
+}
+function pick(rc){
+  const i = S.rads.indexOf(rc);
+  if (i >= 0){ S.rads.splice(i,1); }
+  else {
+    if (S.rads.length >= 3){ toast('부수는 3개까지! 먼저 하나를 빼 주세요.'); return; }
+    S.rads.push(rc); note(rc);
+  }
+  if (S.active >= S.rads.length) S.active = 0;
+  save(); renderTray(); renderGrid(); renderSteps();
+}
+
+/* ================= STEP 2: NOTE ================= */
+function renderTabs(){
+  $('rtabs').innerHTML = S.rads.map((rc,i) => { const p = noteProgress(rc); return `<button type="button" class="rtab ${i===S.active?'on':''}" data-tab="${i}"><span class="hj">${esc(rc)}</span><span class="prog ${p.done===p.total?'full':''}">${p.done}/${p.total}</span></button>`; }).join('');
+}
+function renderNote(){
+  if (S.rads.length < 3){ $('noteForm').innerHTML = '<div class="callout gold">먼저 2번 화면에서 부수 3개를 골라 주세요.</div>'; $('rtabs').innerHTML=''; return; }
+  renderTabs();
+  const rc = S.rads[S.active], n = note(rc), info = radInfo(rc);
+  const dict = 'https://hanja.dict.naver.com/#/search?query=' + encodeURIComponent(rc);
+  const hOpts = n.hanja.map(h => (h.c||'').trim()).filter(Boolean);
+  $('noteForm').innerHTML = `
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <div class="row"><span class="hj" style="font-size:3rem;line-height:1">${esc(rc)}</span><span class="muted">${S.active+1}번 부수</span></div>
+      <a class="btn ghost sm" href="${dict}" target="_blank" rel="noopener">네이버 한자사전에서 찾기 ↗</a>
+    </div>
+    <div class="fgrid">
+      <div class="span2"><label class="f" for="nName">부수 명칭 (부수표에서)</label><input class="in" id="nName" data-f="name" value="${esc(n.name)}" placeholder="예: 나무 목"><div class="muted" id="nameChk"></div></div>
+      <div><label class="f" for="nStrokes">획수</label><input class="in" id="nStrokes" data-f="strokes" inputmode="numeric" value="${esc(n.strokes)}" placeholder="숫자"><div class="muted" id="strokeChk"></div></div>
+      <div><label class="f" for="nPos">위치 (선택)</label><select class="in" id="nPos" data-f="pos">${['','변(왼쪽)','방(오른쪽)','머리(위)','발(아래)','엄(위·왼쪽)','받침(왼쪽·아래)','몸(둘레)','제부수(글자 그대로)'].map(o => `<option value="${o}" ${n.pos===o?'selected':''}>${o||'고르기'}</option>`).join('')}</select></div>
+      <div class="span2"><label class="f" for="nVar">변신 모습 (선택)</label><input class="in" id="nVar" data-f="variant" value="${esc(n.variant)}" placeholder="예: 氵, 忄 (없으면 비워 두기)"></div>
+      <div class="span2"><label class="f" for="nMeaning">본래 의미: 무엇을 본뜬 글자? 어떤 뜻과 관련?</label><input class="in" id="nMeaning" data-f="meaning" value="${esc(n.meaning)}" placeholder="사전의 설명을 내 말로 한 줄"></div>
+    </div>
+
+    <div class="sec-title"><h3>가족 한자 2개 (모양 · 뜻 · 음)</h3><span class="muted"><b>가족 한자 = 같은 부수를 가진 한자</b> · 예: <span class="hj">路</span> 길 로 · 한자 입력이 어려우면 사전에서 한자를 길게 눌러 복사해 붙여 넣어요</span></div>
+    ${n.hanja.map((h,i) => `
+      <div class="hrow">
+        <span class="num">${'①②③'[i]}</span>
+        <input class="in hjin" data-h="${i}" data-k="c" value="${esc(h.c)}" maxlength="2" aria-label="${i+1}번 한자" placeholder="한자">
+        <input class="in" data-h="${i}" data-k="m" value="${esc(h.m)}" aria-label="${i+1}번 뜻" placeholder="뜻 (예: 길)">
+        <input class="in" data-h="${i}" data-k="s" value="${esc(h.s)}" maxlength="2" aria-label="${i+1}번 음" placeholder="음">
+        <div class="hstat" id="hstat${i}"></div>
+      </div>`).join('')}
+
+    <div class="sec-title"><h3>생활 속 낱말 (용례)</h3><span class="muted">가족 한자가 들어간 낱말 1개</span></div>
+    <div class="fgrid">
+      <div><label class="f" for="wH">한자어</label><input class="in" id="wH" data-w="h" value="${esc(n.word.h)}" placeholder="예: 蹴球" style="font-family:'Noto Serif KR',serif;font-weight:700"></div>
+      <div><label class="f" for="wR">읽기</label><input class="in" id="wR" data-w="r" value="${esc(n.word.r)}" placeholder="예: 축구"></div>
+      <div class="span2"><label class="f" for="wM">뜻</label><input class="in" id="wM" data-w="m" value="${esc(n.word.m)}" placeholder="예: 공을 발로 차서 겨루는 경기"></div>
+      <div class="span4 muted" id="wordChk"></div>
+    </div>
+
+    <div class="sec-title"><h3>연결 문장: 왜 이 한자에 이 부수가 들어 있을까?</h3></div>
+    <div class="linkhow"><div><b>①</b> 가족 한자 하나 고르고 <b>뜻</b> 떠올리기<span>蹴 = 차다</span></div><div><b>②</b> 부수의 <b>뜻</b> 떠올리기<span>足 = 발</span></div><div><b>③</b> 두 뜻을 이어 <b>까닭</b> 쓰기<span>차는 일은 발로 하니까!</span></div></div>
+    <div class="fgrid">
+      <div><label class="f" for="lH">한자 고르기</label><select class="in" id="lH" data-l="h"><option value="">고르기</option>${hOpts.map(c => `<option value="${esc(c)}" ${n.link.h===c?'selected':''}>${esc(c)}</option>`).join('')}</select></div>
+      <div class="span4" style="grid-column:2/-1"><label class="f" for="lWhy">까닭</label><input class="in" id="lWhy" data-l="why" value="${esc(n.link.why)}" placeholder="예: 공을 차는 일은 발로 하는 일이기"></div>
+    </div>
+    <div class="sentence" id="linkPreview"></div>
+
+    <div class="sec-title"><h3>출처 (2개 이상)</h3></div>
+    <div class="srcs">${SOURCES.map(s => `<label><input type="checkbox" data-src="${esc(s)}" ${n.src.includes(s)?'checked':''}> ${esc(s)}</label>`).join('')}</div>
+    <div class="srcs" style="margin-top:4px"><label><input type="checkbox" id="compared" ${n.compared?'checked':''}> 두 자료를 비교해서 확인했어요</label></div>
+    <div class="muted" id="srcChk"></div>
+
+    <div class="row" style="justify-content:flex-end;margin-top:14px">
+      ${S.active < 2 ? `<button type="button" class="btn sm" data-tab="${S.active+1}">다음 부수 (${esc(S.rads[S.active+1])}) ▶</button>` : `<button type="button" class="btn ghost sm" data-go="5">📮 다 썼으면 선생님께 보내기</button> <button type="button" class="btn jade sm" data-go="3">카드 설계도로 ▶</button>`}
+    </div>`;
+  refreshNoteChecks();
+}
+function refreshNoteChecks(){
+  if (S.rads.length < 3 || S.step !== 2) return;
+  const rc = S.rads[S.active], n = note(rc), info = radInfo(rc);
+  // 명칭
+  const nc = $('nameChk');
+  if (nc){
+    if (!n.name.trim()) nc.textContent = '';
+    else if (info.n && (norm(n.name) === norm(info.n) || (info.a||[]).some(a => norm(a) === norm(n.name)))) nc.innerHTML = '<span style="color:var(--jade);font-weight:700">부수표 명칭과 같아요 ✓</span>';
+    else if (/[一-龥]/.test(n.name) && !/[가-힣]/.test(n.name)) nc.innerHTML = '<span style="color:var(--seal);font-weight:700">명칭 칸에는 한자가 아니라 뜻과 음을 써요. (예: 나무 목)</span>';
+    else if (info.n) nc.innerHTML = '<span style="color:var(--gold);font-weight:700">부수표의 명칭과 다른 것 같아요. 한 번 더 확인!</span>';
+    else nc.textContent = '';
+  }
+  const sc = $('strokeChk');
+  if (sc){
+    const v = parseInt(n.strokes,10);
+    if (!String(n.strokes).trim() || !info.s) sc.textContent = '';
+    else if (v === info.s) sc.innerHTML = '<span style="color:var(--jade);font-weight:700">✓</span>';
+    else sc.innerHTML = '<span style="color:var(--gold);font-weight:700">다시 세어 보세요</span>';
+  }
+  // 한자
+  const p = noteProgress(rc);
+  p.hs.forEach((r,i) => {
+    const el = $('hstat'+i); if (!el) return;
+    const h = n.hanja[i];
+    let html = r.parts.map(x => `<span class="${x.k}">${esc(x.t)}</span>`).join(' ');
+    if (r.radOk === null && (h.c||'').trim()) html += ` <label style="display:inline-flex;gap:4px;align-items:center"><input type="checkbox" data-hok="${i}" ${h.ok?'checked':''}> 사전에서 부수 확인함</label>`;
+    if (r.complete) html = '<span class="ok">완성 ✓</span> ' + html;
+    el.innerHTML = html;
+    if (r.trap) logTrap(r.trap);
+  });
+  // 낱말
+  const wc = $('wordChk');
+  if (wc){
+    const fam = n.hanja.map(h => (h.c||'').trim()).filter(Boolean);
+    if (!n.word.h.trim()) wc.textContent = '';
+    else if (fam.some(c => n.word.h.includes(c))) wc.innerHTML = '<span style="color:var(--jade);font-weight:700">가족 한자가 들어간 낱말이에요 ✓</span>';
+    else if (n.word.h.includes(rc)) wc.innerHTML = '<span style="color:var(--gold);font-weight:700">부수 글자는 있지만, 위의 가족 한자가 들어간 낱말이면 더 좋아요.</span>';
+    else wc.innerHTML = '<span style="color:var(--gold);font-weight:700">위의 가족 한자 중 하나가 들어간 낱말인지 확인해요.</span>';
+  }
+  // 연결 문장
+  const lp = $('linkPreview');
+  if (lp){
+    const hz = n.link.h || '(　)';
+    const why = n.link.why.trim().replace(/[.。]$/,'').replace(/(때문|때문이다)$/,'').trim();
+    lp.innerHTML = `<b class="hj">${esc(hz)}</b>에 <b class="hj">${esc(rc)}</b> 부수가 들어간 까닭은 <b>${esc(why || '______')}</b> 때문이다.`;
+  }
+  const scc = $('srcChk');
+  if (scc) scc.innerHTML = n.src.length >= 2 ? `<span style="color:var(--jade);font-weight:700">출처 ${n.src.length}개 ✓${n.compared?' · 비교 확인 ✓':''}</span>` : `<span style="color:var(--gold)">출처를 ${2-n.src.length}개 더 체크해요.</span>`;
+  renderTabs(); renderSteps();
+}
+/* ================= SEND TO TEACHER (Google Sheet) ================= */
+function sheetUrl(){
+  let u = DEFAULT_SHEET;
+  try { const p = new URLSearchParams(location.search).get('sheet'); if (p && /^https:\/\/script\.google\.com\//.test(p)) u = p; } catch(e){}
+  return /^https:\/\//.test(u) ? u : '';
+}
+function buildPayload(){
+  return {
+    key:'busu2026', cls:String(S.student.cls||'').trim(), no:String(S.student.no||'').trim(), name:String(S.student.name||'').trim(),
+    theme:S.theme.title||'', why:S.theme.why||'',
+    rads:S.rads.map(rc => {
+      const n = note(rc), p = noteProgress(rc);
+      const why = n.link.why.trim().replace(/[.。]$/,'').replace(/(때문|때문이다)$/,'').trim();
+      return {c:rc, name:n.name||'', strokes:String(n.strokes||''), variant:n.variant||'', meaning:n.meaning||'',
+        fam:n.hanja.map(h => [h.c,h.m,h.s].map(x => (x||'').trim()).filter(Boolean).join(' ')),
+        word:n.word.h ? `${n.word.h}${n.word.r?'('+n.word.r+')':''}${n.word.m?' - '+n.word.m:''}` : '',
+        link:(n.link.h && why) ? `${n.link.h}에 ${rc} 부수가 들어간 까닭은 ${why} 때문이다.` : '',
+        src:n.src.join(', ') + (n.compared ? ' (두 자료 비교)' : ''), done:`${p.done}/${p.total}`,
+        character:[n.char.name ? '「'+n.char.name+'」' : '', n.char.intro, n.char.idea ? '그림: '+n.char.idea : ''].filter(Boolean).join(' ')};
+    }),
+    traps:S.traps.map(t => `${t.c}: ${t.chose}부로 썼지만 실제는 ${t.act}부`).join(' / '),
+    trapNote:S.trapNote||'', ref1:S.ref1||'', ref2:S.ref2||''
+  };
+}
+function renderSend(){
+  const w = $('sendWho'); if (!w) return;
+  const st = S.student, ok = st.cls && st.no && st.name;
+  w.innerHTML = ok ? `보내는 사람: <b>1학년 ${esc(st.cls)}반 ${esc(st.no)}번 ${esc(st.name)}</b> · 부수 ${S.rads.map(rc => `<span class="hj">${esc(rc)}</span>`).join(' ') || '없음'}`
+    : '먼저 <b>2번 화면</b>에서 반·번호·이름을 써 주세요. <button type="button" class="btn ghost sm" data-go="1">이름 쓰러 가기</button>';
+  const m = $('sendMsg');
+  if (m && S.sentAt && !m.dataset.live) m.innerHTML = `<span class="muted">마지막으로 보낸 시각: ${esc(S.sentAt)}</span>`;
+}
+async function sendNote(){
+  const m = $('sendMsg'), b = $('sendBtn'), st = S.student;
+  const url = sheetUrl();
+  if (!url){ m.innerHTML = '<span style="color:var(--seal);font-weight:700">선생님 시트 주소가 아직 연결되지 않았어요. 선생님께 알려 주세요.</span>'; return; }
+  if (!(st.cls && st.no && st.name)){ m.innerHTML = '<span style="color:var(--seal);font-weight:700">반·번호·이름을 먼저 써 주세요.</span>'; return; }
+  if (S.rads.length < 3){ m.innerHTML = '<span style="color:var(--seal);font-weight:700">부수 3개를 먼저 골라 주세요.</span>'; return; }
+  const body = JSON.stringify(buildPayload());
+  b.disabled = true; m.dataset.live = '1'; m.innerHTML = '<span class="muted">보내는 중…</span>';
+  let ok = false, unsure = false;
+  try {
+    const r = await fetch(url, {method:'POST', body});
+    const j = await r.json();
+    ok = !!j.ok; if (!ok) throw new Error(j.error || '실패');
+  } catch(e){
+    try { await fetch(url, {method:'POST', mode:'no-cors', body}); ok = true; unsure = true; } catch(e2){ ok = false; }
+  }
+  b.disabled = false;
+  if (ok){
+    const now = new Date(); S.sentAt = now.toLocaleString('ko-KR'); save();
+    m.innerHTML = `<span style="color:var(--jade);font-weight:800">보냈어요 ✓</span> <span class="muted">${esc(S.sentAt)}${unsure ? ' · 확인 응답은 못 받았어요. 걱정되면 한 번 더 눌러도 괜찮아요.' : ''}</span>`;
+    toast('선생님께 보냈어요!');
+  } else {
+    m.innerHTML = '<span style="color:var(--seal);font-weight:700">보내지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요.</span>';
+  }
+}
+
+function logTrap(t){
+  if (!S.traps.some(x => x.c === t.c && x.chose === t.chose)){ S.traps.push(t); save(); }
+}
+
+/* ================= STEP 3: DESIGN ================= */
+function renderDesign(){
+  if (S.rads.length < 3){ $('designForm').innerHTML = '<div class="callout gold">먼저 부수 3개를 고르고 탐구 노트를 채워 주세요.</div>'; $('deck').innerHTML=''; return; }
+  $('designForm').innerHTML = `
+    <div class="callout gold"><b>캐릭터 만들기 팁</b> 부수의 의미를 성격이나 특기로 바꿔 보세요. 예) 氵 → "물방울 삼총사: 특기는 강·바다·눈물 만들기", 足 → "멈추지 않는 운동화"</div>
+    <div class="row" style="margin:8px 0 14px"><span class="f" style="margin:0">표지 색</span><div class="swatches">${COLORS.map((c,i) => `<button type="button" class="sw ${S.coverColor===i?'on':''}" style="background:${c.pc}" data-cover="${i}" aria-label="표지 색 ${i+1}"></button>`).join('')}</div></div>
+    ${S.rads.map((rc,i) => { const c = note(rc).char; return `
+      <div class="sec-title" style="${i===0?'border-top:0;padding-top:0;margin-top:0':''}"><h3><span class="hj" style="font-size:1.6rem">${esc(rc)}</span> 캐릭터</h3>
+        <div class="swatches">${COLORS.map((cc,j) => `<button type="button" class="sw ${c.color===j?'on':''}" style="background:${cc.pc}" data-color="${i}:${j}" aria-label="색 ${j+1}"></button>`).join('')}</div></div>
+      <div class="fgrid">
+        <div class="span2"><label class="f">캐릭터 이름</label><input class="in" data-c="${i}" data-ck="name" value="${esc(c.name)}" placeholder="예: 물방울 삼총사"></div>
+        <div class="span2"><label class="f">그림 아이디어 (부수 글자 어디에 무엇을?)</label><input class="in" data-c="${i}" data-ck="idea" value="${esc(c.idea)}" placeholder="예: 氵의 세 점을 물방울 얼굴로"><div class="feas" id="feas${i}"></div></div>
+        <div class="span4"><label class="f">캐릭터 소개 한 줄 (부수의 의미가 드러나게)</label>
+          <div class="row"><input class="in" data-c="${i}" data-ck="intro" value="${esc(c.intro)}" placeholder="예: 나는 氵! 강·바다·눈물까지 물과 관련된 뜻을 데려와." style="flex:1;min-width:200px">
+          <button type="button" class="btn ghost sm" data-introhelp="${i}">내 탐구로 첫 문장 만들기</button></div></div>
+      </div>`; }).join('')}`;
+  renderDeck();
+  S.rads.forEach((rc,i) => refreshFeas(i));
+}
+/* 그림 아이디어 가능성 점검 */
+function feasibility(rc, c){
+  const idea = (c.idea||'').trim(), out = [];
+  const kw = CANVA_KW[VAR[rc]||rc];
+  if (!idea){ out.push(['q','부수 글자 위에 무엇을 얹을지 한 줄로 써 보세요.']); }
+  else {
+    if (/AI|인공지능|매직|생성|챗GPT|제미나이/i.test(idea)) out.push(['bad','AI로 그림을 만드는 것은 안 돼요. 캔바 일반 요소나 그리기 도구를 써요.']);
+    if (/인터넷|구글|퍼오|캡처|캡쳐|다운/.test(idea)) out.push(['bad','인터넷 그림을 통째로 가져오면 안 돼요. 캔바 [요소]에서 골라 내가 배치해요.']);
+    if (/(빼|지우|없애)/.test(idea) && /(글자|부수)/.test(idea)) out.push(['bad','부수 글자는 지우면 안 돼요! 글자 위에 꾸미기를 얹어요.']);
+    if (idea.length < 6) out.push(['q','조금 더 자세히: 글자의 어느 부분을 무엇으로 바꿀까요?']);
+    if (!out.some(x => x[0]==='bad') && idea.length >= 6) out.push(['ok','캔바로 만들 수 있는 아이디어예요 ✓']);
+  }
+  if (kw) out.push(['kw',`캔바 [요소] 검색어 추천: ${kw}`]);
+  return out;
+}
+function refreshFeas(i){
+  const el = $('feas'+i); if (!el) return;
+  const rc = S.rads[i], items = feasibility(rc, note(rc).char);
+  el.innerHTML = items.map(([k,t]) => `<div style="color:${k==='ok'?'var(--jade)':k==='bad'?'var(--seal)':k==='kw'?'var(--blue)':'var(--gold)'};font-weight:700">${esc(t)}</div>`).join('');
+}
+
+/* ================= STEP 4: CANVA ================= */
+function canvaUrl(){
+  let u = DEFAULT_CANVA;
+  try { const p = new URLSearchParams(location.search).get('canva'); if (p && /^https:\/\//.test(p)) u = p; } catch(e){}
+  return u;
+}
+function cardText(rc){
+  const n = note(rc), c = n.char;
+  const why = n.link.why.trim().replace(/[.。]$/,'').replace(/(때문이다|때문)$/,'').trim();
+  const lines = [];
+  lines.push(`${n.name || '(부수 명칭)'}${n.strokes ? ' · ' + n.strokes + '획' : ''}`);
+  lines.push(`${c.name ? '「' + c.name + '」 ' : ''}${c.intro || '(캐릭터 소개)'}`);
+  lines.push('가족 한자: ' + (n.hanja.filter(h => (h.c||'').trim()).map(h => `${h.c} ${h.m} ${h.s}`).join('  ') || '(가족 한자 2개)'));
+  if (n.link.h && why) lines.push(`${n.link.h}에 ${rc} 부수가 들어간 까닭은 ${why} 때문!`);
+  if (n.word.h) lines.push(`생활 속 낱말: ${n.word.h}${n.word.r ? '(' + n.word.r + ')' : ''}${n.word.m ? ' - ' + n.word.m : ''}`);
+  if (n.variant) lines.push(`변신 모습: ${n.variant}${n.pos ? ' (' + n.pos + ')' : ''}`);
+  return lines.join('\n');
+}
+function renderCanva(){
+  const all3 = S.rads.length === 3;
+  const progs = all3 ? S.rads.map(noteProgress) : [];
+  const ready = [
+    ['부수 3개를 금지 부수 없이 골랐어요', all3 && S.rads.every(rc => !FORBIDDEN.some(f => f.c === rc))],
+    ['탐구 노트를 모두 채웠어요 (부수마다 7/7)', all3 && progs.every(p => p.done === p.total)],
+    ['캐릭터 이름과 소개를 정했어요', all3 && S.rads.every(rc => note(rc).char.name.trim() && note(rc).char.intro.trim())],
+    ['그림 아이디어가 캔바로 만들 수 있는 것이에요', all3 && S.rads.every(rc => { const f = feasibility(rc, note(rc).char); return !f.some(x => x[0]==='bad') && f.some(x => x[0]==='ok'); })]
+  ];
+  $('readyList').innerHTML = ready.map(([t,ok]) => `<li><span class="ck ${ok?'y':'n'}">${ok?'✓':'·'}</span><span>${esc(t)}</span></li>`).join('');
+  const allOk = ready.every(r => r[1]);
+  $('readyMsg').innerHTML = allOk ? '<div class="callout green" style="margin-bottom:0"><b>모두 준비됐어요!</b> 아래 글을 복사해 두고 캔바로 출발해요.</div>'
+    : '<div class="callout gold" style="margin-bottom:0">아직 덜 된 칸이 있어요. 캔바로 가도 되지만, 빈 칸은 카드에서도 비어 있게 돼요. <button type="button" class="btn ghost sm" data-go="2">탐구 노트로</button> <button type="button" class="btn ghost sm" data-go="3">캐릭터 설계로</button></div>';
+  if (!all3){ $('copyBlocks').innerHTML = '<p class="muted">부수 3개를 고르면 여기에 글이 만들어져요.</p>'; }
+  else {
+    const cover = `${S.student.name || '○○○'}의 부수 도감\n1학년 ${S.student.cls||'_'}반 ${S.student.no||'_'}번\n나의 테마: ${S.theme.title || '-'}\n고른 이유: ${S.theme.why || '-'}\n${S.rads.join('  ')}`;
+    const blocks = [{t:'1쪽 · 표지', body:cover, kw:''}].concat(S.rads.map((rc,i) => ({t:`카드 ${i+1} · ${rc}`, body:cardText(rc), kw:CANVA_KW[rc] ? `큰 부수 글자: ${rc} (그대로 크게) · [요소] 검색어: ${CANVA_KW[rc]}` : `큰 부수 글자: ${rc}`})));
+    $('copyBlocks').innerHTML = blocks.map((b,i) => `<div class="cblock"><div class="row" style="justify-content:space-between"><b>${esc(b.t)}</b><button type="button" class="btn sm" data-copy="${i}">복사</button></div><pre id="cb${i}">${esc(b.body)}</pre>${b.kw?`<div class="kw">${esc(b.kw)}</div>`:''}</div>`).join('');
+  }
+  $('launchRads').textContent = all3 ? S.rads.join('') : '部';
+  const u = canvaUrl(), a = $('canvaGo');
+  if (u){ a.href = u; a.classList.remove('hidden'); $('canvaNoLink').classList.add('hidden'); }
+  else { a.classList.add('hidden'); $('canvaNoLink').classList.remove('hidden'); }
+}
+function renderDeck(){
+  if (S.rads.length < 3) return;
+  const cc = COLORS[S.coverColor] || COLORS[0];
+  const who = S.student.name ? esc(S.student.name) : '○○○';
+  let h = `<div class="pc cover" style="--pc:${cc.pc};--pcs:${cc.pcs}"><div class="muted" style="color:#5d574c">${esc(S.student.cls||'_')}반 ${esc(S.student.no||'_')}번</div><div class="ttl">${who}의 부수 도감</div><div class="rads">${S.rads.map(esc).join('')}</div><div style="font-weight:700">테마: ${esc(S.theme.title||'나의 테마')}</div><div class="link">${esc(S.theme.why||'테마를 고른 이유')}</div></div>`;
+  S.rads.forEach(rc => {
+    const n = note(rc), c = n.char, col = COLORS[c.color] || COLORS[0];
+    const fam = n.hanja.filter(x => (x.c||'').trim()).map(x => `<span><b>${esc(x.c)}</b> ${esc(x.m)} ${esc(x.s)}</span>`).join('') || '<span>가족 한자 2개</span>';
+    const why = n.link.why.trim().replace(/[.。]$/,'').replace(/(때문이다|때문)$/,'').trim();
+    const linkTxt = n.link.h && why ? `${esc(n.link.h)}에 ${esc(rc)} 부수가 있는 까닭: ${esc(why)} 때문` : (n.word.h ? `생활 속 낱말: ${esc(n.word.h)}(${esc(n.word.r)})` : '연결 문장 / 생활 속 낱말');
+    h += `<div class="pc" style="--pc:${col.pc};--pcs:${col.pcs}">
+      <div class="bar"><span>${esc(n.name || '부수 명칭')}</span><span>${n.strokes?esc(n.strokes)+'획':''}</span></div>
+      <div class="art"><span class="hj">${esc(rc)}</span>${c.idea?`<span class="idea">${esc(c.idea)}</span>`:''}</div>
+      <div class="intro">${esc(c.name ? '「'+c.name+'」 ' : '')}${esc(c.intro || '캐릭터 소개 한 줄')}</div>
+      <div class="fam">${fam}</div>
+      <div class="link">${linkTxt}</div>
+    </div>`;
+  });
+  $('deck').innerHTML = h;
+}
+
+/* ================= STEP 4 ================= */
+function renderCheck(){
+  const all3 = S.rads.length === 3;
+  const progs = all3 ? S.rads.map(noteProgress) : [];
+  const forbidOk = all3 && S.rads.every(rc => !FORBIDDEN.some(f => f.c === rc));
+  const items = [
+    ['학번과 이름을 썼어요', !!(S.student.cls && S.student.no && S.student.name.trim())],
+    ['나의 테마와 고른 이유를 썼어요', !!(S.theme.title.trim() && S.theme.why.trim())],
+    ['금지 부수 없이 부수 3개를 골랐어요', forbidOk],
+    ['부수 명칭·획수·본래 의미를 모두 썼어요', all3 && progs.every(p => p.items[0] && p.items[1] && p.items[2])],
+    ['가족 한자 6개(부수마다 2개) 모두 모양·뜻·음을 쓰고 부수를 확인했어요', all3 && progs.every(p => p.items[3])],
+    ['부수마다 생활 속 낱말과 연결 문장을 썼어요', all3 && progs.every(p => p.items[4] && p.items[5])],
+    ['부수마다 출처를 2개 이상 체크했어요', all3 && progs.every(p => p.items[6])],
+    ['캐릭터 이름과 소개를 정했어요 (2단계)', all3 && S.rads.every(rc => note(rc).char.name.trim() && note(rc).char.intro.trim())]
+  ];
+  $('checklist').innerHTML = items.map(([t,ok]) => `<li><span class="ck ${ok?'y':'n'}">${ok?'✓':'·'}</span><span>${esc(t)}</span></li>`).join('');
+  $('pledge').checked = !!S.pledge; renderSend();
+  document.querySelectorAll('[data-sub]').forEach(c => c.checked = !!(S.sub && S.sub[c.dataset.sub]));
+  $('trapLog').innerHTML = S.traps.length
+    ? '앱이 찾아낸 착각: ' + S.traps.map(t => `<b class="hj">${esc(t.c)}</b> → ${esc(t.chose)}부로 썼지만 실제는 <b class="hj">${esc(t.act)}</b>부`).join(' / ')
+    : '아직 착각한 한자가 없어요. 착각했다가 사전으로 바로잡은 한자가 있다면 아래에 직접 써 주세요.';
+  $('trapNote').value = S.trapNote; $('ref1').value = S.ref1; $('ref2').value = S.ref2;
+}
+
+/* ================= EXPORT (canvas) ================= */
+async function exportPng(){
+  try { await Promise.all([document.fonts.load('900 40px "Noto Serif KR"'), document.fonts.load('700 20px "Noto Sans KR"'), document.fonts.load('400 20px "Noto Sans KR"')]); } catch(e){}
+  const W = 1240, P = 56, cw = W - P*2;
+  const SANS = '"Noto Sans KR", "Malgun Gothic", sans-serif', SERIF = '"Noto Serif KR", "Batang", serif';
+  const meas = document.createElement('canvas').getContext('2d');
+  function lines(ctx, text, font, maxW){
+    ctx.font = font; const out = []; let cur = '';
+    for (const para of String(text||'').split('\n')){
+      cur = '';
+      for (const ch of [...para]){
+        const t = cur + ch;
+        if (ctx.measureText(t).width > maxW && cur){ out.push(cur); cur = ch.trim() ? ch : ''; } else cur = t;
+      }
+      out.push(cur);
+    }
+    return out;
+  }
+  // 그리기 명령을 먼저 쌓고 높이를 계산
+  const ops = []; let y = P;
+  const text = (t, x, f, color, lh, maxW) => { const ls = lines(meas, t, f, maxW || cw - (x - P)); ls.forEach(l => { ops.push({k:'t', t:l, x, y: y + lh*0.78, f, color}); y += lh; }); };
+  const rect = (x, yy, w, h, fill, stroke) => ops.push({k:'r', x, y:yy, w, h, fill, stroke});
+  const C = {ink:'#24211c', sub:'#6d675c', seal:'#b3362c', jade:'#2a6b58', gold:'#94650a', line:'#d9d2c3', soft:'#f6f2ea'};
+
+  text('1학년 한문 수행평가 · 나만의 부수 카드 만들기 (1단계)', P, `700 22px ${SANS}`, C.seal, 34);
+  text('부수 탐정 탐구 노트', P, `800 44px ${SANS}`, C.ink, 60);
+  text(`1학년 ${S.student.cls||'_'}반 ${S.student.no||'_'}번  ${S.student.name||'이름 미입력'}`, P, `700 26px ${SANS}`, C.ink, 40);
+  y += 8; rect(P, y, cw, 2, C.ink); y += 18;
+  text(`나의 테마: ${S.theme.title||'-'}`, P, `700 26px ${SANS}`, C.ink, 38);
+  text(`고른 이유: ${S.theme.why||'-'}`, P, `400 23px ${SANS}`, C.sub, 34);
+  y += 12;
+
+  S.rads.forEach((rc, idx) => {
+    const n = note(rc), p = noteProgress(rc);
+    const top = y, startIdx = ops.length; y += 18;
+    const boxX = P + 18, inner = cw - 36;
+    ops.push({k:'t', t:rc, x: boxX, y: y + 74, f:`900 84px ${SERIF}`, color:C.seal});
+    const tx = boxX + 120;
+    const yStart = y;
+    text(`${idx+1}번 부수 · ${n.name||'명칭 미입력'} · ${n.strokes?n.strokes+'획':'획수 미입력'}  (완성도 ${p.done}/${p.total})`, tx, `800 27px ${SANS}`, C.ink, 40, inner - 120);
+    if (n.variant || n.pos) text(`변신 모습: ${n.variant||'-'}   위치: ${n.pos||'-'}`, tx, `400 22px ${SANS}`, C.sub, 32, inner - 120);
+    text(`본래 의미: ${n.meaning||'-'}`, tx, `400 23px ${SANS}`, C.ink, 34, inner - 120);
+    y = Math.max(y, yStart + 96) + 6;
+    n.hanja.forEach((h, i) => {
+      const r = p.hs[i];
+      const mark = r.complete ? '✓' : (r.radOk === false ? '✗ 부수 확인 필요' : '…');
+      ops.push({k:'t', t:'①②③'[i], x: boxX, y: y + 34, f:`700 26px ${SANS}`, color:C.ink});
+      ops.push({k:'t', t:h.c||'□', x: boxX + 44, y: y + 38, f:`900 40px ${SERIF}`, color:C.ink});
+      ops.push({k:'t', t:`${h.m||'뜻'} ${h.s||'음'}`, x: boxX + 110, y: y + 34, f:`700 26px ${SANS}`, color:C.ink});
+      ops.push({k:'t', t:mark, x: boxX + 420, y: y + 34, f:`700 22px ${SANS}`, color: r.complete ? C.jade : (r.radOk === false ? C.seal : C.gold)});
+      y += 50;
+    });
+    y += 4;
+    text(`생활 속 낱말: ${n.word.h||'-'}${n.word.r?'('+n.word.r+')':''}${n.word.m?' - '+n.word.m:''}`, boxX, `400 23px ${SANS}`, C.ink, 34, inner);
+    const why = n.link.why.trim().replace(/[.。]$/,'').replace(/(때문|때문이다)$/,'').trim();
+    text(`연결 문장: ${n.link.h||'(　)'}에 ${rc} 부수가 들어간 까닭은 ${why||'______'} 때문이다.`, boxX, `400 23px ${SANS}`, C.ink, 34, inner);
+    text(`출처: ${n.src.length ? n.src.join(', ') : '미기재'}${n.compared ? '  · 두 자료 비교 확인' : ''}`, boxX, `400 21px ${SANS}`, n.src.length >= 2 ? C.jade : C.seal, 32, inner);
+    if (n.char.name || n.char.intro) text(`캐릭터 아이디어: ${n.char.name ? '「'+n.char.name+'」 ' : ''}${n.char.intro||''}`, boxX, `400 21px ${SANS}`, C.sub, 32, inner);
+    y += 16;
+    ops.splice(startIdx, 0, {k:'r', x:P, y:top, w:cw, h:y-top, fill:C.soft, stroke:C.line});
+    y += 18;
+  });
+
+  text('탐정 기록 · 착각했다가 바로잡은 한자', P, `800 25px ${SANS}`, C.ink, 38);
+  const tl = S.traps.map(t => `${t.c}: ${t.chose}부로 썼지만 실제는 ${t.act}부`).join(' / ');
+  text(tl || '앱 기록 없음', P, `400 22px ${SANS}`, C.gold, 32);
+  if (S.trapNote) text(`직접 쓴 기록: ${S.trapNote}`, P, `400 22px ${SANS}`, C.ink, 32);
+  y += 10;
+  text('성찰', P, `800 25px ${SANS}`, C.ink, 38);
+  text(`1. ${S.ref1||'-'}`, P, `400 22px ${SANS}`, C.ink, 32);
+  text(`2. ${S.ref2||'-'}`, P, `400 22px ${SANS}`, C.ink, 32);
+  y += 14;
+  const d = new Date();
+  text(`${S.pledge ? 'AI가 만든 내용을 쓰지 않고 직접 조사했음을 약속합니다. · ' : ''}저장: ${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')} · 부수 캐릭터 카드 연구소`, P, `400 18px ${SANS}`, C.sub, 28);
+  y += P - 20;
+
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = Math.ceil(y);
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, cv.height);
+  ctx.fillStyle = C.seal; ctx.fillRect(0, 0, W, 10);
+  ops.forEach(o => {
+    if (o.k === 'r'){ ctx.fillStyle = o.fill; ctx.fillRect(o.x, o.y, o.w, o.h); if (o.stroke){ ctx.strokeStyle = o.stroke; ctx.lineWidth = 2; ctx.strokeRect(o.x+1, o.y+1, o.w-2, o.h-2); } }
+    else { ctx.font = o.f; ctx.fillStyle = o.color; ctx.textBaseline = 'alphabetic'; ctx.fillText(o.t, o.x, o.y); }
+  });
+  const url = cv.toDataURL('image/png');
+  $('exportImg').src = url;
+  const fn = `부수탐구노트_${S.student.cls||''}반${S.student.no||''}번_${(S.student.name||'이름').replace(/\s+/g,'')}.png`;
+  $('exportDl').href = url; $('exportDl').download = fn;
+  $('exportModal').classList.remove('hidden');
+}
+
+/* ================= TEACHER TOOLS ================= */
+let tLeft = 1380, tRun = null;
+const fmt = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+function tUpdate(){ $('timerBig').textContent = fmt(tLeft); const m = $('miniTimer'); m.textContent = fmt(tLeft); m.classList.toggle('hidden', !tRun && tLeft === +$('timerPreset').value); $('timerStart').textContent = tRun ? '일시정지' : '시작'; }
+function beep(){ try { const A = window.AudioContext || window.webkitAudioContext; const a = new A(); const o = a.createOscillator(), g = a.createGain(); o.connect(g); g.connect(a.destination); o.frequency.value = 880; g.gain.setValueAtTime(.2, a.currentTime); g.gain.exponentialRampToValueAtTime(.001, a.currentTime + 1.2); o.start(); o.stop(a.currentTime + 1.2); } catch(e){} }
+function tToggle(){
+  if (tRun){ clearInterval(tRun); tRun = null; }
+  else { if (tLeft <= 0) tLeft = +$('timerPreset').value; tRun = setInterval(() => { tLeft--; if (tLeft <= 0){ tLeft = 0; clearInterval(tRun); tRun = null; beep(); toast('시간 종료!'); } tUpdate(); }, 1000); }
+  tUpdate();
+}
+function makeQr(){
+  let base = $('appUrl').value.trim();
+  if (!base){ toast('웹앱을 올린 주소를 먼저 넣어 주세요.'); return; }
+  const cv = $('canvaUrl').value.trim();
+  let url = base;
+  if (cv){ try { const u = new URL(base); u.searchParams.set('canva', cv); url = u.toString(); } catch(e){ url = base + (base.includes('?')?'&':'?') + 'canva=' + encodeURIComponent(cv); } }
+  $('qrBox').dataset.url = url;
+  if (typeof window.qrcode !== 'function'){ $('qrBox').innerHTML = '<span class="muted">QR 도구를 불러오지 못했어요(인터넷 확인). 링크 복사를 써 주세요.</span>'; return; }
+  try { const q = window.qrcode(0, 'M'); q.addData(url); q.make(); $('qrBox').innerHTML = q.createSvgTag({cellSize:4, margin:2, scalable:true}); }
+  catch(e){ $('qrBox').innerHTML = '<span class="muted">주소가 너무 길어요. 짧은 주소로 바꿔 보세요.</span>'; }
+}
+
+/* ================= EVENTS ================= */
+function renderAll(){
+  renderSteps();
+  if (S.step === 0) renderQuiz();
+  if (S.step === 1) renderStep1();
+  if (S.step === 2) renderNote();
+  if (S.step === 3) renderDesign();
+  if (S.step === 4) renderCanva();
+  if (S.step === 5) renderCheck();
+}
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('button, a, [data-close]');
+  if (!t) return;
+  if (t.dataset.go !== undefined){ go(+t.dataset.go); return; }
+  if (t.dataset.q !== undefined){ S.quiz[t.dataset.q] = t.dataset.o; save(); renderQuiz(); renderSteps(); return; }
+  if (t.dataset.theme){ S.theme.id = t.dataset.theme; if (t.dataset.theme !== 'custom'){ filterMode = 'theme'; } save(); renderStep1(); return; }
+  if (t.dataset.pick){ pick(t.dataset.pick); return; }
+  if (t.dataset.unpick){ pick(t.dataset.unpick); return; }
+  if (t.dataset.tab !== undefined){ S.active = +t.dataset.tab; save(); renderNote(); window.scrollTo({top:0,behavior:'smooth'}); return; }
+  if (t.dataset.cover !== undefined){ S.coverColor = +t.dataset.cover; save(); renderDesign(); return; }
+  if (t.dataset.color){ const [i,j] = t.dataset.color.split(':').map(Number); note(S.rads[i]).char.color = j; save(); renderDesign(); return; }
+  if (t.dataset.introhelp !== undefined){
+    const i = +t.dataset.introhelp, rc = S.rads[i], n = note(rc);
+    if (!n.meaning.trim()){ toast('탐구 노트의 \'본래 의미\'를 먼저 써 주세요.'); return; }
+    n.char.intro = `나는 ${rc}! ${n.meaning.trim().replace(/[.。]$/,'')}${n.hanja.filter(h=>h.c).length ? ' / 내 가족: ' + n.hanja.filter(h=>h.c).map(h=>h.c).join('·') : ''}`;
+    save(); renderDesign(); toast('첫 문장을 만들었어요. 내 캐릭터답게 고쳐 써 보세요!'); return;
+  }
+  if (t.dataset.copy !== undefined){
+    const txt = $('cb' + t.dataset.copy).textContent;
+    const done = () => { t.textContent = '복사됨 ✓'; setTimeout(() => t.textContent = '복사', 1500); };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(done, () => fallbackCopy(txt, done));
+    else fallbackCopy(txt, done);
+    return;
+  }
+  if (t.id === 'canvaGo'){ S.canvaOpened = true; save(); renderSteps(); return; }
+  if (t.id === 'prevBtn'){ go(S.step - 1); return; }
+  if (t.id === 'nextBtn'){ go(S.step === STEPS.length-1 ? 0 : S.step + 1); return; }
+  if (t.id === 'quizReset'){ S.quiz = {}; save(); renderQuiz(); renderSteps(); return; }
+  if (t.id === 'filterTheme'){ if (!S.theme.id || S.theme.id === 'custom'){ toast('먼저 위에서 테마를 골라 주세요.'); return; } filterMode = 'theme'; renderGrid(); return; }
+  if (t.id === 'filterAll'){ filterMode = 'all'; renderGrid(); return; }
+  if (t.id === 'customCheck'){
+    const r = judgeRadical($('customRad').value);
+    const box = $('customRes');
+    if (r.st === 'empty'){ box.innerHTML = ''; return; }
+    const cls = r.st === 'ok' ? 'green' : r.st === 'forbidden' ? 'red' : 'gold';
+    let extra = '';
+    if (r.st === 'ok') extra = ` <button type="button" class="btn sm jade" data-pick="${esc(r.rad)}">이 부수 고르기</button>`;
+    if (r.st === 'unknown') extra = `<div class="row" style="margin-top:6px"><input class="in" id="customName" placeholder="부수표의 명칭 (예: 얼음 빙)" style="flex:1;min-width:150px"><input class="in" id="customStroke" placeholder="획수" inputmode="numeric" style="width:80px"><button type="button" class="btn sm" id="customAdd" data-rad="${esc(r.rad)}">추가하고 고르기</button></div>`;
+    box.innerHTML = `<div class="callout ${cls}" style="margin:0">${esc(r.msg)}${extra}</div>`;
+    return;
+  }
+  if (t.id === 'customAdd'){
+    const rc = t.dataset.rad, nm = ($('customName').value||'').trim();
+    if (!nm){ toast('부수표에 나온 명칭을 적어 주세요.'); return; }
+    S.custom[rc] = {c:rc, n:nm, s: parseInt($('customStroke').value,10) || null, t:[], m:''};
+    NAME_OF[rc] = nm;
+    save(); $('customRes').innerHTML = ''; $('customRad').value = '';
+    if (!S.rads.includes(rc)) pick(rc); else renderGrid();
+    return;
+  }
+  if (t.id === 'exportBtn'){ exportPng(); return; }
+  if (t.id === 'sendBtn'){ sendNote(); return; }
+  if (t.id === 'resetAll'){
+    if (!confirm('이 기기에 저장된 내용을 모두 지울까요? 되돌릴 수 없어요.')) return;
+    try { localStorage.removeItem(KEY); } catch(e){}
+    location.reload(); return;
+  }
+  if (t.id === 'teacherBtn'){ $('teacherModal').classList.remove('hidden'); if (!$('appUrl').value && location.protocol.startsWith('http')) $('appUrl').value = location.href.split('?')[0]; return; }
+  if (t.hasAttribute('data-close')){ t.closest('.modal').classList.add('hidden'); return; }
+  if (t.id === 'timerStart'){ tToggle(); return; }
+  if (t.id === 'timerReset'){ clearInterval(tRun); tRun = null; tLeft = +$('timerPreset').value; tUpdate(); return; }
+  if (t.id === 'qrMake'){ makeQr(); return; }
+  if (t.id === 'qrCopy'){ const u = $('qrBox').dataset.url || $('appUrl').value; if (!u) return; (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(() => toast('링크를 복사했어요.'), () => prompt('아래 링크를 복사하세요', u)); return; }
+  if (t.id === 'bigToggle'){ const on = document.documentElement.classList.toggle('big'); t.textContent = on ? '칠판 확대 모드 끄기' : '칠판 확대 모드 켜기'; return; }
+});
+document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.add('hidden'); }));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden')); });
+
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.id === 'stClass'){ S.student.cls = el.value; save(); return; }
+  if (el.id === 'stNo'){ S.student.no = el.value; save(); return; }
+  if (el.id === 'stName'){ S.student.name = el.value; save(); return; }
+  if (el.id === 'themeTitle'){ S.theme.title = el.value; save(); renderSteps(); return; }
+  if (el.id === 'themeWhy'){ S.theme.why = el.value; save(); return; }
+  if (el.id === 'radSearch'){ renderGrid(); return; }
+  if (el.id === 'trapNote'){ S.trapNote = el.value; save(); return; }
+  if (el.id === 'ref1'){ S.ref1 = el.value; save(); renderSteps(); return; }
+  if (el.id === 'ref2'){ S.ref2 = el.value; save(); return; }
+  if (S.step === 2 && S.rads.length === 3){
+    const n = note(S.rads[S.active]);
+    if (el.dataset.f){ n[el.dataset.f] = el.value; save(); refreshNoteChecks(); return; }
+    if (el.dataset.h !== undefined){ n.hanja[+el.dataset.h][el.dataset.k] = el.value; save(); refreshNoteChecks(); refreshLinkOptions(); return; }
+    if (el.dataset.w){ n.word[el.dataset.w] = el.value; save(); refreshNoteChecks(); return; }
+    if (el.dataset.l === 'why'){ n.link.why = el.value; save(); refreshNoteChecks(); return; }
+  }
+  if (S.step === 3 && el.dataset.c !== undefined){ note(S.rads[+el.dataset.c]).char[el.dataset.ck] = el.value; save(); renderDeck(); renderSteps(); if (el.dataset.ck === 'idea') refreshFeas(+el.dataset.c); return; }
+  if (el.dataset.sub !== undefined){ S.sub = S.sub || {}; S.sub[el.dataset.sub] = el.checked; save(); return; }
+});
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.id === 'pledge'){ S.pledge = el.checked; save(); renderSteps(); return; }
+  if (el.id === 'timerPreset'){ if (!tRun){ tLeft = +el.value; tUpdate(); } return; }
+  if (S.step === 2 && S.rads.length === 3){
+    const n = note(S.rads[S.active]);
+    if (el.dataset.f === 'pos'){ n.pos = el.value; save(); return; }
+    if (el.dataset.l === 'h'){ n.link.h = el.value; save(); refreshNoteChecks(); return; }
+    if (el.dataset.src){ const s = el.dataset.src; n.src = el.checked ? [...new Set([...n.src, s])] : n.src.filter(x => x !== s); save(); refreshNoteChecks(); return; }
+    if (el.id === 'compared'){ n.compared = el.checked; save(); refreshNoteChecks(); return; }
+    if (el.dataset.hok !== undefined){ n.hanja[+el.dataset.hok].ok = el.checked; save(); refreshNoteChecks(); return; }
+  }
+});
+function fallbackCopy(txt, done){
+  const ta = document.createElement('textarea'); ta.value = txt; ta.setAttribute('readonly',''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, txt.length);
+  let ok = false; try { ok = document.execCommand('copy'); } catch(e){}
+  document.body.removeChild(ta);
+  if (ok) done(); else toast('복사가 안 되면 글자를 길게 눌러 직접 복사해 주세요.');
+}
+function refreshLinkOptions(){
+  const sel = $('lH'); if (!sel) return;
+  const n = note(S.rads[S.active]);
+  const opts = n.hanja.map(h => (h.c||'').trim()).filter(Boolean);
+  if (n.link.h && !opts.includes(n.link.h)) n.link.h = '';
+  sel.innerHTML = '<option value="">고르기</option>' + opts.map(c => `<option value="${esc(c)}" ${n.link.h===c?'selected':''}>${esc(c)}</option>`).join('');
+}
+
+/* ================= INIT ================= */
+load();
+// 저장된 직접 추가 부수 이름 복원
+Object.values(S.custom||{}).forEach(r => NAME_OF[r.c] = r.n);
+(function(){ // ?canva= 링크
+  try {
+    const cv = canvaUrl();
+    if (cv){ const a = $('canvaLink'); a.href = cv; a.classList.remove('hidden'); $('canvaUrl').value = cv; }
+  } catch(e){}
+})();
+tLeft = +$('timerPreset').value; tUpdate();
+renderAll();
+})();
+</script>
+</body>
+</html>

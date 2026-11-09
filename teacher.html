@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>부수 카드 수업 화면</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<style>
+:root{--bg:#1d1b18;--stage:#fbf8f1;--ink:#23201b;--sub:#6b6458;--line:#e2dacb;--seal:#b3362c;--seal-soft:#f7e2dd;--jade:#2a6b58;--jade-soft:#dcefe6;--gold:#94650a;--gold-soft:#f9edcf;--blue:#2b5aa0;--blue-soft:#e3ebf8}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);font-family:'Noto Sans KR',sans-serif;color:var(--ink);overflow:hidden}
+.hj{font-family:'Noto Serif KR','Batang',serif;font-weight:900}
+button{font:inherit;cursor:pointer}
+.hidden{display:none!important}
+/* top bar */
+.bar{height:52px;display:flex;align-items:center;gap:8px;padding:0 12px;background:#14120f;color:#efe9dc;overflow-x:auto;white-space:nowrap}
+.bar>*{flex-shrink:0}
+.bar .lesson{border:1px solid #3b362e;background:transparent;color:#cfc6b4;border-radius:8px;padding:6px 12px;font-weight:700;font-size:14px}
+.bar .lesson.on{background:var(--seal);border-color:var(--seal);color:#fff}
+.bar .sp{flex:1}
+.bar .tbtn{border:1px solid #3b362e;background:#24211c;color:#efe9dc;border-radius:8px;padding:6px 12px;font-size:14px;font-weight:700}
+.timer{display:flex;align-items:center;gap:6px;background:#24211c;border:1px solid #3b362e;border-radius:8px;padding:3px 8px}
+.timer .t{font-variant-numeric:tabular-nums;font-weight:900;font-size:20px;color:#f4c45a;min-width:64px;text-align:center}
+.timer.end .t{color:#ff7a6b}
+.timer button{border:0;background:#3b362e;color:#efe9dc;border-radius:6px;padding:3px 8px;font-size:13px;font-weight:700}
+/* stage */
+:root{--pw:0px}
+body.exon{--pw:min(36vw, 540px)}
+.wrap{height:calc(100% - 52px - 40px);display:flex;align-items:center;justify-content:center;gap:10px;padding:10px}
+.stage{flex:0 0 auto;aspect-ratio:16/9;width:min(calc(100vw - 20px - var(--pw)), calc((100vh - 112px) * 16 / 9));background:var(--stage);border-radius:14px;position:relative;overflow:hidden;font-size:calc(min(100vw - 20px - var(--pw), (100vh - 112px) * 16 / 9) / 64);box-shadow:0 10px 40px rgba(0,0,0,.4)}
+/* example side panel */
+.exp{display:none;flex:0 0 auto;width:calc(var(--pw) - 10px);height:100%;overflow:auto;background:var(--stage);border-radius:14px;padding:12px 14px;font-size:clamp(12px,1.05vw,16px)}
+body.exon .exp{display:block}
+.exp .exh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.exp .exh b{font-size:1.1em}
+.exp .tabs{display:flex;gap:6px;margin-bottom:8px}
+.exp .tabs button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:3px 12px;font-weight:700;font-size:.92em}
+.exp .tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.exp .deck4{grid-template-columns:1fr 1fr;font-size:.95em}
+.exp .tip{font-size:.85em;color:var(--sub);margin-top:8px}
+/* example sheet + card mocks */
+table.ex{width:100%;border-collapse:collapse;background:#fff;font-size:1em}
+table.ex th{background:#fff6dc;text-align:left;white-space:nowrap;padding:.32em .6em;border:.1em solid var(--line);width:1%;vertical-align:top}
+table.ex td{padding:.32em .6em;border:.1em solid var(--line);line-height:1.45}
+table.ex .hj{font-size:1.15em}
+table.ex.focus tr:not(.hl){opacity:.35}
+table.ex tr.hl th,table.ex tr.hl td{background:#fff1b8;border-color:#e9b400}
+table.ex tr.hl th{box-shadow:inset .35em 0 0 #e9b400}
+table.ex tr{cursor:pointer;transition:opacity .2s}
+.sub{color:var(--sub);font-size:.88em}
+.hl{box-shadow:0 0 0 .16em #e9b400;background-color:#fff1b8 !important;border-radius:.3em;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 .3em rgba(233,180,0,.45)}}
+.deck4{display:grid;grid-template-columns:repeat(4,1fr);gap:.6em}
+.cm{aspect-ratio:1;background:#fff;border:.18em solid var(--c,#b3362c);border-radius:.7em;display:flex;flex-direction:column;gap:.22em;padding-bottom:.4em;overflow:hidden;font-size:.6em}
+.cmh{background:var(--c);color:#fff;display:flex;justify-content:space-between;padding:.25em .6em;font-weight:900;font-size:.9em}
+.cma{margin:0 .5em;background:var(--cs);border-radius:.5em;flex:1;display:grid;place-items:center;position:relative;min-height:0}
+.cma .hj{font-size:4em;color:var(--c);line-height:1}
+.cma em{position:absolute;bottom:.25em;font-style:normal;font-size:.8em;background:rgba(255,255,255,.88);padding:0 .45em;border-radius:.3em;white-space:nowrap}
+.cm>b,.cm>div:not(.cmh):not(.cma){margin-left:.6em;margin-right:.6em}
+.cmi{font-size:.9em;line-height:1.3}
+.cmf{display:flex;gap:.3em}.cmf span{background:#f4f0e8;border-radius:.3em;padding:0 .35em;font-size:.95em}
+.cml{font-size:.8em;color:#4d473e;line-height:1.3}
+.cms{font-size:.68em;color:var(--sub)}
+.cm.cover{--c:var(--seal);background:var(--seal-soft)}
+.cvt{font-size:2em;font-weight:900;line-height:1.15;margin-top:.25em}
+.cvr{display:flex;gap:.4em;margin-top:auto!important}.cvr span{flex:1;aspect-ratio:1;background:#fff;border:.12em solid var(--seal);border-radius:.4em;display:grid;place-items:center;font-size:2.1em}
+.big2 .cm{font-size:.74em}
+/* interactive bug-finding note */
+.bug{border-bottom:.12em dashed var(--seal);cursor:pointer;padding:0 .15em;border-radius:.2em;background:#fff6f4}
+.bug .fix{display:none;color:var(--jade);font-weight:900}
+.bug.open{background:var(--jade-soft);border-bottom-color:var(--jade)}
+.bug.open .fix{display:inline}
+.mark{display:inline-block;font-weight:900;border-radius:.4em;padding:0 .45em;margin-left:.3em;font-size:.95em}
+.mark.r{background:var(--seal);color:#fff}.mark.g{background:var(--gold);color:#fff}
+/* dictionary mock */
+.dict{background:#fff;border:2px solid #cfd8cf;border-radius:.8em;overflow:hidden;font-size:1.05em}
+.dict .dbar{background:#03c75a;color:#fff;font-weight:900;padding:.35em .8em}
+.dict .dbar span{background:#fff;color:#222;border-radius:.4em;padding:.05em .6em;margin-left:.4em;font-family:'Noto Serif KR',serif}
+.dict .row{display:flex;align-items:center;gap:.5em;padding:.35em .8em;border-bottom:1px solid #eee}
+.dict .tab{padding:.1em .6em;border-radius:999px;background:#f1f1f1}
+.dict .tab.on{background:#222;color:#fff;font-weight:700}
+.dict .lst{display:flex;gap:.4em;flex-wrap:wrap}
+.dict .lst span{border:1px solid #ddd;border-radius:.4em;padding:.05em .45em;font-size:1.05em}
+.dict .lst span.pick{border-color:var(--seal);background:var(--seal-soft)}
+.num{display:inline-grid;place-items:center;width:1.5em;height:1.5em;border-radius:50%;background:var(--seal);color:#fff;font-weight:900;font-size:.85em;flex:0 0 auto}
+/* canva editor mock */
+.cvm{background:#fff;border:2px solid #d6d3f0;border-radius:.8em;overflow:hidden;font-size:.95em}
+.cvm .top{display:flex;align-items:center;gap:.6em;background:linear-gradient(90deg,#00c4cc,#7d2ae8);color:#fff;padding:.3em .7em;font-weight:700}
+.cvm .top .ttl{flex:1;font-size:.9em;opacity:.95}
+.cvm .top .sh{background:#fff;color:#7d2ae8;border-radius:.4em;padding:.05em .6em}
+.cvm .top .ed{background:#ffd54f;color:#333;border-radius:.4em;padding:.05em .6em}
+.cvm .body{display:grid;grid-template-columns:9em 1fr;min-height:0}
+.cvm .side{background:#f6f5fb;padding:.5em;border-right:1px solid #e6e3f3}
+.cvm .side .q{background:#fff;border:1px solid #ddd;border-radius:.4em;padding:.15em .4em;margin:.3em 0}
+.cvm .side .g{display:grid;grid-template-columns:1fr 1fr;gap:.3em;font-size:1.5em;text-align:center}
+.cvm .page{padding:.5em;display:grid;place-items:center;background:#eceaf3}
+.cvm .page .cm{width:17em;font-size:.48em}
+.cvm .strip{display:flex;gap:.35em;padding:.35em .6em;background:#fff;border-top:1px solid #e6e3f3}
+.cvm .strip span{border:2px solid #ddd;border-radius:.3em;padding:.05em .45em;font-size:.85em}
+.cvm .strip span.on{border-color:#7d2ae8;color:#7d2ae8;font-weight:900}
+.cvm .strip span.ex{background:var(--gold-soft)}
+/* download mock */
+.dlm{background:#fff;border:2px solid #d6d3f0;border-radius:.8em;padding:.7em .9em;font-size:1.1em}
+.dlm .r{display:flex;justify-content:space-between;align-items:center;margin:.35em 0}
+.dlm .sel{border:1px solid #ccc;border-radius:.4em;padding:.1em .6em;background:#fafafa}
+.dlm .go{background:#7d2ae8;color:#fff;text-align:center;border-radius:.5em;padding:.35em;font-weight:900;margin-top:.5em}
+.ann{list-style:none;padding:0;margin:0}
+.ann li{display:flex;gap:.5em;align-items:flex-start;margin:.32em 0;font-size:1.15em}
+.weak .cma .hj{font-size:1.3em}
+.frame2{background:#fff;border:2px dashed var(--blue);border-radius:.7em;padding:.6em .9em;font-size:1.25em;line-height:1.8}
+.stepper{display:flex;gap:.35em;margin:.15em 0 .3em;flex-wrap:wrap}
+.stepper span{font-size:.9em;font-weight:700;padding:.1em .6em;border-radius:999px;background:#efe9dd;color:var(--sub)}
+.stepper span.on{background:var(--seal);color:#fff}
+.stepper span.done{background:var(--jade-soft);color:var(--jade)}
+.eq{display:flex;align-items:center;gap:.5em;flex-wrap:wrap;margin:.3em 0 .6em}
+.eq div{background:#fff;border:2px solid var(--line);border-radius:.6em;padding:.35em .7em;font-size:1.2em;text-align:center}
+.eq div small{display:block;font-size:.65em;color:var(--sub);font-weight:700}
+.eq b.op{font-size:1.8em;color:var(--sub)}
+.frame{background:#fff;border:2px dashed var(--seal);border-radius:.7em;padding:.6em .9em;font-size:1.3em;line-height:1.7}
+.frame u{text-decoration:none;border-radius:.3em;padding:0 .3em;font-weight:900}
+.u1{background:var(--blue-soft);color:var(--blue)}.u2{background:var(--seal-soft);color:var(--seal)}.u3{background:var(--gold-soft);color:var(--gold)}
+.maprow{display:flex;align-items:center;gap:.6em;margin:.3em 0;font-size:1.25em}
+.maprow .from{flex:1;background:#fff;border:2px solid var(--line);border-radius:.6em;padding:.3em .7em}
+.maprow .arr{color:var(--sub);font-weight:900}
+.maprow .to{background:var(--seal-soft);border:2px solid #ecc3bb;border-radius:.6em;padding:.1em .6em;font-size:1.4em}
+.tree{display:flex;flex-direction:column;align-items:center;gap:.3em}
+.tree .root{font-size:3.2em;color:var(--seal);line-height:1}
+.tree .kids{display:flex;gap:.8em}
+.tree .kids div{background:#fff;border:2px solid var(--line);border-radius:.6em;padding:.3em .8em;text-align:center;font-size:1.15em}
+.tree .kids div .hj{font-size:1.8em;display:block;line-height:1.1}
+.tree .kids div.no{opacity:.45;border-style:dashed}
+.slide{position:absolute;inset:0;padding:3.2em 3.6em 3em;display:none;flex-direction:column}
+.slide.on{display:flex}
+.kicker{font-size:1.05em;font-weight:900;color:var(--seal);letter-spacing:.02em}
+.slide h1{font-size:2.7em;line-height:1.25;margin:.15em 0 .5em;font-weight:900}
+.slide h2{font-size:1.5em;margin:0 0 .4em}
+.slide p,.slide li{font-size:1.25em;line-height:1.55}
+.slide ul,.slide ol{margin:.2em 0;padding-left:1.3em}
+.grid{display:grid;gap:1em}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g6{grid-template-columns:repeat(6,1fr)}
+.box{background:#fff;border:2px solid var(--line);border-radius:.8em;padding:.9em 1.1em}
+.box b.t{display:block;font-size:1.25em;margin-bottom:.2em}
+.red{background:var(--seal-soft);border-color:#ecc3bb}.green{background:var(--jade-soft);border-color:#b9dccb}.gold{background:var(--gold-soft);border-color:#ecd59c}.blue{background:var(--blue-soft);border-color:#c3d3ee}
+.flow{display:flex;gap:.6em;margin-top:.4em}
+.flow div{flex:var(--w,1);background:#fff;border:2px solid var(--line);border-radius:.7em;padding:.6em .7em;font-size:1.1em}
+.flow div b{display:block;color:var(--seal);font-size:.9em}
+.flow div span{font-weight:900;font-size:1.1em}
+.big{font-size:4.5em;line-height:1}
+.pill{display:inline-block;border-radius:999px;padding:.1em .7em;font-weight:900;font-size:.95em}
+.p-red{background:var(--seal);color:#fff}.p-green{background:var(--jade);color:#fff}.p-gold{background:var(--gold);color:#fff}.p-blue{background:var(--blue);color:#fff}
+.note{position:absolute;left:0;right:0;bottom:0;background:#14120f;color:#e9e1d0;font-size:.95em;padding:.7em 1.2em;display:none}
+body.notes .note{display:block}
+.foot{position:absolute;right:1.4em;bottom:1em;font-size:.85em;color:var(--sub)}
+/* quiz */
+.qz{background:#fff;border:2px solid var(--line);border-radius:.8em;text-align:center;padding:.6em .4em;cursor:pointer;user-select:none}
+.qz .hj{font-size:3.6em;line-height:1.1;display:block}
+.qz .opt{font-size:1.3em;font-weight:900;color:var(--sub)}
+.qz .ans{display:none;font-size:1.05em;margin-top:.3em}
+.qz.open{border-color:var(--jade);background:var(--jade-soft)}
+.qz.open .ans{display:block}
+.qz.open .opt{display:none}
+.forb{display:flex;gap:.45em;flex-wrap:wrap}
+.forb span{font-family:'Noto Serif KR',serif;font-weight:900;font-size:2.2em;width:1.7em;height:1.7em;display:grid;place-items:center;background:#fff;border:2px solid #ecc3bb;border-radius:.3em;color:var(--seal);position:relative}
+.forb span::after{content:'✕';position:absolute;top:-.25em;right:-.2em;font-size:.35em;background:var(--seal);color:#fff;border-radius:50%;width:1.4em;height:1.4em;display:grid;place-items:center;font-family:'Noto Sans KR'}
+.chips{display:flex;flex-wrap:wrap;gap:.4em}
+.chips span{background:#fff;border:2px solid var(--line);border-radius:999px;padding:.15em .7em;font-size:1em}
+.chips span .hj{color:var(--seal)}
+.step{display:flex;gap:.7em;align-items:flex-start;margin:.35em 0}
+.step i{font-style:normal;flex:0 0 1.8em;height:1.8em;border-radius:50%;background:var(--jade);color:#fff;display:grid;place-items:center;font-weight:900;font-size:1.05em}
+.step p{margin:0}
+.mock{background:#fff;border:3px solid var(--seal);border-radius:.8em;padding:.7em;display:flex;flex-direction:column;gap:.35em}
+.mock .art{background:var(--seal-soft);border-radius:.6em;height:7.5em;display:grid;place-items:center;position:relative}
+.mock .art .hj{font-size:6em;color:var(--seal);line-height:1}
+.mock .art em{position:absolute;bottom:.3em;font-style:normal;font-size:.9em;background:rgba(255,255,255,.85);padding:.05em .5em;border-radius:.4em}
+.mock .fam{display:flex;gap:.4em;font-size:1.05em}
+.mock .fam span{background:#f4f0e8;border-radius:.3em;padding:0 .4em}
+.okx{display:grid;grid-template-columns:repeat(4,1fr);gap:.8em}
+.okx div{border-radius:.7em;padding:.7em;font-size:1.15em;background:#fff;border:2px solid var(--line)}
+.okx .o{border-color:var(--jade);background:var(--jade-soft)}
+.okx .x{border-color:#ecc3bb;background:var(--seal-soft)}
+table.rb{width:100%;border-collapse:collapse;font-size:1.1em;background:#fff}
+table.rb td,table.rb th{border:2px solid var(--line);padding:.35em .6em;text-align:left;vertical-align:top}
+table.rb th{background:#f1ece2}
+/* bottom nav */
+.nav{height:40px;display:flex;align-items:center;justify-content:center;gap:10px;color:#cfc6b4;font-size:14px}
+.nav button{border:1px solid #3b362e;background:#24211c;color:#efe9dc;border-radius:8px;padding:4px 14px;font-weight:700}
+.dots{display:flex;gap:5px}
+.dots i{width:9px;height:9px;border-radius:50%;background:#4a443a;cursor:pointer}
+.dots i.on{background:#f4c45a}
+/* overlays */
+.ov{position:fixed;inset:0;background:rgba(10,8,6,.85);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}
+.ovbox{background:var(--stage);border-radius:16px;padding:24px;max-width:860px;width:100%}
+.ovbox h2{margin:0 0 10px}
+.ovbox input{width:100%;font:inherit;padding:9px 11px;border:1px solid #cfc6b3;border-radius:8px;margin:4px 0 10px}
+.qrs{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.qrs .q{background:#fff;border-radius:12px;padding:12px;text-align:center}
+.qrs .q div{width:100%;aspect-ratio:1;display:grid;place-items:center}
+.qrs .q svg{width:100%;height:100%}
+.btn{border:0;border-radius:8px;padding:9px 16px;font-weight:700;background:var(--ink);color:#fff}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid #cfc6b3}
+.bigtimer{font-size:min(28vw,40vh);font-weight:900;color:#f4c45a;font-variant-numeric:tabular-nums;line-height:1}
+.bigtimer.end{color:#ff7a6b}
+@media (max-width:700px){.bar .lbl{display:none}}
+</style>
+</head>
+<body>
+<div class="bar">
+  <span class="hj" style="font-size:20px;color:#f4c45a">部</span>
+  <span class="lbl" style="font-weight:700;font-size:14px;margin-right:6px">부수 캐릭터 카드</span>
+  <button class="lesson" data-lesson="0">1차시</button>
+  <button class="lesson" data-lesson="1">2차시</button>
+  <button class="lesson" data-lesson="2">3차시</button>
+  <button class="lesson" data-lesson="3">4차시</button>
+  <span class="sp"></span>
+  <div class="timer" id="timer"><span class="t" id="tT">05:00</span><button id="tGo">시작</button><button id="tRe">↺</button><button id="tBig" title="크게 보기">⤢</button></div>
+  <button class="tbtn" id="exBtn" title="E 키 · 수행평가 예시를 옆에 띄우기">예시 패널</button>
+  <button class="tbtn" id="qrBtn">QR</button>
+  <button class="tbtn" id="noteBtn" title="N 키">메모</button>
+  <button class="tbtn" id="fsBtn" title="F 키">전체화면</button>
+</div>
+<div class="wrap"><div class="stage" id="stage"></div>
+  <aside class="exp" id="exPanel" aria-label="수행평가 예시">
+    <div class="exh"><b>수행평가 예시 · 「축구하는 나」</b><button class="btn ghost" id="exClose" style="padding:3px 10px">닫기</button></div>
+    <div class="tabs"><button data-extab="note" class="on">탐구 노트 (2차시)</button><button data-extab="card">카드뉴스 4쪽 (3~4차시)</button></div>
+    <div id="exBody"></div>
+    <p class="tip">슬라이드를 넘기면 관련 칸이 노랗게 표시돼요. 칸을 누르면 직접 짚어 줄 수 있어요. (E 키로 열고 닫기)</p>
+  </aside>
+</div>
+<div class="nav"><button id="prev">◀</button><div class="dots" id="dots"></div><span id="pos"></span><button id="next">▶</button></div>
+
+<div class="ov hidden" id="qrOv"><div class="ovbox">
+  <h2>학생 접속 QR</h2>
+  <div class="qrs">
+    <div><label><b>학생용 웹앱 주소</b></label><input id="uApp" placeholder="https://... (웹앱을 올린 주소)">
+      <label><b>캔바 템플릿 링크</b></label><input id="uCanva" placeholder="https://www.canva.com/design/.../view?mode=preview">
+      <p style="font-size:14px;color:var(--sub);margin:0 0 10px">웹앱 주소에 캔바 링크가 자동으로 붙어서, 학생 웹앱의 [캔바로 출발] 화면에 캔바 버튼이 생겨요. 입력값은 이 컴퓨터에 기억돼요.</p>
+      <button class="btn" id="qrMake">QR 만들기</button> <button class="btn ghost" id="qrClose">닫기</button></div>
+    <div class="grid g2" style="gap:10px">
+      <div class="q"><div id="qApp"></div><b>학생 웹앱</b></div>
+      <div class="q"><div id="qCanva"></div><b>캔바 템플릿</b></div>
+    </div>
+  </div>
+</div></div>
+<div class="ov hidden" id="tOv"><div style="text-align:center"><div class="bigtimer" id="tBigT">05:00</div><div style="color:#cfc6b4;font-size:22px;margin-top:10px" id="tLabel"></div><button class="btn" style="margin-top:20px" id="tBigClose">닫기 (Esc)</button></div></div>
+
+<script>
+(function(){
+'use strict';
+const $ = id => document.getElementById(id);
+const flow = items => `<div class="flow">${items.map(([t,m,w]) => `<div style="--w:${w||m}"><b>${m}분</b><span>${t}</span></div>`).join('')}</div>`;
+
+/* ---------- 수행평가 예시 데이터 (축구하는 나) ---------- */
+const H = c => `<span class="hj">${c}</span>`;
+const EX_ROWS = [
+  ['theme','나의 테마',`<b>축구하는 나</b> <span class="sub">— 이유: 매주 친구들과 축구를 해서 발로 차고, 달리고, 공을 보는 일이 많으니까</span>`],
+  ['rads','부수 3개',`${H('足')}(발 족) · ${H('走')}(달릴 주) · ${H('目')}(눈 목)`],
+  ['name','부수 ①',`${H('足')} · 이름: 발 족 · 7획 <span class="sub">(변신 모습: 왼쪽에 오면 아랫부분이 짧아져요)</span>`],
+  ['meaning','본래 의미','무릎부터 발까지의 모양을 본뜬 글자 → 발, 걷기·뛰기와 관련'],
+  ['fam','가족 한자 2개',`${H('蹴')} 찰 축 &nbsp;·&nbsp; ${H('路')} 길 로 <span class="sub">(둘 다 사전에서 足부 확인)</span>`],
+  ['word','생활 속 낱말',`${H('蹴球')}(축구) - 공을 발로 차서 겨루는 경기`],
+  ['link','연결 문장',`${H('蹴')}에 ${H('足')} 부수가 들어간 까닭은 <b>공을 차는 일은 발로 하는 일이기</b> 때문이다.`],
+  ['src','출처','☑ 부수표 &nbsp;☑ 네이버 한자사전 &nbsp;☑ 두 자료를 비교해 확인함']
+];
+const exSheet = (hl=[]) => `<table class="ex ${hl.length?'focus':''}">${EX_ROWS.map(([k,l,v]) => `<tr data-f="${k}" class="${hl.includes(k)?'hl':''}"><th>${l}</th><td>${v}</td></tr>`).join('')}</table>`;
+const CARDS = [
+  {c:'足',n:'발 족',s:7,col:'seal',name:'발차기 대장 뻥이',intro:'나는 足! 걷고 뛰고 공 차는 일은 다 내 담당이야.',idea:'足 아래에 축구화·축구공',fam:[['蹴','찰 축'],['路','길 로']],link:'蹴에 足 부수가 들어간 까닭은 공을 차는 일은 발로 하는 일이기 때문이다.'},
+  {c:'走',n:'달릴 주',s:7,col:'jade',name:'달리기 선수 쌩쌩이',intro:'나는 走! 달리고 뛰어넘는 일은 나에게 맡겨.',idea:'走 옆에 바람 선·결승선',fam:[['起','일어날 기'],['超','뛰어넘을 초']],link:'超에 走 부수가 들어간 까닭은 뛰어넘으려면 힘껏 달려야 하기 때문이다.'},
+  {c:'目',n:'눈 목',s:5,col:'blue',name:'매의 눈 반짝이',intro:'나는 目! 보고 살피는 일은 내가 최고야.',idea:'目 안에 눈동자·반짝이',fam:[['看','볼 간'],['眼','눈 안']],link:'看에 目 부수가 들어간 까닭은 보는 일은 눈으로 하기 때문이다.'}
+];
+const EXCARD = {c:'亻',n:'사람 인',s:2,col:'gold',name:'쉬는 시간 대장 인이',intro:'나는 亻! 사람이 하는 일은 다 내 담당이야.',idea:'亻 위에 동그란 얼굴·팔',fam:[['休','쉴 휴'],['信','믿을 신']],link:'休에 亻 부수가 들어간 까닭은 사람이 나무 옆에서 쉬기 때문이다.'};
+function cardMock(i, hl=[], dd, label){
+  const d = dd || CARDS[i], h = k => hl.includes(k) ? 'hl' : '';
+  return `<div class="cm" style="--c:var(--${d.col});--cs:var(--${d.col}-soft)">
+    <div class="cmh"><span>${label || `${i+2}쪽 · 카드 ${i+1}`}</span><span>${d.n} · ${d.s}획</span></div>
+    <div class="cma ${h('art')}" data-f="art"><span class="hj">${d.c}</span><em>${d.idea}</em></div>
+    <b class="${h('char')}" data-f="char">「${d.name}」</b><div class="cmi ${h('char')}" data-f="char">${d.intro}</div>
+    <div class="cmf ${h('fam')}" data-f="fam">${d.fam.map(([c,m]) => `<span><b class="hj">${c}</b> ${m}</span>`).join('')}</div>
+    <div class="cml ${h('link')}" data-f="link">${d.link}</div>
+    <div class="cms ${h('src')}" data-f="src">출처: 부수표 · 네이버 한자사전</div></div>`;
+}
+function coverMock(hl=[]){
+  const h = k => hl.includes(k) ? 'hl' : '';
+  return `<div class="cm cover"><div class="cmh"><span>1쪽 · 표지</span><span>1학년 ○반 ○번</span></div>
+    <div class="cvt">○○○의<br>부수 도감</div>
+    <div class="${h('theme')}" data-f="theme"><b>나의 테마</b> 축구하는 나<br><span class="cmi">매주 축구를 해서 발로 차고, 달리고, 공을 봐요</span></div>
+    <div class="cvr ${h('rads')}" data-f="rads">${['足','走','目'].map(c => `<span class="hj">${c}</span>`).join('')}</div></div>`;
+}
+const exCardMock = (hl=[]) => cardMock(0, hl, EXCARD, '예시 쪽 · 첫째 줄 부수');
+const BUG_NOTE = `<table class="ex">
+  <tr><th>부수 ②</th><td>${H('走')} · 이름: <span class="bug">走<span class="fix"> → 달릴 주 (이름은 뜻·음으로!)</span></span> · 7획</td></tr>
+  <tr><th>본래 의미</th><td>팔을 흔들며 달려가는 사람의 모습 → 달리기와 관련</td></tr>
+  <tr><th>가족 한자 2개</th><td><span class="bug">${H('起')} 기<span class="fix"> → 起 일어날 기 (뜻 빠짐)</span></span> &nbsp;·&nbsp; <span class="bug">${H('徒')} 무리 도<span class="fix"> → 徒는 彳(두인변)부! 超 뛰어넘을 초로</span></span></td></tr>
+  <tr><th>생활 속 낱말</th><td>${H('起床')}(기상) - 잠자리에서 일어남</td></tr>
+  <tr><th>연결 문장</th><td><span class="bug">超에 走 부수가 들어간 까닭은 走 부수이기 때문이다.<span class="fix"> → 까닭이 없어요! "뛰어넘으려면 힘껏 달려야 하기 때문"</span></span></td></tr>
+  <tr><th>출처</th><td><span class="bug">☑ 네이버 한자사전<span class="fix"> → 2개 이상! 부수표와 비교하기</span></span></td></tr></table>`;
+const DICT_MOCK = `<div class="dict">
+  <div class="dbar">네이버 한자사전 <span>足</span></div>
+  <div class="row"><span class="num">1</span><span class="tab">전체</span><span class="tab on">부수·모양자</span></div>
+  <div class="row"><span class="num">2</span><b style="color:var(--seal)">● 부수</b><span style="color:#999">○ 모양자</span><span style="font-size:.85em;color:var(--sub)">← 반드시 부수!</span></div>
+  <div class="row"><span class="num">3</span><div class="lst"><span class="hj">路</span><span class="hj">跳</span><span class="hj pick">蹴</span><span class="hj">踏</span><span class="hj">距</span><span>…</span></div></div>
+  <div class="row" style="border:0"><span class="num">4</span><div><span class="hj" style="font-size:1.6em">蹴</span> <b>찰 축</b> · 부수 <b style="color:var(--seal)">足</b> · 19획</div></div></div>`;
+const FEEDBACK_MOCK = `<table class="ex">
+  <tr><th>가족 한자</th><td>${H('蹴')} 찰 축 · ${H('促')} 재촉할 촉 <span class="mark r">↺ 促은 亻부! 다시 찾기</span></td></tr>
+  <tr><th>연결 문장</th><td>蹴에 足 부수가 들어간 까닭은 공을 차는 일은 발로 하는 일이기 때문이다. <span class="mark g">★ 까닭이 분명해요</span></td></tr></table>`;
+const CANVA_MOCK = `<div class="cvm">
+  <div class="top"><span>Canva</span><span class="ttl">1_15_김한문_부수도감 <span class="num" style="background:#fff;color:#7d2ae8">2</span></span><span class="ed">템플릿 편집 <span class="num">1</span></span><span class="sh">공유</span></div>
+  <div class="body"><div class="side"><b>요소 <span class="num">4</span></b><div class="q">🔍 축구공</div><div class="g"><i>⚽</i><i>👟</i><i>⭐</i><i>💨</i></div></div>
+   <div class="page">${cardMock(0)}</div></div>
+  <div class="strip"><span class="num">5</span><span>1 표지</span><span class="ex">2 예시</span><span class="on">3 카드1</span><span>4 카드2</span><span>5 카드3</span></div></div>`;
+const WEAK_CARD = `<div class="cm weak" style="--c:var(--seal);--cs:var(--seal-soft)"><div class="cmh"><span>카드 1</span><span>발 족</span></div>
+  <div class="cma"><span class="hj">足</span><em>축구공 사진만 크게</em></div><b>「뻥이」</b><div class="cmi">안녕! 나는 뻥이야. 잘 부탁해!</div>
+  <div class="cmf"><span><b class="hj">路</b> 로</span></div><div class="cml" style="color:#bbb">(연결 문장 없음)</div></div>`;
+const DL_MOCK = `<div class="dlm"><b>다운로드</b>
+  <div class="r"><span>파일 형식</span><span class="sel">PNG ▾</span></div>
+  <div class="r"><span>페이지 선택</span><span class="sel">모든 페이지 (4) ▾</span></div>
+  <div class="go">다운로드</div>
+  <p style="margin:.4em 0 0;font-size:.85em;color:var(--sub)">5쪽이면 예시 쪽을 안 지운 것! → 예시 쪽 삭제 후 다시</p></div>`;
+const deckMock = (hl=[]) => `<div class="deck4">${coverMock(hl)}${[0,1,2].map(i => cardMock(i, hl)).join('')}</div>`;
+const STEPS8 = ['테마','부수 3개','이름·의미','가족 한자','낱말','연결 문장','출처','카드뉴스'];
+const stepper = n => `<div class="stepper">${STEPS8.map((s,i) => `<span class="${i+1===n?'on':(i+1<n?'done':'')}">${i+1}. ${s}</span>`).join('')}</div>`;
+const stepSlide = (n, title, left, right) => `<div class="kicker">예시로 배우기 · 「축구하는 나」 ${n} / 8</div>${stepper(n)}<h1 style="margin:0 0 .3em;font-size:2.05em">${title}</h1>
+  <div class="grid" style="grid-template-columns:1fr 1.2fr;align-items:start;gap:1.2em"><div>${left}</div><div>${right}</div></div>`;
+const LINK_HOW = `<div class="eq"><div><small>① 가족 한자의 뜻</small>${H('蹴')} = 차다</div><b class="op">+</b><div><small>② 부수의 뜻</small>${H('足')} = 발</div><b class="op">→</b><div><small>③ 두 뜻을 이은 까닭</small>차는 일은 발로 한다</div></div>
+  <div class="frame">(<u class="u1">蹴</u>)에 (<u class="u2">足</u>) 부수가 들어간 까닭은<br>(<u class="u3">공을 차는 일은 발로 하는 일이기</u>) 때문이다.</div>`;
+const LINK_OX = `<div class="okx" style="grid-template-columns:1fr 1fr 1fr;margin-top:.7em">
+  <div class="x"><b>X 까닭이 없어요</b><br>蹴에 足이 들어간 까닭은 足 부수이기 때문이다.</div>
+  <div class="x"><b>X 뜻만 썼어요</b><br>蹴은 '찰 축'이다.</div>
+  <div class="o"><b>O 두 뜻을 이었어요</b><br>차는 일은 발로 하기 때문이다.</div></div>`;
+
+const L = [
+/* ---------- 1차시 ---------- */
+{title:'1차시 · 부수 탐정이 되자', slides:[
+ {t:300, h:`<div class="kicker">1차시 / 4 · 나만의 부수 카드 만들기</div><h1>부수 탐정이 되자!<br><span style="font-size:.6em;color:var(--sub)">테마를 정하고, 부수 3개를 고른다</span></h1>
+  <div class="grid g2"><div class="box green"><b class="t">오늘의 목표</b><p style="margin:0">부수가 한자의 뜻을 알려 주는 단서임을 알고,<br>나만의 테마에 맞는 부수 3개를 고를 수 있다.</p></div>
+  <div class="box"><b class="t">준비물</b><p style="margin:0">학습지 · 태블릿 · 부수표(학습지 1면)</p></div></div>
+  ${flow([['함정 퀴즈',5],['4시간 안내',4],['예시로 배우기',14],['금지 부수',3],['테마·부수 고르기',12],['사전 연습',5],['정리',2]])}`,
+  n:'도입 5분. 학습지 배부 후 바로 다음 장 퀴즈로. 상단 [예시 패널](E 키)을 열면 어느 슬라이드에서든 수행평가 예시를 옆에 띄울 수 있어요.'},
+ {t:300, h:`<div class="kicker">탐정 훈련 · 눌러서 정답 보기</div><h1 style="margin-bottom:.3em">이 한자의 부수는 무엇일까?</h1>
+  <div class="grid g6">${[['休','木? 人?','<b>人(亻)</b><br>사람이 나무 옆에서 쉬어요'],['明','日? 月?','<b>日</b><br>사전으로 확인!'],['江','水? 工?','<b>水(氵)</b><br>工은 소리(강)'],['問','門? 口?','<b>口</b><br>묻는 건 입으로'],['國','口? 囗?','<b>囗 큰입구몸</b><br>口와 다른 부수'],['男','田? 力?','<b>田</b><br>밭에서 힘쓰는 사람']].map(([h,o,a]) => `<div class="qz"><span class="hj">${h}</span><div class="opt">${o}</div><div class="ans">${a}</div></div>`).join('')}</div>
+  <div class="box gold" style="margin-top:1em"><p style="margin:0"><b>모양이 들어 있다고 모두 그 부수는 아니다!</b> → 그래서 우리는 사전으로 확인하는 <b>부수 탐정</b>이 됩니다.</p></div>`,
+  n:'카드를 누르면 정답이 열립니다. 학생에게 먼저 손들게 한 뒤 공개. 휴대폰으로 休를 검색해 보게 해도 좋습니다.'},
+ {t:480, h:`<div class="kicker">4시간 로드맵</div><h1 style="margin-bottom:.4em">4시간 동안 이렇게 완성해요</h1>
+  <div class="grid g4">
+   <div class="box blue"><span class="pill p-blue">1차시</span><b class="t" style="margin-top:.3em">테마·부수 3개</b><p style="margin:0">금지 부수 피하기<br>사전 찾는 법 익히기</p></div>
+   <div class="box blue"><span class="pill p-blue">2차시</span><b class="t" style="margin-top:.3em">탐구 노트 완성</b><p style="margin:0">부수마다 가족 한자 2개<br>낱말·연결 문장·출처</p></div>
+   <div class="box green"><span class="pill p-green">3차시</span><b class="t" style="margin-top:.3em">캐릭터 설계 + 캔바</b><p style="margin:0">캐릭터 정하기<br>카드뉴스 1·2쪽</p></div>
+   <div class="box green"><span class="pill p-green">4차시</span><b class="t" style="margin-top:.3em">완성·제출·나눔</b><p style="margin:0">카드뉴스 3·4쪽<br>PNG 제출, 성찰</p></div></div>
+  <table class="rb" style="margin-top:1em"><tr><th style="width:24%">평가 요소</th><th>무엇을 보나요?</th><th style="width:18%">언제</th></tr>
+   <tr><td><b>자료의 적절성</b></td><td>출처 2개 이상, 가족 한자 6개(부수마다 2개)의 모양·뜻·음과 부수가 정확한가</td><td>1~2차시 노트</td></tr>
+   <tr><td><b>내용 구성력</b></td><td>부수 의미 → 가족 한자 → 연결 문장이 잘 이어지는가</td><td>3~4차시 카드</td></tr>
+   <tr><td><b>표현력</b></td><td>부수 글자가 그림 속에 살아 있고, 색·글꼴·캐릭터가 독창적인가</td><td>3~4차시 카드</td></tr></table>`,
+  n:'수행평가는 수업 시간 안에만 합니다(과제 없음). AI가 쓴 내용 제출 금지도 여기서 안내.'},
+ {t:120, h:`<div class="kicker">예시로 배우기 · 완성하면 이런 모습! (예시 테마·부수 足·走·目는 따라 하지 않아요)</div><h1 style="margin:0 0 .3em;font-size:2.2em">「축구하는 나」로 미리 보는 수행평가</h1>
+  <div class="grid" style="grid-template-columns:1.55fr 1fr;gap:1.2em;align-items:start">
+   <div><span class="pill p-blue">2차시 · 탐구 노트</span> <span class="sub">평가: 자료의 적절성</span><div style="margin-top:.4em;font-size:.86em">${exSheet()}</div></div>
+   <div><span class="pill p-green">3~4차시 · 캔바 카드뉴스 4쪽</span> <span class="sub">평가: 내용 구성력·표현력</span><div class="deck4" style="grid-template-columns:1fr 1fr;margin-top:.4em;font-size:.95em">${coverMock()}${cardMock(0)}${cardMock(1)}${cardMock(2)}</div></div></div>
+  <p style="margin:.4em 0 0;font-size:1.1em">☞ 지금부터 이 예시를 <b>한 칸씩</b> 채워 보며 방법을 익혀요.</p>`,
+  n:'전체 그림을 먼저 보여 주고 다음 장부터 한 칸씩 설명합니다. 탐구 노트의 내용이 카드뉴스 각 쪽으로 옮겨진다는 점을 강조.'},
+ {t:90, ex:'note', hl:['theme'], h: stepSlide(1, '나만의 테마 정하기', `
+   <div class="step"><i>1</i><p>내가 <b>좋아하는 것·자주 하는 것</b>을 떠올려요</p></div>
+   <div class="step"><i>2</i><p>짧은 이름을 붙여요 → <b>"축구하는 나"</b></p></div>
+   <div class="step"><i>3</i><p>고른 <b>이유</b>를 한 줄로 써요</p></div>
+   <div class="box gold" style="margin-top:.5em"><p style="margin:0">📝 학습지 1쪽 ①칸 · 카드뉴스 <b>1쪽 표지</b>에 들어가요</p></div>`, exSheet(['theme'])),
+  n:'테마가 구체적일수록 부수 고르기가 쉬워요. "운동"보다 "축구하는 나"처럼.'},
+ {t:120, ex:'note', hl:['rads'], h: stepSlide(2, '테마에서 부수 3개 고르기', `
+   <p style="margin:0 0 .3em">테마에서 떠오르는 <b>몸·물건·행동</b>을 부수로 바꿔요</p>
+   <div class="maprow"><span class="from">공을 차는 <b>발</b></span><span class="arr">→</span><span class="to hj">足</span></div>
+   <div class="maprow"><span class="from">경기장을 <b>달리기</b></span><span class="arr">→</span><span class="to hj">走</span></div>
+   <div class="maprow"><span class="from">공을 <b>보는 눈</b></span><span class="arr">→</span><span class="to hj">目</span></div>
+   <div class="box red" style="margin-top:.5em;padding:.5em .9em"><p style="margin:0">금지 부수인지 확인! 헷갈리면 웹앱 <b>[판별하기]</b></p></div>`, exSheet(['rads'])),
+  n:'부수표를 펴 놓고 테마 관련 낱말을 3개 먼저 쓰게 하면 쉽습니다.'},
+ {t:120, ex:'note', hl:['name','meaning'], h: stepSlide(3, '부수 이름·획수·본래 의미 쓰기', `
+   <div class="step"><i>1</i><p><b>부수표</b>에서 이름과 획수 → ${H('足')} 발 족, 7획</p></div>
+   <div class="step"><i>2</i><p><b>사전</b>에서 무엇을 본뜬 글자인지 읽기</p></div>
+   <div class="step"><i>3</i><p><b>내 말로 한 줄</b> → "무릎부터 발까지의 모양 → 발, 걷기와 관련"</p></div>
+   <div class="box blue" style="margin-top:.5em"><p style="margin:0">이름 칸에는 한자가 아니라 <b>뜻과 음</b>을 써요 (足 ✕ → 발 족 ○)</p></div>`, exSheet(['name','meaning']))},
+ {t:150, ex:'note', hl:['fam'], h: stepSlide(4, '가족 한자 2개 찾기', `
+   <div class="box gold" style="padding:.5em .9em"><b class="t" style="font-size:1.2em">가족 한자 = 같은 부수를 가진 한자</b><p style="margin:0">부수가 같으면 뜻도 닮아서 한 가족 같아요.</p></div>
+   <div class="tree" style="margin:.5em 0"><span class="root hj">足</span>
+    <div class="kids"><div>${H('蹴')}찰 축</div><div>${H('路')}길 로</div><div class="no">${H('跳')}뛸 도</div></div></div>
+   <div class="step"><i>1</i><p>사전에서 <b>[부수·모양자] → [● 부수]</b>로 찾기</p></div>
+   <div class="step"><i>2</i><p><b>2개</b>를 골라 <b>모양·뜻·음</b> 모두 쓰기 (蹴 찰 축)</p></div>`, exSheet(['fam'])),
+  n:'뜻이 테마와 이어지는 한자를 고르면 연결 문장이 쉬워집니다. 사전에서 한자를 눌러 부수 표시를 꼭 다시 확인.'},
+ {t:90, ex:'note', hl:['word'], h: stepSlide(5, '생활 속 낱말 1개 쓰기', `
+   <div class="step"><i>1</i><p>가족 한자가 <b>들어간 낱말</b>을 찾아요</p></div>
+   <div class="step"><i>2</i><p>사전 한자 화면 아래 <b>[단어]</b> 목록 활용</p></div>
+   <div class="step"><i>3</i><p><b>한자어(읽기) - 뜻</b> 순서로 써요</p></div>
+   <div class="frame" style="margin-top:.5em;font-size:1.25em">${H('蹴球')}(축구) - 공을 발로 차서 겨루는 경기</div>`, exSheet(['word']))},
+ {t:240, ex:'note', hl:['link'], h: `<div class="kicker">예시로 배우기 · 「축구하는 나」 6 / 8</div>${stepper(6)}<h1 style="margin:0 0 .2em;font-size:2.05em">연결 문장: "왜 이 한자에 이 부수가 들어갔을까?"</h1>
+   <p style="margin:0 0 .2em">가족 한자의 뜻과 부수의 뜻을 <b>이어서 까닭</b>을 쓰는 문장이에요. 3단계로 만들어요.</p>
+   ${LINK_HOW}${LINK_OX}`,
+  n:'정답이 하나가 아닙니다. "한자 뜻 ↔ 부수 뜻"이 이어지면 OK. 학생에게 走(달릴 주)-超(뛰어넘을 초)로 함께 만들어 보게 해도 좋아요: 뛰어넘으려면 힘껏 달려야 하니까.'},
+ {t:90, ex:'note', hl:['src'], h: stepSlide(7, '출처 2개 이상 쓰기', `
+   <div class="step"><i>1</i><p><b>부수표</b> + <b>네이버 한자사전</b>처럼 2곳 이상</p></div>
+   <div class="step"><i>2</i><p>두 자료에서 부수가 <b>같은지 비교</b>해요</p></div>
+   <div class="step"><i>3</i><p>학습지 출처 칸에 ☑ 체크</p></div>
+   <div class="box red" style="margin-top:.5em"><p style="margin:0">AI에게 물어보고 그대로 쓰기 ✕ → 출처로 인정되지 않아요</p></div>`, exSheet(['src']))},
+ {t:150, ex:'card', hl:['fam','link','char','art'], h: `<div class="kicker">예시로 배우기 · 「축구하는 나」 8 / 8</div>${stepper(8)}<h1 style="margin:0 0 .3em;font-size:2.05em">탐구 노트 → 캔바 카드뉴스 4쪽</h1>
+   <div class="grid" style="grid-template-columns:.8fr 1.45fr;gap:1.2em;align-items:start">
+    <div><div class="step"><i>1</i><p><b>1쪽 표지</b> ← 테마·이유·부수 3개</p></div>
+     <div class="step"><i>2</i><p><b>2~4쪽</b> ← 한 쪽에 부수 1개씩</p></div>
+     <div class="step"><i>3</i><p>노트의 <b>가족 한자·연결 문장</b>을 그대로 옮기고</p></div>
+     <div class="step"><i>4</i><p>부수 글자를 <b>크게</b> 두고 그 위를 꾸며 <b>캐릭터</b>로!</p></div>
+     <div class="box gold" style="margin-top:.4em"><p style="margin:0">캐릭터 이름·소개는 3차시에 정해요</p></div></div>
+    <div class="grid g2 big2" style="gap:.7em;font-size:1.08em">${coverMock(['theme','rads'])}${cardMock(0, ['fam','link','char','art'])}</div></div>`,
+  n:'노란 칸이 탐구 노트에서 그대로 옮겨 오는 부분입니다.'},
+ {t:240, h:`<div class="kicker">꼭 지켜요</div><h1>고를 수 없는 부수</h1>
+  <div class="grid g2" style="align-items:start">
+   <div class="box red"><b class="t">① 선생님 예시 부수</b><div class="forb" style="margin:.3em 0"><span>口</span></div><p style="margin:0">입 구(口)는 예시로 썼기 때문에 안 돼요.</p></div>
+   <div class="box red"><b class="t">② 부수표 첫째 줄 10개</b><div class="forb" style="margin:.3em 0">${'一丨丶丿乙亅二亠人儿'.split('').map(c=>`<span>${c}</span>`).join('')}</div><p style="margin:0">亻(사람인변)도 人이라서 안 돼요.</p></div></div>
+  <div class="box green" style="margin-top:1em"><p style="margin:0"><span class="hj" style="font-size:1.6em;color:var(--jade)">囗</span> <b>큰입구몸</b>은 口와 <b>다른 부수</b>라서 써도 돼요! (國, 園, 圖 …) &nbsp;헷갈리면 학생 웹앱의 <b>[판별하기]</b>로 확인!</p></div>
+  <div class="box gold" style="margin-top:.6em;padding:.5em 1em"><p style="margin:0">예시 「축구하는 나」의 <b>足·走·目</b> 세트를 그대로 따라 하지 않기 — 나만의 테마로!</p></div>`},
+ {t:900, h:`<div class="kicker">활동 · 15분</div><h1 style="margin-bottom:.3em">나만의 테마 → 부수 3개 고르기</h1>
+  <div class="grid g2">
+   <div><h2>테마 예시와 어울리는 부수</h2>
+    <div class="chips" style="margin-bottom:.5em"><span>⚽ 축구하는 나 <span class="hj">足 走 目</span> (예시)</span><span>🐶 우리 집 강아지 <span class="hj">犬 耳 目</span></span><span>🍚 요리왕 <span class="hj">火 米 食</span></span><span>🌧 사계절 날씨 <span class="hj">雨 日 木</span></span><span>🎨 미술 시간 <span class="hj">糸 竹 巾</span></span><span>💗 내 기분 <span class="hj">心 言 目</span></span></div>
+    <div class="box gold"><p style="margin:0">테마를 고른 <b>이유</b>도 한 줄 써요.<br>→ 나중에 카드 표지에 들어가요.</p></div></div>
+   <div><h2>학생 웹앱에서</h2>
+    <div class="step"><i>1</i><p>반·번호·이름 쓰기</p></div>
+    <div class="step"><i>2</i><p>테마 고르고 이름 붙이기</p></div>
+    <div class="step"><i>3</i><p>부수 3개 고르기 (없는 부수는 [판별하기])</p></div>
+    <div class="step"><i>4</i><p>학습지 ①칸에도 옮겨 쓰기</p></div></div></div>`,
+  n:'상단 QR 버튼으로 웹앱 QR을 띄우세요. 순회하며 금지 부수 확인. 테마가 안 떠오르는 학생은 웹앱의 [테마 추천만] 필터 안내.'},
+ {t:480, h:`<div class="kicker">사전 연습 · 8분</div><h1 style="margin-bottom:.3em">네이버 한자사전으로 가족 한자 찾기</h1>
+  <div class="grid g2"><div>
+   <div class="step"><i>1</i><p>검색창에 <b>부수</b>를 검색 (한자 입력이 어려우면 필기 인식 ✏️ 또는 '나무 목'처럼 이름으로)</p></div>
+   <div class="step"><i>2</i><p><b>[부수·모양자]</b>를 누르고, 반드시 <b style="color:var(--seal)">[● 부수]</b> 선택</p></div>
+   <div class="step"><i>3</i><p>한자를 눌러 <b>뜻 · 음 · 부수</b> 표시 확인</p></div>
+   <div class="step"><i>4</i><p>한자 입력이 어려우면 사전에서 한자를 <b>길게 눌러 복사</b> → 웹앱에 붙여 넣기</p></div></div>
+   <div class="box blue"><b class="t">같이 해 봐요</b><p style="margin:0">내가 고른 첫 번째 부수로 검색해서<br>가족 한자 <b>1개</b>만 찾아 학습지 '사전 연습' 칸에 써 보기<br><span class="hj" style="font-size:2em">路</span> 길 로 ← 이렇게 모양·뜻·음</p></div></div>`,
+  n:'[모양자]를 누르면 다른 부수의 한자가 섞인다는 점을 실제 화면으로 시범.'},
+ {t:300, h:`<div class="kicker">정리 · 5분</div><h1>오늘 확인할 것</h1>
+  <div class="grid g3"><div class="box green"><b class="t">✓ 테마와 이유</b><p style="margin:0">학습지 ①칸</p></div><div class="box green"><b class="t">✓ 부수 3개</b><p style="margin:0">금지 부수 없음</p></div><div class="box green"><b class="t">✓ 가족 한자 1개</b><p style="margin:0">사전에서 찾아봄</p></div></div>
+  <div class="box gold" style="margin-top:1em"><p style="margin:0"><b>다음 시간:</b> 탐구 노트를 완성해요. 한 부수에 가족 한자 2개 · 생활 속 낱말 · 연결 문장 · 출처!</p></div>`}
+]},
+/* ---------- 2차시 ---------- */
+{title:'2차시 · 탐구 노트 완성', slides:[
+ {t:180, h:`<div class="kicker">2차시 / 4 · 1단계 평가(자료의 적절성)</div><h1>부수 탐정 탐구 노트 완성하기</h1>
+  <div class="box green"><b class="t">오늘의 목표</b><p style="margin:0">믿을 수 있는 자료 2가지 이상을 비교하며 부수 3개의 의미와 가족 한자를 정확하게 조사할 수 있다.</p></div>
+  ${flow([['예시·시범',7],['탐구 1번 부수',10],['중간 점검',2],['탐구 2·3번 부수',16],['짝 점검',5],['보내기·제출',5]])}`},
+ {t:180, ex:'note', h:`<div class="kicker">예시 다시 보기 · 예시 테마·부수는 따라 하지 않기!</div><h1 style="margin-bottom:.2em">탐구 노트 한 칸은 이렇게</h1>
+  <p style="margin:0 0 .4em">예시 테마 <b>축구하는 나</b> → 부수 3개 ${H('足')}(발 족) · ${H('走')}(달릴 주) · ${H('目')}(눈 목) &nbsp;→ 그중 <b>${H('足')}</b>을 채운 모습</p>
+  ${exSheet()}
+  <div class="grid g2" style="margin-top:.6em;gap:.8em"><div class="box gold" style="padding:.45em .9em"><p style="margin:0"><b>가족 한자</b> = 같은 부수를 가진 한자 → 부수마다 <b>2개</b></p></div><div class="box gold" style="padding:.45em .9em"><p style="margin:0"><b>연결 문장</b> = 한자 뜻 + 부수 뜻을 이은 <b>까닭</b></p></div></div>`,
+  n:'1차시 「예시로 배우기」를 짧게 복습. 예시 패널(E)을 열어 두고 활동해도 좋습니다.'},
+ {t:180, ex:'note', hl:['fam'], h:`<div class="kicker">시범 · 사전에서 가족 한자 찾기</div><h1 style="margin-bottom:.3em">이 순서대로 누르면 돼요</h1>
+  <div class="grid" style="grid-template-columns:1.1fr 1fr;gap:1.2em;align-items:start">${DICT_MOCK}
+   <div><div class="step"><i>1</i><p>부수(足)를 검색 → <b>[부수·모양자]</b></p></div>
+    <div class="step"><i>2</i><p><b>[● 부수]</b>를 꼭 고르기 <span class="sub">(모양자를 고르면 다른 부수 한자가 섞여요)</span></p></div>
+    <div class="step"><i>3</i><p>목록에서 뜻이 <b>테마와 이어지는</b> 한자 고르기</p></div>
+    <div class="step"><i>4</i><p>눌러서 <b>뜻·음·부수</b> 확인 → 노트에 <b>모양·뜻·음</b> 쓰기</p></div>
+    <div class="box blue" style="margin-top:.4em;padding:.45em .9em"><p style="margin:0">학생 웹앱의 [네이버 한자사전에서 찾기] 버튼을 누르면 바로 열려요</p></div></div></div>`,
+  n:'실제 네이버 한자사전을 띄워 같은 순서로 시범을 보여도 좋습니다. 蹴은 19획, 足부.'},
+ {t:180, ex:'note', hl:['link'], h:`<div class="kicker">연결 문장 쓰는 법 · 다시 한 번</div><h1 style="margin:.05em 0 .25em">왜 이 한자에 이 부수가 들어갔을까?</h1>
+  ${LINK_HOW}${LINK_OX}
+  <p style="margin:.6em 0 0;font-size:1.1em">함께 해 봐요: ${H('超')}(뛰어넘을 초) + ${H('走')}(달릴 주) → <b>?</b></p>`,
+  n:'함께 해 보기 정답 예: 超에 走 부수가 들어간 까닭은 뛰어넘으려면 힘껏 달려야 하기 때문이다. 정답은 하나가 아닙니다.'},
+ {t:180, h:`<div class="kicker">감점 막기</div><h1 style="margin-bottom:.4em">한자는 모양 · 뜻 · 음 모두!</h1>
+  <div class="okx"><div class="o"><b>O</b><br><span class="hj" style="font-size:1.6em">路</span> 길 로</div><div class="x"><b>X 뜻 빠짐</b><br><span class="hj" style="font-size:1.6em">路</span> 로</div><div class="x"><b>X 모양 빠짐</b><br>길 로</div><div class="x"><b>X 명칭 칸에 한자만</b><br>명칭: <span class="hj">足</span> → '발 족'</div></div>
+  <div class="grid g2" style="margin-top:1em"><div class="box red"><b class="t">부수 함정 조심</b><p style="margin:0">足 칸에 <span class="hj">促</span>? → <b>亻부</b>! &nbsp;木 칸에 <span class="hj">休</span>? → <b>亻부</b>!<br>모양이 들어 있어도 부수는 다를 수 있어요. 웹앱이 알려 줘요.</p></div>
+  <div class="box blue"><b class="t">착각했다면 기회!</b><p style="margin:0">착각했다가 바로잡은 한자를 학습지<br>'착각한 한자' 칸에 써 두세요.</p></div></div>`},
+ {t:600, ex:'note', h:`<div class="kicker">활동 · 첫 번째 부수 (10분)</div><h1 style="margin-bottom:.3em">1번 부수부터 완성!</h1>
+  <div class="grid" style="grid-template-columns:1fr 1.15fr;gap:1.2em;align-items:start"><div>
+   <div class="step"><i>1</i><p>명칭·획수 (부수표)</p></div><div class="step"><i>2</i><p>본래 의미 한 줄 (내 말로)</p></div>
+   <div class="step"><i>3</i><p>가족 한자 2개 (모양·뜻·음 + 부수 확인)</p></div><div class="step"><i>4</i><p>생활 속 낱말 1개</p></div>
+   <div class="step"><i>5</i><p>연결 문장 1개 (한자 뜻 + 부수 뜻 → 까닭)</p></div><div class="step"><i>6</i><p>출처 2개 이상 체크</p></div>
+   <div class="box gold" style="margin-top:.4em;padding:.45em .9em"><p style="margin:0">웹앱 탭에 <b>7/7</b>이 뜨면 1번 부수 완성! 손을 들면 확인해요.</p></div></div>
+   <div style="font-size:.9em"><span class="pill p-gold">예시를 보며 따라 쓰기</span><div style="margin-top:.3em">${exSheet()}</div></div></div>`,
+  n:'10분 후 순회하며 1번 부수 7/7 여부와 3요소 누락을 즉석 피드백(평가계획 피드백 전략).'},
+ {t:960, ex:'note', h:`<div class="kicker">활동 · 2·3번 부수 (16분)</div><h1>나머지 두 부수도 같은 방법으로</h1>
+  <div class="grid g3"><div class="box"><b class="t">빠른 친구</b><p style="margin:0">'변신 모습·위치' 칸까지 도전 (氵, 忄 …)</p></div><div class="box"><b class="t">막힌 친구</b><p style="margin:0">웹앱의 [네이버 한자사전에서 찾기] 버튼을 눌러요</p></div><div class="box"><b class="t">한자 입력</b><p style="margin:0">사전에서 길게 눌러 복사 → 붙여 넣기</p></div></div>
+  <div class="grid g3" style="margin-top:.8em"><div class="box gold" style="text-align:center"><span class="hj" style="font-size:2.4em">足</span><br><span class="sub">발 족 · 蹴 路</span></div><div class="box gold" style="text-align:center"><span class="hj" style="font-size:2.4em">走</span><br><span class="sub">달릴 주 · 起 超</span></div><div class="box gold" style="text-align:center"><span class="hj" style="font-size:2.4em">目</span><br><span class="sub">눈 목 · 看 眼</span></div></div>
+  <div class="box red" style="margin-top:.8em"><p style="margin:0"><b>AI에게 물어보고 그대로 쓰기 금지!</b> 사전과 부수표에서 직접 찾은 내용만 인정돼요.</p></div>`,
+  n:'예시 테마의 부수 3개(足·走·目)를 한눈에 보여 주는 장입니다. 그대로 따라 쓰지 않게 안내하세요.'},
+ {t:300, h:`<div class="kicker">짝 점검 · 5분 · 눌러서 정답 보기</div><h1 style="margin-bottom:.25em">이 노트에서 실수 5개를 찾아라!</h1>
+  <div class="grid" style="grid-template-columns:1.5fr 1fr;gap:1.2em;align-items:start"><div>${BUG_NOTE}</div>
+   <div><div class="box green" style="padding:.5em .9em"><b class="t">짝 점검 체크</b><p style="margin:0">□ 금지 부수 없음<br>□ 가족 한자 6개 모양·뜻·음<br>□ 가족 한자의 부수가 맞음<br>□ 연결 문장에 까닭이 있음<br>□ 출처 2개 이상</p></div>
+    <p style="margin:.5em 0 0">연습이 끝나면 짝의 노트를 같은 방법으로 점검!<br>틀린 곳은 <b>친구가 직접</b> 고치게 해요.</p></div></div>`,
+  n:'점선 부분을 누르면 고친 답이 나옵니다. 실수 5개: 이름 칸에 한자만, 起 뜻 빠짐, 徒는 彳부, 연결 문장에 까닭 없음, 출처 1개.'},
+ {t:300, h:`<div class="kicker">보내기 · 제출 · 5분</div><h1 style="margin-bottom:.35em">탐구 노트를 선생님께 보내요</h1>
+  <div class="grid g3">
+   <div class="box blue"><span class="num">1</span> <b class="t" style="display:inline">웹앱에서 보내기</b><p style="margin:.3em 0 0">[점검·제출] → <b>[선생님께 탐구 노트 보내기]</b><br><span class="sub">반·번호·이름이 맞는지 꼭 확인!</span></p>
+    <div style="margin-top:.5em;background:var(--seal);color:#fff;border-radius:.6em;text-align:center;padding:.4em;font-weight:900">📮 선생님께 탐구 노트 보내기</div>
+    <p class="sub" style="margin:.3em 0 0">"보냈어요 ✓"가 뜨면 끝. 고친 뒤 다시 보내도 돼요.</p></div>
+   <div class="box blue"><span class="num">2</span> <b class="t" style="display:inline">학습지 제출</b><p style="margin:.3em 0 0">다음 시간에 <b>↺</b>(다시 확인)와 <b>★</b>(잘한 점) 표시와 함께 돌려받아요.</p></div>
+   <div class="box gold"><span class="num">3</span> <b class="t" style="display:inline">다음 시간 미리 생각</b><p style="margin:.3em 0 0">내 부수를 어떤 <b>캐릭터</b>로 만들까?</p></div></div>`,
+  n:'웹앱에서 보낸 내용은 선생님 구글 시트 「탐구노트」 탭에 학생별 한 줄로 쌓입니다(다시 보내면 같은 줄이 갱신). 학습지로 자료의 적절성 가채점 + ↺/★ 표시.'}
+]},
+/* ---------- 3차시 ---------- */
+{title:'3차시 · 캐릭터 설계 + 캔바 시작', slides:[
+ {t:180, h:`<div class="kicker">3차시 / 4 · 2단계(내용 구성력·표현력)</div><h1>부수를 캐릭터로! 캔바 카드 시작</h1>
+  <div class="box green"><b class="t">오늘의 목표</b><p style="margin:0">부수의 의미가 드러나는 캐릭터를 설계하고, 캔바로 표지와 첫 카드를 만들 수 있다.</p></div>
+  ${flow([['피드백 고치기',3],['예시 카드·설계',8],['캔바 시범',9],['제작: 표지+카드1',23],['정리',2]])}`},
+ {t:180, h:`<div class="kicker">3분 · 피드백 고치기</div><h1 style="margin-bottom:.35em">돌려받은 노트의 ↺ 표시를 고쳐요</h1>
+  ${FEEDBACK_MOCK}
+  <div class="grid g2" style="margin-top:.8em"><div class="box red"><b class="t">↺ 다시 확인</b><p style="margin:0">促은 足 모양이 있지만 <b>亻부</b>! → 사전에서 足부 한자로 다시 찾기 (예: 路 길 로)<br>→ 학습지와 웹앱 모두 고치고 웹앱에서 <b>다시 보내기</b></p></div>
+  <div class="box gold"><b class="t">★ 잘한 점</b><p style="margin:0">잘된 연결 문장은 카드에 그대로 옮겨 써요!</p></div></div>`},
+ {t:240, ex:'card', hl:['char','art'], h:`<div class="kicker">예시 카드 보기 · 캔바 템플릿 2쪽에도 있어요</div><h1 style="margin-bottom:.3em">완성된 카드는 이렇게 생겼어요</h1>
+  <div class="grid" style="grid-template-columns:1fr 1.15fr;gap:1.4em;align-items:center">
+   <div class="big2" style="max-width:24em">${exCardMock(['art','char','fam','link'])}</div>
+   <ul class="ann"><li><span class="num">1</span><span><b>부수 글자를 크게</b> 두고 그 위에 얼굴·팔 요소를 얹었어요</span></li>
+    <li><span class="num">2</span><span><b>캐릭터 이름</b>: 「쉬는 시간 대장 인이」</span></li>
+    <li><span class="num">3</span><span><b>소개</b>에 부수의 뜻(사람)이 드러나요</span></li>
+    <li><span class="num">4</span><span><b>가족 한자 2개</b>: 休 쉴 휴 · 信 믿을 신</span></li>
+    <li><span class="num">5</span><span><b>연결 문장</b>: 休 = 사람 + 나무 → 쉬기</span></li>
+    <li style="color:var(--seal)"><span class="num" style="background:var(--gold)">!</span><span>亻은 첫째 줄 부수 → 여러분은 못 써요. 제출 때 예시 쪽은 삭제!</span></li></ul></div>`,
+  n:'예시 카드는 금지 부수(亻)로 만들어 학생이 그대로 베낄 수 없게 했습니다.'},
+ {t:300, ex:'card', hl:['char','art'], h:`<div class="kicker">캐릭터 설계 · 5분</div><h1 style="margin-bottom:.3em">부수의 뜻 → 캐릭터의 성격·특기</h1>
+  <div class="grid g2" style="align-items:start">
+   <div class="big2" style="max-width:22em">${cardMock(0, ['char','art'])}</div>
+   <div><div class="step"><i>1</i><p><b>캐릭터 이름</b> — 예) 발차기 대장 뻥이(足)</p></div>
+    <div class="step"><i>2</i><p><b>소개 한 줄</b> — "나는 足! 걷고 뛰고 공 차는 일은 다 내 담당이야."</p></div>
+    <div class="step"><i>3</i><p><b>그림 아이디어</b> — 足 글자 <b>위에</b> 축구화·축구공 얹기</p></div>
+    <div class="box blue" style="margin-top:.5em"><p style="margin:0">웹앱 [캐릭터 설계]에 쓰면 <b>캔바로 만들 수 있는지</b> 점검하고 <b>캔바 검색어</b>도 알려 줘요.</p></div></div></div>`},
+ {t:120, h:`<div class="kicker">그림 아이디어 점검</div><h1 style="margin-bottom:.4em">되는 아이디어 / 안 되는 아이디어</h1>
+  <div class="grid g2"><div class="box green"><b class="t">O 이렇게</b><ul style="margin:0"><li>足 아래에 축구화·축구공 얹기</li><li>氵의 세 점을 물방울 얼굴로</li><li>木 위에 나뭇잎·사과 요소 얹기</li><li>캔바 [요소]에서 찾아 크기·색 바꾸기</li></ul></div>
+  <div class="box red"><b class="t">X 이건 안 돼요</b><ul style="margin:0"><li>부수 글자를 지우고 그림만 넣기</li><li>매직 미디어 등 <b>AI로 그림 만들기</b></li><li>인터넷 그림을 통째로 캡처해 붙이기</li><li>부수와 상관없는 꾸미기만 잔뜩</li></ul></div></div>`},
+ {t:540, h:`<div class="kicker">캔바 시범 · 9분 (선생님 화면 보기)</div><h1 style="margin-bottom:.3em">캔바 템플릿 쓰는 법</h1>
+  <div class="grid" style="grid-template-columns:1.15fr 1fr;gap:1.2em;align-items:start">${CANVA_MOCK}
+   <div><div class="step"><i>1</i><p>웹앱 [캔바로 출발] → 링크 열기 → <b>[템플릿 편집]</b></p></div>
+    <div class="step"><i>2</i><p>제목을 <b>반_번호_이름_부수도감</b>으로</p></div>
+    <div class="step"><i>3</i><p><b>2쪽 예시</b>를 보고 → 1쪽 표지부터 웹앱 <b>[복사]</b> → 붙여 넣기</p></div>
+    <div class="step"><i>4</i><p>큰 부수 글자는 두고 <b>[요소]</b>에서 검색어로 그림 얹기</p></div>
+    <div class="step"><i>5</i><p>아래 <b>쪽 목록</b>에서 카드1 → 카드2 → 카드3 이동</p></div>
+    <p class="sub" style="margin:.3em 0 0">· 한자가 □로 보이면 글꼴 바꾸기 · 그림이 글자를 가리면 [위치] → [뒤로]</p></div></div>`,
+  n:'교사 화면에서 실제로 템플릿 열기 → 사본 → 붙여넣기 → 요소 검색(예: 축구공) 시범.'},
+ {t:1380, ex:'card', hl:['theme','rads'], h:`<div class="kicker">제작 · 23분</div><h1 style="margin-bottom:.3em">표지 + 카드 1 완성하기</h1>
+  <div class="grid" style="grid-template-columns:1fr 1fr 1.1fr;gap:1em;align-items:start">
+   <div class="big2">${coverMock(['theme','rads'])}<p class="sub" style="text-align:center;margin:.3em 0 0">1쪽 · 표지 (5분)</p></div>
+   <div class="big2">${cardMock(0)}<p class="sub" style="text-align:center;margin:.3em 0 0">카드 1 (15분~)</p></div>
+   <div><div class="box blue" style="padding:.5em .9em"><b class="t">순서</b><p style="margin:0">① 표지: 이름·테마·이유·부수 3개<br>② 카드 1: 글 붙여 넣기<br>③ 부수 글자 위에 요소 얹기</p></div>
+    <div class="box red" style="margin-top:.6em;padding:.5em .9em"><p style="margin:0">AI 기능 금지 · 부수 글자 지우지 않기 · 친구 디자인 베끼기 금지</p></div></div></div>`,
+  n:'순회 포인트: 부수 글자가 크게 살아 있는지, 사본을 본인 이름으로 만들었는지.'},
+ {t:120, h:`<div class="kicker">정리 · 2분</div><h1>저장 확인!</h1><p>캔바는 자동 저장돼요. 내 디자인 제목에 <b>반·번호·이름</b>이 있는지 확인하고 닫기.<br>다음 시간: <b>카드 2·3 완성 → PNG 제출 → 친구 카드 감상</b></p>`}
+]},
+/* ---------- 4차시 ---------- */
+{title:'4차시 · 완성·제출·나눔', slides:[
+ {t:120, h:`<div class="kicker">4차시 / 4 · 마무리</div><h1>부수 도감 카드뉴스 완성하고 나누기</h1>
+  <div class="box green"><b class="t">오늘의 목표</b><p style="margin:0">부수의 의미와 가족 한자가 잘 연결된 카드를 완성하고, 친구의 카드에서 새로운 부수를 배운다.</p></div>
+  ${flow([['채점 기준 보기',4],['제작: 카드 2·3',24],['자기점검',4],['PNG 제출',4],['감상·성찰',9]])}`},
+ {t:180, h:`<div class="kicker">채점 기준 · 비교해 보기</div><h1 style="margin-bottom:.3em">A 카드 vs 아쉬운 카드</h1>
+  <div class="grid" style="grid-template-columns:.9fr .9fr 1.2fr;gap:1em;align-items:start">
+   <div class="big2">${cardMock(0)}<p style="text-align:center;margin:.3em 0 0;color:var(--jade);font-weight:900">A 카드</p></div>
+   <div class="big2">${WEAK_CARD}<p style="text-align:center;margin:.3em 0 0;color:var(--seal);font-weight:900">아쉬운 카드</p></div>
+   <ul class="ann"><li><span class="num">1</span><span>부수 글자가 <b>작고</b> 사진만 커요</span></li>
+    <li><span class="num">2</span><span>소개에 <b>부수의 뜻</b>이 없어요</span></li>
+    <li><span class="num">3</span><span>가족 한자 <b>1개</b>, 뜻 빠짐</span></li>
+    <li><span class="num">4</span><span><b>연결 문장</b>이 없어요</span></li>
+    <li><span class="num">5</span><span><b>출처</b>가 없어요</span></li>
+    <li style="margin-top:.5em"><span class="sub">내용 구성력: 이름·소개·가족 한자 2개·연결 문장<br>표현력: 부수 글자가 그림 속에 살아 있음 · 통일감 · 독창성</span></li></ul></div>`,
+  n:'학생에게 먼저 "무엇이 다를까?"를 묻고 하나씩 짚으세요.'},
+ {t:1440, ex:'card', h:`<div class="kicker">제작 · 24분</div><h1 style="margin-bottom:.3em">카드 2 · 카드 3 완성</h1>
+  <div class="grid" style="grid-template-columns:1fr 1fr 1.1fr;gap:1em;align-items:start">
+   <div class="big2">${cardMock(1)}</div><div class="big2">${cardMock(2)}</div>
+   <div><div class="box" style="padding:.5em .9em"><b class="t">1. 붙여 넣기</b><p style="margin:0">웹앱 [캔바로 출발]의 글 복사</p></div>
+    <div class="box" style="padding:.5em .9em;margin-top:.5em"><b class="t">2. 부수 그림</b><p style="margin:0">큰 글자 위에 요소 얹기</p></div>
+    <div class="box" style="padding:.5em .9em;margin-top:.5em"><b class="t">3. 통일감</b><p style="margin:0">카드끼리 색·글꼴 맞추기</p></div>
+    <div class="box blue" style="padding:.5em .9em;margin-top:.5em"><p style="margin:0">12분 → 카드 2 끝<br>24분 → 카드 3 끝</p></div></div></div>`},
+ {t:240, ex:'card', hl:['art','char','fam','link','src'], h:`<div class="kicker">자기점검 · 4분</div><h1 style="margin-bottom:.3em">제출 전에 내 카드와 비교!</h1>
+  <div class="grid" style="grid-template-columns:.85fr 1.2fr;gap:1.4em;align-items:center">
+   <div class="big2" style="max-width:22em">${cardMock(0, ['art','char','fam','link','src'])}</div>
+   <div class="grid g2" style="gap:.6em"><div class="box green"><b class="t">□ 표지 완성</b><span class="sub">테마·이유·부수 3개</span></div><div class="box green"><b class="t">□ 부수 글자 크게</b><span class="sub">그림 속에 살아 있게</span></div>
+    <div class="box green"><b class="t">□ 소개·이름</b><span class="sub">부수 뜻이 드러나게</span></div><div class="box green"><b class="t">□ 가족 한자 2개</b><span class="sub">모양·뜻·음</span></div>
+    <div class="box green"><b class="t">□ 연결 문장</b><span class="sub">까닭이 있게</span></div><div class="box green"><b class="t">□ AI 기능 안 씀</b><span class="sub">↺ 피드백도 고침</span></div></div></div>`},
+ {t:240, h:`<div class="kicker">제출 · 4분</div><h1 style="margin-bottom:.4em">예시 쪽 지우고 PNG로 제출</h1>
+  <div class="grid" style="grid-template-columns:1fr 1fr;gap:1.2em;align-items:start"><div>
+   <div class="step"><i>1</i><p>쪽 목록에서 <b>2쪽 예시(人)</b> 선택 → 휴지통 🗑</p></div>
+   <div class="step"><i>2</i><p>오른쪽 위 <b>[공유] → [다운로드]</b></p></div>
+   <div class="step"><i>3</i><p><b>PNG</b> · 모든 페이지(4) → 다운로드</p></div>
+   <div class="step"><i>4</i><p>클래스룸 과제에 올리고 <b>[제출]</b> <span class="sub">(여러 장은 압축 파일 하나로 받아져요)</span></p></div>
+   <div class="box gold" style="margin-top:.4em;padding:.45em .9em"><p style="margin:0">파일 이름: 반_번호_이름_부수도감 &nbsp;예) 1_15_김한문_부수도감</p></div></div>
+   ${DL_MOCK}</div>`},
+ {t:540, ex:'card', h:`<div class="kicker">감상 · 성찰 · 9분</div><h1 style="margin-bottom:.3em">친구의 부수 도감 둘러보기</h1>
+  <div class="grid" style="grid-template-columns:1.1fr 1fr;gap:1.2em;align-items:start">
+   <div class="deck4" style="grid-template-columns:1fr 1fr;font-size:.62em;max-width:26em">${coverMock()}${cardMock(0)}${cardMock(1)}${cardMock(2)}</div>
+   <div><div class="frame2"><b style="color:var(--blue)">칭찬 한 줄 틀</b><br>○○의 카드에서 새로 알게 된 부수는 <u>( &nbsp;&nbsp;&nbsp; )</u>야.<br><u>( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )</u>한 점이 멋져!</div>
+    <div class="box green" style="margin-top:.6em;padding:.5em .9em"><b class="t">성찰 (학습지 뒷면)</b><p style="margin:0">1. 부수를 알면 처음 보는 한자의 뜻을 짐작할 수 있을까?<br>2. 새롭게 알게 된 점 / 자랑하고 싶은 점</p></div></div></div>`,
+  n:'성찰과 착각한 한자 칸은 세특 기록 근거가 됩니다. 학습지를 꼭 회수하세요.'},
+ {t:60, h:`<div style="margin:auto;text-align:center"><div class="hj" style="font-size:7em;color:var(--seal);line-height:1">部首</div><h1 style="margin-top:.3em">부수는 한자의 뜻을 여는 열쇠!</h1><p>4시간 동안 수고했어요. 여러분의 부수 도감은 친구들의 한자 공부를 돕는 자료가 됩니다.</p></div>`}
+]}
+];
+
+let lesson = 0, idx = 0;
+try { const s = JSON.parse(localStorage.getItem('busu-teacher-pos')||'{}'); if (s.l != null){ lesson = s.l; idx = s.i||0; } } catch(e){}
+const stage = $('stage');
+function render(){
+  const ls = L[lesson];
+  if (idx >= ls.slides.length) idx = ls.slides.length - 1;
+  stage.innerHTML = ls.slides.map((s,i) => `<section class="slide ${i===idx?'on':''}">${s.h}${s.n?`<div class="note">교사 메모 · ${s.n}</div>`:''}<div class="foot">${ls.title} · ${i+1}/${ls.slides.length}</div></section>`).join('');
+  document.querySelectorAll('.lesson').forEach(b => b.classList.toggle('on', +b.dataset.lesson === lesson));
+  $('dots').innerHTML = ls.slides.map((_,i) => `<i class="${i===idx?'on':''}" data-i="${i}"></i>`).join('');
+  $('pos').textContent = `${idx+1} / ${ls.slides.length}`;
+  if (!running) setTimer(ls.slides[idx].t || 300);
+  try { localStorage.setItem('busu-teacher-pos', JSON.stringify({l:lesson,i:idx})); } catch(e){}
+  const cur = ls.slides[idx];
+  exHl = cur.hl || []; if (cur.ex) exTab = cur.ex;
+  renderPanel();
+}
+/* example side panel */
+let exTab = 'note', exHl = [];
+function renderPanel(){
+  if (!document.body.classList.contains('exon')) return;
+  document.querySelectorAll('[data-extab]').forEach(b => b.classList.toggle('on', b.dataset.extab === exTab));
+  $('exBody').innerHTML = exTab === 'note'
+    ? `<p class="sub" style="margin:0 0 6px">테마 <b>축구하는 나</b> · 부수 3개 足·走·目 중 <b>足</b>을 채운 탐구 노트</p>${exSheet(exHl)}
+       <div class="box gold" style="margin-top:8px;padding:8px 10px;font-size:.92em"><b>가족 한자</b> = 같은 부수를 가진 한자 (부수마다 2개)<br><b>연결 문장</b> = 한자 뜻 + 부수 뜻 → 까닭 <span class="sub">예) 蹴(차다)+足(발) → 차는 일은 발로 하니까</span></div>`
+    : `<p class="sub" style="margin:0 0 6px">캔바 카드뉴스 4쪽 · 1쪽 표지 + 2~4쪽 카드 (한 쪽에 부수 1개)</p>${deckMock(exHl)}`;
+  const first = $('exBody').querySelector('.hl');
+  if (first) first.scrollIntoView({block:'nearest', behavior:'smooth'});
+}
+function togglePanel(force){
+  const on = force != null ? force : !document.body.classList.contains('exon');
+  document.body.classList.toggle('exon', on);
+  try { localStorage.setItem('busu-teacher-ex', on ? '1' : '0'); } catch(e){}
+  renderPanel();
+}
+function go(d){
+  const n = L[lesson].slides.length;
+  idx += d;
+  if (idx < 0){ if (lesson > 0){ lesson--; idx = L[lesson].slides.length - 1; } else idx = 0; }
+  if (idx >= n){ if (lesson < L.length - 1){ lesson++; idx = 0; } else idx = n - 1; }
+  render();
+}
+/* timer */
+let left = 300, total = 300, running = null;
+const fmt = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+function setTimer(s){ total = left = s; paint(); }
+function paint(){ $('tT').textContent = fmt(left); $('tBigT').textContent = fmt(left); $('timer').classList.toggle('end', left === 0); $('tBigT').classList.toggle('end', left === 0); $('tGo').textContent = running ? '정지' : '시작'; }
+function chime(){ try { const A = window.AudioContext || window.webkitAudioContext, a = new A(); [0, .35, .7].forEach(t => { const o = a.createOscillator(), g = a.createGain(); o.connect(g); g.connect(a.destination); o.frequency.value = 880; g.gain.setValueAtTime(.25, a.currentTime + t); g.gain.exponentialRampToValueAtTime(.001, a.currentTime + t + .3); o.start(a.currentTime + t); o.stop(a.currentTime + t + .3); }); } catch(e){} }
+function toggle(){
+  if (running){ clearInterval(running); running = null; }
+  else { if (left === 0) left = total; running = setInterval(() => { left = Math.max(0, left - 1); if (left === 0){ clearInterval(running); running = null; chime(); } paint(); }, 1000); }
+  paint();
+}
+/* QR */
+function qr(el, url){
+  if (!url){ el.innerHTML = '<span style="color:#999">주소 없음</span>'; return; }
+  if (typeof window.qrcode !== 'function'){ el.innerHTML = '<span style="color:#999">QR 도구를 못 불러왔어요</span>'; return; }
+  try { const q = window.qrcode(0, 'M'); q.addData(url); q.make(); el.innerHTML = q.createSvgTag({cellSize:4, margin:2, scalable:true}); }
+  catch(e){ el.innerHTML = '<span style="color:#999">주소가 너무 길어요</span>'; }
+}
+function makeQr(){
+  const app = $('uApp').value.trim(), cv = $('uCanva').value.trim();
+  try { localStorage.setItem('busu-teacher-urls', JSON.stringify({app, cv})); } catch(e){}
+  let full = app;
+  if (app && cv && cv !== DEF_CANVA){ try { const u = new URL(app); u.searchParams.set('canva', cv); full = u.toString(); } catch(e){ full = app + (app.includes('?')?'&':'?') + 'canva=' + encodeURIComponent(cv); } }
+  qr($('qApp'), full); qr($('qCanva'), cv);
+}
+const DEF_CANVA = 'https://canva.link/g11bkrld1191zvz';
+$('uCanva').value = DEF_CANVA;
+$('uApp').value = 'https://verbanova-space.github.io/busu2026/';
+try { const u = JSON.parse(localStorage.getItem('busu-teacher-urls')||'{}'); if (u.app) $('uApp').value = u.app; if (u.cv) $('uCanva').value = u.cv; } catch(e){}
+
+document.addEventListener('click', e => {
+  const t = e.target;
+  const qz = t.closest('.qz'); if (qz){ qz.classList.toggle('open'); return; }
+  const bg = t.closest('.bug'); if (bg){ bg.classList.toggle('open'); return; }
+  const et = t.closest('[data-extab]'); if (et){ exTab = et.dataset.extab; renderPanel(); return; }
+  const pf = t.closest('#exBody [data-f]'); if (pf){ const k = pf.dataset.f; exHl = (exHl.length === 1 && exHl[0] === k) ? [] : [k]; renderPanel(); return; }
+  if (t.id === 'exBtn'){ togglePanel(); return; }
+  if (t.id === 'exClose'){ togglePanel(false); return; }
+  const ls = t.closest('[data-lesson]'); if (ls){ lesson = +ls.dataset.lesson; idx = 0; render(); return; }
+  if (t.dataset.i != null){ idx = +t.dataset.i; render(); return; }
+  if (t.id === 'prev') go(-1);
+  else if (t.id === 'next') go(1);
+  else if (t.id === 'tGo') toggle();
+  else if (t.id === 'tRe'){ clearInterval(running); running = null; setTimer(L[lesson].slides[idx].t || 300); }
+  else if (t.id === 'tBig'){ $('tLabel').textContent = L[lesson].title; $('tOv').classList.remove('hidden'); }
+  else if (t.id === 'tBigClose') $('tOv').classList.add('hidden');
+  else if (t.id === 'qrBtn'){ $('qrOv').classList.remove('hidden'); makeQr(); }
+  else if (t.id === 'qrMake') makeQr();
+  else if (t.id === 'qrClose') $('qrOv').classList.add('hidden');
+  else if (t.id === 'noteBtn') document.body.classList.toggle('notes');
+  else if (t.id === 'fsBtn') fullscreen();
+});
+function fullscreen(){ try { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); } catch(e){} }
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' '){ e.preventDefault(); go(1); }
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp'){ e.preventDefault(); go(-1); }
+  else if (e.key === 'n' || e.key === 'N') document.body.classList.toggle('notes');
+  else if (e.key === 'f' || e.key === 'F') fullscreen();
+  else if (e.key === 't' || e.key === 'T') toggle();
+  else if (e.key === 'e' || e.key === 'E') togglePanel();
+  else if (e.key === 'Escape'){ $('qrOv').classList.add('hidden'); $('tOv').classList.add('hidden'); }
+  else if (/^[1-4]$/.test(e.key)){ lesson = +e.key - 1; idx = 0; render(); }
+});
+try { if (localStorage.getItem('busu-teacher-ex') === '1') document.body.classList.add('exon'); } catch(e){}
+render();
+})();
+</script>
+</body>
+</html>
