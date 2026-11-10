@@ -250,12 +250,12 @@ table.rb th{background:#f1ece2}
   <h2>학생 접속 QR</h2>
   <div class="qrs">
     <div><label><b>학생용 웹앱 주소</b></label><input id="uApp" placeholder="https://... (웹앱을 올린 주소)">
-      <label><b>캔바 수업 초대 링크</b></label><input id="uCanva" placeholder="캔바 [수업] → [학생 초대] → 링크 복사">
-      <p style="font-size:14px;color:var(--sub);margin:0 0 10px">캔바 수업 초대 링크를 넣으면 학생 웹앱의 [캔바 열기] 버튼이 그 링크로 열려요. 입력값은 이 컴퓨터에 기억돼요.</p>
+      <label><b>클래스룸 과제 링크 (선택)</b></label><input id="uCanva" placeholder="구글 클래스룸 과제 주소 (비워도 돼요)">
+      <p style="font-size:14px;color:var(--sub);margin:0 0 10px">클래스룸 과제 링크를 넣으면 학생 웹앱의 [클래스룸 열기] 버튼이 그 과제로 바로 열려요. 입력값은 이 컴퓨터에 기억돼요.</p>
       <button class="btn" id="qrMake">QR 만들기</button> <button class="btn ghost" id="qrClose">닫기</button></div>
     <div class="grid g2" style="gap:10px">
       <div class="q"><div id="qApp"></div><b>학생 웹앱</b></div>
-      <div class="q"><div id="qCanva"></div><b>캔바 수업 초대</b></div>
+      <div class="q"><div id="qCanva"></div><b>클래스룸 과제</b></div>
     </div>
   </div>
 </div></div>
@@ -327,10 +327,10 @@ const CANVA_MOCK = `<div class="cvm">
 const WEAK_CARD = `<div class="cm weak" style="--c:var(--seal);--cs:var(--seal-soft)"><div class="cmh"><span>카드 1</span><span>발 족</span></div>
   <div class="cma"><span class="hj">足</span><em>축구공 사진만 크게</em></div><b>「뻥이」</b><div class="cmi">안녕! 나는 뻥이야. 잘 부탁해!</div>
   <div class="cmf"><span><b class="hj">路</b> 로</span></div><div class="cml" style="color:#bbb">(연결 문장 없음)</div></div>`;
-const DL_MOCK = `<div class="dlm"><b>캔바 과제 제출</b>
+const DL_MOCK = `<div class="dlm"><b>클래스룸 과제 제출</b>
   <div class="r"><span>쪽 수</span><span class="sel">3쪽 (표지 + 카드 2) ✓</span></div>
-  <div class="r"><span>오른쪽 위</span><span class="sel">제출 ▸</span></div>
-  <div class="go">제출됨 ✓</div>
+  <div class="r"><span>구글 클래스룸</span><span class="sel">제출 ▸</span></div>
+  <div class="go">제출함 ✓</div>
   <p style="margin:.4em 0 0;font-size:.85em;color:var(--sub)">4쪽이면 예시 쪽을 안 지운 것! → 예시 쪽 삭제 후 제출</p></div>`;
 const deckMock = (hl=[]) => `<div class="deck4">${coverMock(hl)}${[0,1].map(i => cardMock(i, hl)).join('')}</div>`;
 const STEPS8 = ['테마','부수 2개','이름·의미','가족 한자','낱말','연결 문장','출처','카드뉴스'];
@@ -361,7 +361,7 @@ const LC_INFO = [
   {d:'11월 11일 (수)', t:'부수 탐정이 되자!', ev:'', c:'seal', steps:['① 탐정 훈련','② 테마·부수 2개','사전 연습']},
   {d:'11월 18일 (수)', t:'부수 탐정 탐구 노트', ev:'★ 평가: 자료의 적절성', c:'gold', steps:['③ 탐구 노트','가족 한자·낱말·연결 문장','📮 선생님께 보내기']},
   {d:'12월 2일 (수)', t:'부수를 캐릭터로!', ev:'', c:'jade', steps:['④ 캐릭터 설계','⑤ 캔바로 출발','표지 + 카드 1']},
-  {d:'12월 9일 (수)', t:'카드뉴스 완성 · 제출', ev:'★ 평가: 내용 구성력 · 표현력', c:'blue', steps:['⑤ 캔바: 카드 2','⑥ 점검·제출','캔바 [제출] + 📮 보내기']}
+  {d:'12월 9일 (수)', t:'카드뉴스 완성 · 제출', ev:'★ 평가: 내용 구성력 · 표현력', c:'blue', steps:['⑤ 캔바: 카드 2','⑥ 점검·제출','클래스룸 [제출] + 📮 보내기']}
 ];
 const lessonCover = n => { const d = LC_INFO[n-1]; return `<div class="lc" style="--c:var(--${d.c});--c-soft:var(--${d.c}-soft)">
   <div class="lc-top">1학년 한문 수행평가 · 나만의 부수 캐릭터 카드</div>
@@ -555,20 +555,20 @@ const L = [
    <div class="box blue"><span class="num">2</span> <b class="t" style="display:inline">학습지 제출</b><p style="margin:.3em 0 0">다음 시간에 <b>↺</b>(다시 확인)와 <b>★</b>(잘한 점) 표시와 함께 돌려받아요.</p></div>
    <div class="box gold"><span class="num">3</span> <b class="t" style="display:inline">다음 시간 미리 생각</b><p style="margin:.3em 0 0">내 부수를 어떤 <b>캐릭터</b>로 만들까?</p></div></div>`,
   n:'웹앱에서 보낸 내용은 선생님 구글 시트 「탐구노트」 탭에 학생별 한 줄로 쌓입니다(다시 보내면 같은 줄이 갱신). 학습지로 자료의 적절성 가채점 + ↺/★ 표시.'},
- {t:60, h:`<div class="kicker">선생님 준비 · 3차시(12/2) 전에 미리 · 학생에게 보여 주지 않아도 돼요</div><h1 style="margin-bottom:.3em">캔바 교육용 수업 · 과제 준비</h1>
+ {t:60, h:`<div class="kicker">선생님 준비 · 3차시(12/2) 전에 미리 · 학생에게 보여 주지 않아도 돼요</div><h1 style="margin-bottom:.3em">구글 클래스룸으로 캔바 과제 내기</h1>
   <div class="grid g2" style="gap:1em;align-items:start"><div>
-   <div class="step"><i>1</i><p>캔바 <b>교육용(교사 인증)</b> 계정으로 로그인</p></div>
-   <div class="step"><i>2</i><p>왼쪽 <b>[수업]</b> → 수업 만들기: <b>1-1 한문</b>, <b>1-2 한문</b></p></div>
-   <div class="step"><i>3</i><p><b>[학생 초대]</b> → 초대 링크 복사 → 이 화면 위 <b>[QR]</b> 창 「캔바 수업 초대 링크」에 붙여 QR로 입장</p></div>
-   <div class="step"><i>4</i><p>수업에서 <b>[과제 만들기]</b> → 「1학년 한문 부수 도감 카드뉴스 템플릿」 추가 → <b>학생마다 각자 사본</b> → 마감 <b>12/9</b></p></div></div>
-   <div><div class="box blue" style="padding:.5em .9em"><b class="t">제출 확인</b><p style="margin:0">과제 화면에서 학생별 <b>제출됨</b> 확인 → 피드백 달고 <b>돌려주기</b>도 돼요</p></div>
+   <div class="step"><i>1</i><p>구글 클래스룸 → 1-1(또는 1-2) 수업 → <b>「수업 과제」</b> → <b>[만들기] → [과제]</b></p></div>
+   <div class="step"><i>2</i><p>첨부에서 <b>Canva</b> 선택 → 「1학년 한문 부수 도감 카드뉴스 템플릿」 → <b>학생마다 사본</b></p></div>
+   <div class="step"><i>3</i><p>마감 <b>12/9</b> → 과제 만들기 (다른 반도 같은 방법으로)</p></div>
+   <div class="step"><i>4</i><p>수정·삭제는 클래스룸 「수업 과제」 → 과제 오른쪽 <b>⋮</b>에서</p></div></div>
+   <div><div class="box blue" style="padding:.5em .9em"><b class="t">제출 확인</b><p style="margin:0">클래스룸 과제에서 학생별 <b>제출함 / 할당됨</b> 확인 → 학생을 누르면 카드뉴스가 열려요 · 점수·댓글·<b>돌려주기</b> 가능</p></div>
     <div class="box gold" style="margin-top:.6em;padding:.5em .9em"><b class="t">평가 근거 보관</b><p style="margin:0">마감 시각에 제출물을 확인하고, 필요하면 내려받아 보관해 두세요.</p></div>
-    <div class="box" style="margin-top:.6em;padding:.5em .9em"><p style="margin:0;font-size:.92em">학생은 초대 링크로 <b>먼저 수업에 들어와야</b> 과제가 보여요. 3차시 시작 전 1~2분 안에 입장시키기!<br><span class="sub">메뉴 이름은 캔바 화면 버전에 따라 조금 다를 수 있어요.</span></p></div></div></div>`,
+    <div class="box" style="margin-top:.6em;padding:.5em .9em"><p style="margin:0;font-size:.92em">캔바 수업 초대 링크·QR은 <b>필요 없어요.</b> 캔바 「과제」 화면에서는 완료율만 보여요.<br><span class="sub">처음 여는 학생은 캔바 로그인(학교 구글 계정) 창이 뜰 수 있어요.</span></p></div></div></div>`,
   n:'선생님 준비용 화면입니다. 수업 중에는 넘기세요. 템플릿은 4쪽(표지 · 예시 · 카드1 · 카드2)이고, 학생은 예시 쪽을 지우고 3쪽으로 제출합니다.'}
 ]},
 /* ---------- 3차시 ---------- */
 {title:'3차시 · 캐릭터 설계 + 캔바 시작', slides:[
- {t:60, h: lessonCover(3), n:'3차시 표지. 수업 시작 전 캔바 수업에 입장시키기(상단 QR → 캔바 수업 초대).'},
+ {t:60, h: lessonCover(3), n:'3차시 표지. 학생들은 구글 클래스룸 과제에서 캔바 디자인을 열어요.'},
  {t:180, h:`<div class="kicker">3차시 / 4 · 2단계(내용 구성력·표현력)</div><h1>부수를 캐릭터로! 캔바 카드 시작</h1>
   <div class="box green"><b class="t">오늘의 목표</b><p style="margin:0">부수의 의미가 드러나는 캐릭터를 설계하고, 캔바로 표지와 첫 카드를 만들 수 있다.</p></div>
   ${flow([['피드백 고치기',3],['예시 카드·설계',8],['캔바 시범',9],['제작: 표지+카드1',23],['정리',2]])}`},
@@ -596,15 +596,15 @@ const L = [
  {t:120, h:`<div class="kicker">그림 아이디어 점검</div><h1 style="margin-bottom:.4em">되는 아이디어 / 안 되는 아이디어</h1>
   <div class="grid g2"><div class="box green"><b class="t">O 이렇게</b><ul style="margin:0"><li>足 아래에 축구화·축구공 얹기</li><li>氵의 세 점을 물방울 얼굴로</li><li>木 위에 나뭇잎·사과 요소 얹기</li><li>캔바 [요소]에서 찾아 크기·색 바꾸기</li></ul></div>
   <div class="box red"><b class="t">X 이건 안 돼요</b><ul style="margin:0"><li>부수 글자를 지우고 그림만 넣기</li><li>매직 미디어 등 <b>AI로 그림 만들기</b></li><li>인터넷 그림을 통째로 캡처해 붙이기</li><li>부수와 상관없는 꾸미기만 잔뜩</li></ul></div></div>`},
- {t:540, h:`<div class="kicker">캔바 시범 · 9분 (선생님 화면 보기)</div><h1 style="margin-bottom:.3em">캔바 수업 과제 쓰는 법</h1>
+ {t:540, h:`<div class="kicker">캔바 시범 · 9분 (선생님 화면 보기)</div><h1 style="margin-bottom:.3em">클래스룸에서 캔바 과제 여는 법</h1>
   <div class="grid" style="grid-template-columns:1.15fr 1fr;gap:1.2em;align-items:start">${CANVA_MOCK}
-   <div><div class="step"><i>1</i><p>캔바 앱 → 왼쪽 <b>[수업]</b> → 「한문 부수 도감」 <b>과제</b> 열기</p></div>
+   <div><div class="step"><i>1</i><p><b>구글 클래스룸</b> → 「수업 과제」 → 과제 → 첨부된 <b>캔바 디자인</b> 열기</p></div>
     <div class="step"><i>2</i><p>제목을 <b>반_번호_부수도감</b>으로</p></div>
     <div class="step"><i>3</i><p><b>2쪽 예시</b>를 보고 → 1쪽 표지부터 웹앱 <b>[복사]</b> → 붙여 넣기</p></div>
     <div class="step"><i>4</i><p>큰 부수 글자는 두고 <b>[요소]</b>에서 검색어로 그림 얹기</p></div>
     <div class="step"><i>5</i><p>아래 <b>쪽 목록</b>에서 카드1 → 카드2 이동</p></div>
     <p class="sub" style="margin:.3em 0 0">· 한자가 □로 보이면 글꼴 바꾸기 · 그림이 글자를 가리면 [위치] → [뒤로]</p></div></div>`,
-  n:'교사 화면에서 과제 열기 → 붙여넣기 → 요소 검색(예: 축구공) 시범. 수업에 들어오지 않은 학생은 과제가 안 보이니 먼저 초대 링크로 들어오게 하세요.'},
+  n:'교사 화면에서 과제 열기 → 붙여넣기 → 요소 검색(예: 축구공) 시범. 처음 여는 학생은 캔바 로그인 창이 뜰 수 있어요(학교 구글 계정으로).'},
  {t:1380, ex:'card', hl:['theme','rads'], h:`<div class="kicker">제작 · 23분</div><h1 style="margin-bottom:.3em">표지 + 카드 1 완성하기</h1>
   <div class="grid" style="grid-template-columns:1fr 1fr 1.1fr;gap:1em;align-items:start">
    <div class="big2">${coverMock(['theme','rads'])}<p class="sub" style="text-align:center;margin:.3em 0 0">1쪽 · 표지 (5분)</p></div>
@@ -616,10 +616,10 @@ const L = [
 ]},
 /* ---------- 4차시 ---------- */
 {title:'4차시 · 완성·제출·나눔', slides:[
- {t:60, h: lessonCover(4), n:'4차시 표지. 오늘은 평가(내용 구성력·표현력)와 캔바 제출 시간입니다.'},
+ {t:60, h: lessonCover(4), n:'4차시 표지. 오늘은 평가(내용 구성력·표현력)와 클래스룸 제출 시간입니다.'},
  {t:120, h:`<div class="kicker">4차시 / 4 · 마무리</div><h1>부수 도감 카드뉴스 완성하고 나누기</h1>
   <div class="box green"><b class="t">오늘의 목표</b><p style="margin:0">부수의 의미와 가족 한자가 잘 연결된 카드를 완성하고, 친구의 카드에서 새로운 부수를 배운다.</p></div>
-  ${flow([['채점 기준 보기',4],['제작: 카드 2',20],['자기점검',4],['캔바 제출',4],['감상·성찰',13]])}`},
+  ${flow([['채점 기준 보기',4],['제작: 카드 2',20],['자기점검',4],['클래스룸 제출',4],['감상·성찰',13]])}`},
  {t:180, h:`<div class="kicker">채점 기준 · 비교해 보기</div><h1 style="margin-bottom:.3em">A 카드 vs 아쉬운 카드</h1>
   <div class="grid" style="grid-template-columns:.9fr .9fr 1.2fr;gap:1em;align-items:start">
    <div class="big2">${cardMock(0)}<p style="text-align:center;margin:.3em 0 0;color:var(--jade);font-weight:900">A 카드</p></div>
@@ -644,12 +644,12 @@ const L = [
    <div class="grid g2" style="gap:.6em"><div class="box green"><b class="t">□ 표지 완성</b><span class="sub">테마·이유·부수 2개</span></div><div class="box green"><b class="t">□ 부수 글자 크게</b><span class="sub">그림 속에 살아 있게</span></div>
     <div class="box green"><b class="t">□ 소개·이름</b><span class="sub">부수 뜻이 드러나게</span></div><div class="box green"><b class="t">□ 가족 한자 1개</b><span class="sub">모양·뜻·음</span></div>
     <div class="box green"><b class="t">□ 연결 문장</b><span class="sub">까닭이 있게</span></div><div class="box green"><b class="t">□ AI 기능 안 씀</b><span class="sub">↺ 피드백도 고침</span></div></div></div>`},
- {t:240, h:`<div class="kicker">제출 · 4분</div><h1 style="margin-bottom:.4em">예시 쪽 지우고 캔바에서 제출</h1>
+ {t:240, h:`<div class="kicker">제출 · 4분</div><h1 style="margin-bottom:.4em">예시 쪽 지우고 클래스룸에서 제출</h1>
   <div class="grid" style="grid-template-columns:1fr 1fr;gap:1.2em;align-items:start"><div>
    <div class="step"><i>1</i><p>쪽 목록에서 <b>2쪽 예시(人)</b> 선택 → 휴지통 🗑</p></div>
    <div class="step"><i>2</i><p><b>3쪽</b>(표지 + 카드 2장)만 남았는지 확인</p></div>
-   <div class="step"><i>3</i><p>오른쪽 위 <b>[제출]</b> 누르기</p></div>
-   <div class="step"><i>4</i><p><b>제출됨</b> 표시를 확인하면 끝! <span class="sub">(선생님이 돌려주면 고쳐서 다시 제출)</span></p></div>
+   <div class="step"><i>3</i><p><b>구글 클래스룸</b> 과제 화면으로 돌아가 <b>[제출]</b></p></div>
+   <div class="step"><i>4</i><p><b>제출함</b> 표시를 확인하면 끝! <span class="sub">(선생님이 돌려주면 고쳐서 다시 제출)</span></p></div>
    <div class="box gold" style="margin-top:.4em;padding:.45em .9em"><p style="margin:0">디자인 제목: 반_번호_부수도감 &nbsp;예) 1_15_부수도감</p></div></div>
    ${DL_MOCK}</div>`},
  {t:540, ex:'card', h:`<div class="kicker">감상 · 성찰 · 9분</div><h1 style="margin-bottom:.3em">친구의 부수 도감 둘러보기</h1>
@@ -728,7 +728,7 @@ function makeQr(){
   if (app && cv && cv !== DEF_CANVA){ try { const u = new URL(app); u.searchParams.set('canva', cv); full = u.toString(); } catch(e){ full = app + (app.includes('?')?'&':'?') + 'canva=' + encodeURIComponent(cv); } }
   qr($('qApp'), full); qr($('qCanva'), cv);
 }
-const DEF_CANVA = ''; // 캔바 교육용 수업 초대 링크를 QR 창에 넣어 쓰기
+const DEF_CANVA = ''; // (선택) 구글 클래스룸 과제 링크를 QR 창에 넣어 쓰기
 $('uCanva').value = DEF_CANVA;
 $('uApp').value = 'https://verbanova-space.github.io/busu2026/';
 try { const u = JSON.parse(localStorage.getItem('busu-teacher-urls2')||'{}'); if (u.app) $('uApp').value = u.app; if (u.cv) $('uCanva').value = u.cv; } catch(e){}
