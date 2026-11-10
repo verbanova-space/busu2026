@@ -144,6 +144,21 @@ table.ex tr{cursor:pointer;transition:opacity .2s}
 .box{background:#fff;border:2px solid var(--line);border-radius:.8em;padding:.9em 1.1em}
 .box b.t{display:block;font-size:1.25em;margin-bottom:.2em}
 .red{background:var(--seal-soft);border-color:#ecc3bb}.green{background:var(--jade-soft);border-color:#b9dccb}.gold{background:var(--gold-soft);border-color:#ecd59c}.blue{background:var(--blue-soft);border-color:#c3d3ee}
+/* 차시 표지 */
+.lc{margin:auto;text-align:center;width:100%}
+.lc-top{font-weight:800;color:var(--sub);letter-spacing:.05em}
+.lc-num{font-size:6.2em;font-weight:900;line-height:1;color:var(--c,var(--seal));margin:.08em 0 .02em}
+.lc h1{font-size:2.5em;margin:.1em 0 .25em}
+.lc-meta{display:flex;gap:.6em;justify-content:center;flex-wrap:wrap;font-size:1.1em}
+.lc-meta span{background:#fff;border:2px solid var(--line);border-radius:999px;padding:.25em .9em;font-weight:800}
+.lc-meta .ev{background:var(--seal);border-color:var(--seal);color:#fff}
+.lc-steps{display:flex;gap:.4em;justify-content:center;align-items:center;flex-wrap:wrap;margin:1em 0 .2em;font-size:1.15em}
+.lc-steps span{background:var(--c-soft,var(--seal-soft));border-radius:.6em;padding:.45em .9em;font-weight:800}
+.lc-steps i{font-style:normal;color:var(--sub);font-weight:900}
+.lc-road{display:flex;gap:.5em;justify-content:center;margin-top:1.1em}
+.lc-road span{min-width:5.2em;padding:.3em .6em;border-radius:.6em;background:#fff;border:2px solid var(--line);color:var(--sub);font-weight:800;font-size:.95em}
+.lc-road span.done{background:var(--jade-soft);border-color:var(--jade-soft);color:var(--jade)}
+.lc-road span.on{background:var(--c,var(--seal));border-color:var(--c,var(--seal));color:#fff}
 .flow{display:flex;gap:.6em;margin-top:.4em}
 .flow div{flex:var(--w,1);background:#fff;border:2px solid var(--line);border-radius:.7em;padding:.6em .7em;font-size:1.1em}
 .flow div b{display:block;color:var(--seal);font-size:.9em}
@@ -283,7 +298,7 @@ function cardMock(i, hl=[], dd, label){
 function coverMock(hl=[]){
   const h = k => hl.includes(k) ? 'hl' : '';
   return `<div class="cm cover"><div class="cmh"><span>1쪽 · 표지</span><span>1학년 ○반 ○번</span></div>
-    <div class="cvt">○○○의<br>부수 도감</div>
+    <div class="cvt">(별명)의<br>부수 도감</div>
     <div class="${h('theme')}" data-f="theme"><b>나의 테마</b> 축구하는 나<br><span class="cmi">매주 축구를 해서 발로 차고 달려요</span></div>
     <div class="cvr ${h('rads')}" data-f="rads">${['足','走'].map(c => `<span class="hj">${c}</span>`).join('')}</div></div>`;
 }
@@ -305,7 +320,7 @@ const FEEDBACK_MOCK = `<table class="ex">
   <tr><th>① 가족 한자</th><td>${H('促')} 재촉할 촉 <span class="mark r">↺ 促은 亻부! 足부 한자로 다시 찾기</span></td></tr>
   <tr><th>② 연결 문장</th><td>超에 走 부수가 들어간 까닭은 뛰어넘으려면 힘껏 달려야 하기 때문이다. <span class="mark g">★ 까닭이 분명해요</span></td></tr></table>`;
 const CANVA_MOCK = `<div class="cvm">
-  <div class="top"><span>Canva</span><span class="ttl">1_15_김한문_부수도감 <span class="num" style="background:#fff;color:#7d2ae8">2</span></span><span class="ed">수업 과제 <span class="num">1</span></span><span class="sh">제출</span></div>
+  <div class="top"><span>Canva</span><span class="ttl">1_15_부수도감 <span class="num" style="background:#fff;color:#7d2ae8">2</span></span><span class="ed">수업 과제 <span class="num">1</span></span><span class="sh">제출</span></div>
   <div class="body"><div class="side"><b>요소 <span class="num">4</span></b><div class="q">🔍 축구공</div><div class="g"><i>⚽</i><i>👟</i><i>⭐</i><i>💨</i></div></div>
    <div class="page">${cardMock(0)}</div></div>
   <div class="strip"><span class="num">5</span><span>1 표지</span><span class="ex">2 예시</span><span class="on">3 카드1</span><span>4 카드2</span></div></div>`;
@@ -341,9 +356,26 @@ const WHY_Q = (sz='1em') => `<div class="grid g2" style="gap:.5em;font-size:${sz
   <div class="box red" style="padding:.45em .75em"><b class="t">④ 무엇으로 만들어요?</b>${H('硯')} 벼루 ← ${H('石')} 돌<br><b>→ 벼루는 돌로 만드니까</b></div></div>`;
 const WHY_STUCK = `<div class="box" style="padding:.45em .9em;margin-top:.5em"><b>막혔을 때</b> &nbsp;① 뜻이 여러 개면 <b>부수와 가까운 뜻</b>을 골라요 &nbsp;② 그 한자가 들어간 <b>낱말 뜻</b>에서 힌트 찾기 &nbsp;③ 그래도 안 보이면 <b>다른 가족 한자로 바꾸기</b> (모양만 빌린 한자도 있어요) &nbsp;④ 지어내지 말고 <b>사전 풀이에 근거</b>해요</div>`;
 
+// 차시 표지: 학생 웹앱 단계 이름과 같게
+const LC_INFO = [
+  {d:'11월 11일 (수)', t:'부수 탐정이 되자!', ev:'', c:'seal', steps:['① 탐정 훈련','② 테마·부수 2개','사전 연습']},
+  {d:'11월 18일 (수)', t:'부수 탐정 탐구 노트', ev:'★ 평가: 자료의 적절성', c:'gold', steps:['③ 탐구 노트','가족 한자·낱말·연결 문장','📮 선생님께 보내기']},
+  {d:'12월 2일 (수)', t:'부수를 캐릭터로!', ev:'', c:'jade', steps:['④ 캐릭터 설계','⑤ 캔바로 출발','표지 + 카드 1']},
+  {d:'12월 9일 (수)', t:'카드뉴스 완성 · 제출', ev:'★ 평가: 내용 구성력 · 표현력', c:'blue', steps:['⑤ 캔바: 카드 2','⑥ 점검·제출','캔바 [제출] + 📮 보내기']}
+];
+const lessonCover = n => { const d = LC_INFO[n-1]; return `<div class="lc" style="--c:var(--${d.c});--c-soft:var(--${d.c}-soft)">
+  <div class="lc-top">1학년 한문 수행평가 · 나만의 부수 캐릭터 카드</div>
+  <div class="lc-num">${n}차시</div>
+  <h1>${d.t}</h1>
+  <div class="lc-meta"><span>📅 ${d.d}</span>${d.ev ? `<span class="ev">${d.ev}</span>` : ''}</div>
+  <div class="lc-steps">${d.steps.map(s => `<span>${s}</span>`).join('<i>→</i>')}</div>
+  <div class="lc-road">${[1,2,3,4].map(k => `<span class="${k<n?'done':(k===n?'on':'')}">${k<n?'✓ ':''}${k}차시</span>`).join('')}</div>
+  ${n===2 ? '<p class="sub" style="margin:.8em 0 0">다음 주 11/25는 체육체험학습으로 수업이 없어요 → 오늘 꼭 보내기!</p>' : ''}</div>`; };
+
 const L = [
 /* ---------- 1차시 ---------- */
 {title:'1차시 · 부수 탐정이 되자', slides:[
+ {t:60, h: lessonCover(1), n:'1차시 표지. 학생 웹앱을 열게 하고(상단 QR) 오늘 할 단계를 짚어 주세요.'},
  {t:300, h:`<div class="kicker">1차시 / 4 · 나만의 부수 카드 만들기</div><h1>부수 탐정이 되자!<br><span style="font-size:.6em;color:var(--sub)">테마를 정하고, 부수 2개를 고른다</span></h1>
   <div class="grid g2"><div class="box green"><b class="t">오늘의 목표</b><p style="margin:0">부수가 한자의 뜻을 알려 주는 단서임을 알고,<br>나만의 테마에 맞는 부수 2개를 고를 수 있다.</p></div>
   <div class="box"><b class="t">준비물</b><p style="margin:0">학습지 · 태블릿 · 부수표(학습지 1면)</p></div></div>
@@ -446,7 +478,7 @@ const L = [
     <div class="chips" style="margin-bottom:.5em"><span>⚽ 축구하는 나 <span class="hj">足 走</span> (예시)</span><span>🐶 우리 집 강아지 <span class="hj">犬 耳</span></span><span>🍚 요리왕 <span class="hj">火 食</span></span><span>🌧 사계절 날씨 <span class="hj">雨 日</span></span><span>🎨 미술 시간 <span class="hj">糸 竹</span></span><span>💗 내 기분 <span class="hj">心 言</span></span></div>
     <div class="box gold"><p style="margin:0">테마를 고른 <b>이유</b>도 한 줄 써요.<br>→ 나중에 카드 표지에 들어가요.</p></div></div>
    <div><h2>학생 웹앱에서</h2>
-    <div class="step"><i>1</i><p>반·번호·이름 쓰기</p></div>
+    <div class="step"><i>1</i><p>반·번호·<b>별명</b> 쓰기 <span class="sub">(진짜 이름 ✕ · 이상한 말 ✕)</span></p></div>
     <div class="step"><i>2</i><p>테마 고르고 이름 붙이기</p></div>
     <div class="step"><i>3</i><p>부수 2개 고르기 (없는 부수는 [판별하기])</p></div>
     <div class="step"><i>4</i><p>학습지 ①칸에도 옮겨 쓰기</p></div></div></div>`,
@@ -465,6 +497,7 @@ const L = [
 ]},
 /* ---------- 2차시 ---------- */
 {title:'2차시 · 탐구 노트 완성', slides:[
+ {t:60, h: lessonCover(2), n:'2차시 표지. 오늘은 평가(자료의 적절성) 시간입니다.'},
  {t:180, h:`<div class="kicker">2차시 / 4 · 1단계 평가(자료의 적절성)</div><h1>부수 탐정 탐구 노트 완성하기</h1>
   <div class="box green"><b class="t">오늘의 목표</b><p style="margin:0">믿을 수 있는 자료 2가지 이상을 비교하며 부수 2개의 의미와 가족 한자를 정확하게 조사할 수 있다.</p></div>
   ${flow([['예시·시범',7],['탐구 1번 부수',10],['중간 점검',2],['탐구 2번 부수',16],['짝 점검',5],['보내기·제출',5]])}`},
@@ -516,15 +549,12 @@ const L = [
   n:'점선 부분을 누르면 고친 답이 나옵니다. 실수 4개: 이름 칸에 한자만, 徒(뜻 빠짐 + 彳부라서 走부가 아님), 연결 문장에 까닭 없음, 출처 1개.'},
  {t:300, h:`<div class="kicker">보내기 · 제출 · 5분</div><h1 style="margin-bottom:.35em">탐구 노트를 선생님께 보내요</h1>
   <div class="grid g3">
-   <div class="box blue"><span class="num">1</span> <b class="t" style="display:inline">웹앱에서 보내기</b><p style="margin:.3em 0 0">[점검·제출] → <b>[선생님께 탐구 노트 보내기]</b><br><span class="sub">반·번호·이름이 맞는지 꼭 확인!</span></p>
+   <div class="box blue"><span class="num">1</span> <b class="t" style="display:inline">웹앱에서 보내기</b><p style="margin:.3em 0 0">[점검·제출] → <b>[선생님께 탐구 노트 보내기]</b><br><span class="sub">반·번호·별명이 맞는지 꼭 확인!</span></p>
     <div style="margin-top:.5em;background:var(--seal);color:#fff;border-radius:.6em;text-align:center;padding:.4em;font-weight:900">📮 선생님께 탐구 노트 보내기</div>
     <p class="sub" style="margin:.3em 0 0">"보냈어요 ✓"가 뜨면 끝. 고친 뒤 다시 보내도 돼요.</p></div>
    <div class="box blue"><span class="num">2</span> <b class="t" style="display:inline">학습지 제출</b><p style="margin:.3em 0 0">다음 시간에 <b>↺</b>(다시 확인)와 <b>★</b>(잘한 점) 표시와 함께 돌려받아요.</p></div>
    <div class="box gold"><span class="num">3</span> <b class="t" style="display:inline">다음 시간 미리 생각</b><p style="margin:.3em 0 0">내 부수를 어떤 <b>캐릭터</b>로 만들까?</p></div></div>`,
-  n:'웹앱에서 보낸 내용은 선생님 구글 시트 「탐구노트」 탭에 학생별 한 줄로 쌓입니다(다시 보내면 같은 줄이 갱신). 학습지로 자료의 적절성 가채점 + ↺/★ 표시.'}
-]},
-/* ---------- 3차시 ---------- */
-{title:'3차시 · 캐릭터 설계 + 캔바 시작', slides:[
+  n:'웹앱에서 보낸 내용은 선생님 구글 시트 「탐구노트」 탭에 학생별 한 줄로 쌓입니다(다시 보내면 같은 줄이 갱신). 학습지로 자료의 적절성 가채점 + ↺/★ 표시.'},
  {t:60, h:`<div class="kicker">선생님 준비 · 3차시(12/2) 전에 미리 · 학생에게 보여 주지 않아도 돼요</div><h1 style="margin-bottom:.3em">캔바 교육용 수업 · 과제 준비</h1>
   <div class="grid g2" style="gap:1em;align-items:start"><div>
    <div class="step"><i>1</i><p>캔바 <b>교육용(교사 인증)</b> 계정으로 로그인</p></div>
@@ -534,7 +564,11 @@ const L = [
    <div><div class="box blue" style="padding:.5em .9em"><b class="t">제출 확인</b><p style="margin:0">과제 화면에서 학생별 <b>제출됨</b> 확인 → 피드백 달고 <b>돌려주기</b>도 돼요</p></div>
     <div class="box gold" style="margin-top:.6em;padding:.5em .9em"><b class="t">평가 근거 보관</b><p style="margin:0">마감 시각에 제출물을 확인하고, 필요하면 내려받아 보관해 두세요.</p></div>
     <div class="box" style="margin-top:.6em;padding:.5em .9em"><p style="margin:0;font-size:.92em">학생은 초대 링크로 <b>먼저 수업에 들어와야</b> 과제가 보여요. 3차시 시작 전 1~2분 안에 입장시키기!<br><span class="sub">메뉴 이름은 캔바 화면 버전에 따라 조금 다를 수 있어요.</span></p></div></div></div>`,
-  n:'선생님 준비용 화면입니다. 수업 중에는 넘기세요. 템플릿은 4쪽(표지 · 예시 · 카드1 · 카드2)이고, 학생은 예시 쪽을 지우고 3쪽으로 제출합니다.'},
+  n:'선생님 준비용 화면입니다. 수업 중에는 넘기세요. 템플릿은 4쪽(표지 · 예시 · 카드1 · 카드2)이고, 학생은 예시 쪽을 지우고 3쪽으로 제출합니다.'}
+]},
+/* ---------- 3차시 ---------- */
+{title:'3차시 · 캐릭터 설계 + 캔바 시작', slides:[
+ {t:60, h: lessonCover(3), n:'3차시 표지. 수업 시작 전 캔바 수업에 입장시키기(상단 QR → 캔바 수업 초대).'},
  {t:180, h:`<div class="kicker">3차시 / 4 · 2단계(내용 구성력·표현력)</div><h1>부수를 캐릭터로! 캔바 카드 시작</h1>
   <div class="box green"><b class="t">오늘의 목표</b><p style="margin:0">부수의 의미가 드러나는 캐릭터를 설계하고, 캔바로 표지와 첫 카드를 만들 수 있다.</p></div>
   ${flow([['피드백 고치기',3],['예시 카드·설계',8],['캔바 시범',9],['제작: 표지+카드1',23],['정리',2]])}`},
@@ -565,7 +599,7 @@ const L = [
  {t:540, h:`<div class="kicker">캔바 시범 · 9분 (선생님 화면 보기)</div><h1 style="margin-bottom:.3em">캔바 수업 과제 쓰는 법</h1>
   <div class="grid" style="grid-template-columns:1.15fr 1fr;gap:1.2em;align-items:start">${CANVA_MOCK}
    <div><div class="step"><i>1</i><p>캔바 앱 → 왼쪽 <b>[수업]</b> → 「한문 부수 도감」 <b>과제</b> 열기</p></div>
-    <div class="step"><i>2</i><p>제목을 <b>반_번호_이름_부수도감</b>으로</p></div>
+    <div class="step"><i>2</i><p>제목을 <b>반_번호_부수도감</b>으로</p></div>
     <div class="step"><i>3</i><p><b>2쪽 예시</b>를 보고 → 1쪽 표지부터 웹앱 <b>[복사]</b> → 붙여 넣기</p></div>
     <div class="step"><i>4</i><p>큰 부수 글자는 두고 <b>[요소]</b>에서 검색어로 그림 얹기</p></div>
     <div class="step"><i>5</i><p>아래 <b>쪽 목록</b>에서 카드1 → 카드2 이동</p></div>
@@ -577,11 +611,12 @@ const L = [
    <div class="big2">${cardMock(0)}<p class="sub" style="text-align:center;margin:.3em 0 0">카드 1 (15분~)</p></div>
    <div><div class="box blue" style="padding:.5em .9em"><b class="t">순서</b><p style="margin:0">① 표지: 이름·테마·이유·부수 2개<br>② 카드 1: 글 붙여 넣기<br>③ 부수 글자 위에 요소 얹기</p></div>
     <div class="box red" style="margin-top:.6em;padding:.5em .9em"><p style="margin:0">AI 기능 금지 · 부수 글자 지우지 않기 · 친구 디자인 베끼기 금지</p></div></div></div>`,
-  n:'순회 포인트: 부수 글자가 크게 살아 있는지, 과제 디자인 제목에 본인 이름이 있는지.'},
- {t:120, h:`<div class="kicker">정리 · 2분</div><h1>저장 확인!</h1><p>캔바는 자동 저장돼요. 내 디자인 제목에 <b>반·번호·이름</b>이 있는지 확인하고 닫기.<br>다음 시간: <b>카드 2 완성 → 캔바에서 제출 → 친구 카드 감상</b></p>`}
+  n:'순회 포인트: 부수 글자가 크게 살아 있는지, 과제 디자인 제목에 반·번호가 있는지.'},
+ {t:120, h:`<div class="kicker">정리 · 2분</div><h1>저장 확인!</h1><p>캔바는 자동 저장돼요. 내 디자인 제목에 <b>반·번호</b>가 있는지 확인하고 닫기.<br>다음 시간: <b>카드 2 완성 → 캔바에서 제출 → 친구 카드 감상</b></p>`}
 ]},
 /* ---------- 4차시 ---------- */
 {title:'4차시 · 완성·제출·나눔', slides:[
+ {t:60, h: lessonCover(4), n:'4차시 표지. 오늘은 평가(내용 구성력·표현력)와 캔바 제출 시간입니다.'},
  {t:120, h:`<div class="kicker">4차시 / 4 · 마무리</div><h1>부수 도감 카드뉴스 완성하고 나누기</h1>
   <div class="box green"><b class="t">오늘의 목표</b><p style="margin:0">부수의 의미와 가족 한자가 잘 연결된 카드를 완성하고, 친구의 카드에서 새로운 부수를 배운다.</p></div>
   ${flow([['채점 기준 보기',4],['제작: 카드 2',20],['자기점검',4],['캔바 제출',4],['감상·성찰',13]])}`},
@@ -615,7 +650,7 @@ const L = [
    <div class="step"><i>2</i><p><b>3쪽</b>(표지 + 카드 2장)만 남았는지 확인</p></div>
    <div class="step"><i>3</i><p>오른쪽 위 <b>[제출]</b> 누르기</p></div>
    <div class="step"><i>4</i><p><b>제출됨</b> 표시를 확인하면 끝! <span class="sub">(선생님이 돌려주면 고쳐서 다시 제출)</span></p></div>
-   <div class="box gold" style="margin-top:.4em;padding:.45em .9em"><p style="margin:0">디자인 제목: 반_번호_이름_부수도감 &nbsp;예) 1_15_김한문_부수도감</p></div></div>
+   <div class="box gold" style="margin-top:.4em;padding:.45em .9em"><p style="margin:0">디자인 제목: 반_번호_부수도감 &nbsp;예) 1_15_부수도감</p></div></div>
    ${DL_MOCK}</div>`},
  {t:540, ex:'card', h:`<div class="kicker">감상 · 성찰 · 9분</div><h1 style="margin-bottom:.3em">친구의 부수 도감 둘러보기</h1>
   <div class="grid" style="grid-template-columns:1.1fr 1fr;gap:1.2em;align-items:start">

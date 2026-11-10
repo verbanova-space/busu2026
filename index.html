@@ -46,6 +46,24 @@ a{color:var(--blue)}
 h1{font-size:1.2rem;margin:0;line-height:1.3}
 .top-actions{display:flex;gap:8px;align-items:center}
 .mini-timer{font-variant-numeric:tabular-nums;font-weight:800;background:var(--ink);color:var(--paper);padding:4px 10px;border-radius:8px}
+.lessons{max-width:1100px;margin:0 auto;padding:0 16px 8px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.lsn{flex:0 0 auto;border:1px dashed var(--line2);background:transparent;color:var(--sub);border-radius:10px;padding:4px 12px;font-size:.8rem;font-weight:800}
+.lsn.on{border-style:solid;border-color:var(--seal);color:var(--seal);background:var(--seal-soft)}
+.lcover{position:fixed;inset:0;z-index:45;background:rgba(20,16,10,.55);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
+.lcover.hidden{display:none}
+.lc-card{background:var(--paper);color:var(--ink);border-radius:20px;max-width:560px;width:100%;padding:26px 22px 22px;text-align:center;border-top:10px solid var(--lc);box-shadow:0 16px 40px rgba(0,0,0,.25)}
+.lc-top{font-size:.8rem;font-weight:800;color:var(--sub)}
+.lc-num{font-size:4.4rem;font-weight:900;line-height:1;color:var(--lc);margin:6px 0 2px}
+.lc-title{font-size:1.6rem;font-weight:900;margin:2px 0 10px}
+.lc-meta{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.lc-meta span{border:1px solid var(--line2);border-radius:999px;padding:3px 12px;font-weight:800;font-size:.88rem}
+.lc-meta .ev{background:var(--seal);border-color:var(--seal);color:#fff}
+.lc-todo{display:flex;flex-direction:column;gap:8px;margin:16px 0 12px;text-align:left}
+.lc-todo div{background:var(--bg);border-radius:12px;padding:10px 12px;font-weight:700;font-size:.95rem;border-left:5px solid var(--lc)}
+.lc-road{display:flex;gap:6px;justify-content:center;margin:4px 0 16px}
+.lc-road span{min-width:62px;padding:4px 8px;border-radius:8px;border:1px solid var(--line2);color:var(--sub);font-weight:800;font-size:.82rem}
+.lc-road span.done{background:var(--jade-soft);border-color:var(--jade-soft);color:var(--jade)}
+.lc-road span.on{background:var(--lc);border-color:var(--lc);color:#fff}
 .steps{max-width:1100px;margin:0 auto;padding:0 16px 10px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
 .steps::-webkit-scrollbar{display:none}
 .step-btn{flex:0 0 auto;border:1px solid var(--line);background:var(--bg);color:var(--sub);border-radius:999px;padding:6px 14px;font-size:.88rem;font-weight:700;display:flex;gap:6px;align-items:center}
@@ -158,8 +176,9 @@ textarea.in{min-height:70px;resize:vertical}
 .traplog{background:var(--gold-soft);border-radius:10px;padding:10px 12px;font-size:.92rem}
 
 .cflow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-.cflow div{background:var(--bg);border-radius:12px;padding:10px;font-size:.88rem}
-.cflow b{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--jade);color:#fff;margin-right:6px;font-size:.8rem}
+.cflow div{background:var(--bg);border-radius:12px;padding:12px;font-size:.9rem;line-height:1.6;word-break:keep-all}
+.cflow div > b:first-child{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--jade);color:#fff;margin:0 0 8px;font-size:.85rem}
+.cflow div b:not(:first-child){color:var(--jade);font-weight:800}
 .cblock{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:var(--paper)}
 .exbox{border:2px dashed var(--line);border-radius:14px;padding:10px 14px;margin:0 0 14px;background:var(--bg)}
 .exbox summary{cursor:pointer;font-weight:800}
@@ -248,6 +267,7 @@ table.ex td{padding:6px 10px;border:1px solid var(--line);background:#fff}
       <button id="teacherBtn" class="btn ghost sm" type="button">교사 도구</button>
     </div>
   </div>
+  <nav class="lessons" id="lessons" aria-label="차시"></nav>
   <nav class="steps" id="steps" aria-label="활동 단계"></nav>
 </header>
 
@@ -284,11 +304,12 @@ table.ex td{padding:6px 10px;border:1px solid var(--line);background:#fff}
       <span class="pill p-blue">1단계</span>
       <h2>나만의 테마를 정하고 부수 2개 고르기</h2>
       <p class="lead">내가 좋아하는 것과 이어지는 부수를 고르면 카드가 훨씬 재미있어져요.</p>
-      <div class="grid2" style="grid-template-columns:repeat(3,1fr)">
+      <div class="grid2" style="grid-template-columns:1fr 1fr 2fr">
         <div><label class="f" for="stClass">반</label><input class="in" id="stClass" inputmode="numeric" placeholder="예: 2"></div>
         <div><label class="f" for="stNo">번호</label><input class="in" id="stNo" inputmode="numeric" placeholder="예: 15"></div>
-        <div><label class="f" for="stName">이름</label><input class="in" id="stName" placeholder="이름"></div>
+        <div><label class="f" for="stNick">별명</label><input class="in" id="stNick" maxlength="10" placeholder="예: 한자탐정" autocomplete="off"><div class="muted" id="nickMsg" style="font-size:.82rem;margin-top:3px"></div></div>
       </div>
+      <p class="muted" style="margin:6px 0 0">🔒 개인정보 보호를 위해 진짜 이름 대신 <b>별명</b>을 써요. 욕설·친구를 놀리는 말·이상한 말은 쓸 수 없어요. (한글·영어·숫자 2~10글자)</p>
     </div>
     <div class="card">
       <h3>① 테마 고르기</h3>
@@ -387,7 +408,7 @@ table.ex td{padding:6px 10px;border:1px solid var(--line);background:#fff}
     <div class="card">
       <h3>캔바에서는 이 순서로!</h3>
       <div class="cflow">
-        <div><b>1</b>아래 [캔바 열기] → 왼쪽 <b>[수업]</b> → 「한문 부수 도감」 <b>과제</b>를 누르면 내 디자인이 생겨요 (제목에 반·번호·이름)</div>
+        <div><b>1</b>아래 [캔바 열기] → 왼쪽 <b>[수업]</b> → 「한문 부수 도감」 <b>과제</b>를 누르면 내 디자인이 생겨요 (제목에 반·번호)</div>
         <div><b>2</b><b>1쪽 표지</b>: 이름, 테마, 이유, 부수 2개 (5분) · <b>2쪽 예시</b>(사람 인 亻)를 보고 방법 익히기</div>
         <div><b>3</b><b>카드 1~2쪽</b>: 한 쪽에 부수 1개씩! 회색 글자를 지우고 아래 글을 붙여 넣기</div>
         <div><b>4</b>큰 부수 글자 위에 [요소]에서 찾은 그림을 얹어 꾸미기 (카드당 8분)</div>
@@ -429,7 +450,7 @@ table.ex td{padding:6px 10px;border:1px solid var(--line);background:#fff}
     </div>
     <div class="card send" id="sendCard">
       <h3>📮 선생님께 탐구 노트 보내기</h3>
-      <p class="muted" style="margin:0 0 8px">반·번호·이름과 탐구 노트(부수 2개), 캐릭터 설계, 착각한 한자, 성찰이 선생님 구글 시트로 전달돼요. <b>고친 뒤 다시 보내면 새 내용으로 바뀌어요.</b></p>
+      <p class="muted" style="margin:0 0 8px">반·번호와 탐구 노트(부수 2개), 캐릭터 설계, 착각한 한자, 성찰이 선생님 구글 시트로 전달돼요. <b>고친 뒤 다시 보내면 새 내용으로 바뀌어요.</b></p>
       <div id="sendWho" class="callout gold" style="margin:0 0 10px"></div>
       <button class="btn seal" type="button" id="sendBtn" style="font-size:1.05rem;padding:12px 22px">📮 선생님께 보내기</button>
       <div id="sendMsg" style="margin-top:8px"></div>
@@ -525,6 +546,9 @@ table.ex td{padding:6px 10px;border:1px solid var(--line);background:#fff}
   <div class="cchips" id="chatChips"></div>
   <form class="chatin" id="chatForm" autocomplete="off"><input id="chatInput" placeholder="여기에 내 생각을 써요" aria-label="도우미에게 보낼 말"><button class="btn seal sm" type="submit">보내기</button></form>
 </section>
+
+<!-- 차시 표지 -->
+<div class="lcover hidden" id="lcover" role="dialog" aria-modal="true" aria-label="차시 표지"><div class="lc-card" id="lcCard"></div></div>
 
 <div class="toast hidden" id="toast" role="status"></div>
 
@@ -737,11 +761,12 @@ function blankNote(){
     word:{h:'',r:'',m:''},link:{h:'',why:''},src:[],compared:false,
     char:{name:'',intro:'',idea:'',color:0}};
 }
-let S = {step:0,quiz:{},student:{cls:'',no:'',name:''},theme:{id:'',title:'',why:''},
+let S = {step:0,quiz:{},student:{cls:'',no:'',name:'',nick:''},theme:{id:'',title:'',why:''},
   rads:[],custom:{},notes:{},active:0,traps:[],trapNote:'',ref1:'',ref2:'',pledge:false,coverColor:0};
 function load(){
   try { const raw = localStorage.getItem(KEY); if (raw) { const o = JSON.parse(raw); S = Object.assign(S, o); } } catch(e){}
   if (S.rads && S.rads.length > NRAD) S.rads = S.rads.slice(0, NRAD);
+  if (S.student && S.student.name){ S.student.name = ''; save(); } // 예전에 저장된 이름도 지움
 }
 let saveT = null;
 function save(){
@@ -853,7 +878,64 @@ function stepDone(i){
 function go(i){
   if (i < 0 || i >= STEPS.length) return;
   if ((i === 2 || i === 3 || i === 4) && S.rads.length < NRAD){ toast('먼저 부수 2개를 골라 주세요.'); i = 1; }
+  const from = S.step;
+  if (i === 5) S.curLesson = 4; else if (i <= 1) S.curLesson = 1; else if (i === 2) S.curLesson = 2; else if (i === 3 || (i === 4 && (S.curLesson || 0) < 3)) S.curLesson = 3;
   S.step = i; save(); renderAll(); window.scrollTo({top:0,behavior:'smooth'});
+  // 다음 차시로 넘어갈 때 차시 표지를 한 번 보여 줌
+  if (i === from + 1){ const n = i === 2 ? 2 : (i === 3 ? 3 : 0); if (n && !(S.seenLC && S.seenLC[n])) showLesson(n); }
+}
+
+/* ================= 차시 표지 ================= */
+const LESSONS = [
+  {n:1, d:'11월 11일 (수)', t:'부수 탐정이 되자!', c:'var(--seal)', start:0, ev:'', todo:['① 탐정 훈련 — 진짜 부수를 맞혀요', '② 테마·부수 — 반·번호·별명, 나만의 테마, 부수 2개', '사전 연습 — 가족 한자 1개를 찾아봐요']},
+  {n:2, d:'11월 18일 (수)', t:'부수 탐정 탐구 노트', c:'var(--gold)', start:2, ev:'★ 평가: 자료의 적절성', todo:['③ 탐구 노트 — 부수 2개 모두 7/7 채우기', '막히면 🔍 부수 탐정 도우미에게 물어봐요', '📮 선생님께 보내기 — 다음 주(11/25)는 수업이 없어요!']},
+  {n:3, d:'12월 2일 (수)', t:'부수를 캐릭터로!', c:'var(--jade)', start:3, ev:'', todo:['④ 캐릭터 설계 — 이름·소개·그림 아이디어', '⑤ 캔바로 출발 — 캔바 [수업] → 과제 열기', '표지 + 카드 1 만들기']},
+  {n:4, d:'12월 9일 (수)', t:'카드뉴스 완성 · 제출', c:'var(--blue)', start:4, ev:'★ 평가: 내용 구성력 · 표현력', todo:['⑤ 캔바 — 카드 2 완성, 예시 쪽 삭제', '캔바 과제에서 [제출] → 제출됨 확인', '⑥ 점검·제출 — 성찰 쓰고 📮 선생님께 보내기']}
+];
+function curLesson(){ if (S.curLesson) return S.curLesson; return S.step <= 1 ? 1 : (S.step === 2 ? 2 : (S.step === 5 ? 4 : 3)); }
+function renderLessons(){
+  const cur = curLesson();
+  $('lessons').innerHTML = LESSONS.map(l => `<button type="button" class="lsn ${l.n===cur?'on':''}" data-lesson="${l.n}">${l.n}차시 · ${l.d.replace(/월 /,'/').replace(/일.*/,'')}</button>`).join('');
+}
+function showLesson(n){
+  const l = LESSONS[n-1]; if (!l) return;
+  $('lcCard').style.setProperty('--lc', l.c);
+  $('lcCard').innerHTML = `<div class="lc-top">1학년 한문 수행평가 · 나만의 부수 캐릭터 카드</div>
+    <div class="lc-num">${l.n}차시</div><div class="lc-title">${esc(l.t)}</div>
+    <div class="lc-meta"><span>📅 ${esc(l.d)}</span>${l.ev ? `<span class="ev">${esc(l.ev)}</span>` : ''}</div>
+    <div class="lc-todo">${l.todo.map(x => `<div>${esc(x)}</div>`).join('')}</div>
+    <div class="lc-road">${LESSONS.map(k => `<span class="${k.n<n?'done':(k.n===n?'on':'')}">${k.n<n?'✓ ':''}${k.n}차시</span>`).join('')}</div>
+    <div class="row" style="justify-content:center;gap:8px"><button type="button" class="btn seal" data-lcstart="${l.n}" style="font-size:1.05rem;padding:12px 26px">${l.n}차시 시작하기 ▶</button><button type="button" class="btn ghost" data-lcclose>닫기</button></div>`;
+  $('lcover').classList.remove('hidden');
+}
+function closeLesson(){ $('lcover').classList.add('hidden'); }
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-lesson]'); if (a && a.classList.contains('lsn')){ showLesson(+a.dataset.lesson); return; }
+  const s = e.target.closest('[data-lcstart]'); if (s){ const n = +s.dataset.lcstart, l = LESSONS[n-1]; S.seenLC = S.seenLC || {}; S.seenLC[n] = 1; closeLesson(); go(l.start); S.curLesson = n; save(); renderLessons(); return; }
+  if (e.target.closest('[data-lcclose]') || e.target.id === 'lcover'){ closeLesson(); }
+});
+
+/* ================= 별명 확인 ================= */
+const BAD_WORDS = ['씨발','시발','씨바','시바','씨빨','쓰발','쉬발','슈발','십새','개새','개색','새끼','새키','쌔끼','병신','븅신','빙신','등신','좆','존나','졸라','존내','지랄','염병','엠창','엄창','애미','애비','느금','니미','닥쳐','꺼져','죽어','죽여','뒤져','디져','자살','살인','섹스','섹시','야동','자지','보지','꼴려','성기','변태','미친','미쳤','또라이','돌아이','찐따','장애','바보','멍청','쓰레기','똥','오줌','방귀','엿먹','틀딱','한남','김치녀','일베','메갈','급식충','맘충','fuck','shit','bitch','sex','porn','dick','pussy','asshole','damn','sibal','ssibal','tlqkf','qudtls','nigg','fck','fxck','wtf'];
+function nickCheck(v){
+  const s = String(v || '').trim();
+  if (!s) return {ok:false, msg:''};
+  if (/[ㄱ-ㅎㅏ-ㅣ]/.test(s)) return {ok:false, msg:'자음·모음만 쓰는 말(ㅋㅋ, ㅎㅎ 등)은 쓸 수 없어요.'};
+  if (!/^[가-힣A-Za-z0-9]+$/.test(s)) return {ok:false, msg:'한글·영어·숫자만 쓸 수 있어요. (띄어쓰기·특수문자 ✕)'};
+  if (s.length < 2) return {ok:false, msg:'별명은 2글자 이상으로 지어요.'};
+  if (s.length > 10) return {ok:false, msg:'별명은 10글자까지예요.'};
+  if (/(.)\1{3,}/.test(s)) return {ok:false, msg:'같은 글자를 너무 많이 반복했어요.'};
+  const z = s.toLowerCase().replace(/[0-9]/g, '');
+  if (BAD_WORDS.some(w => z.includes(w))) return {ok:false, msg:'쓸 수 없는 말이 들어 있어요. 다른 별명을 지어 주세요.'};
+  if (/선생|쌤|교장|교감/.test(s)) return {ok:false, msg:'선생님 호칭은 별명으로 쓸 수 없어요.'};
+  return {ok:true, msg:'좋은 별명이에요! ✓'};
+}
+function renderNick(){
+  const el = $('stNick'), m = $('nickMsg'); if (!el || !m) return;
+  el.readOnly = !!S.nickLocked;
+  if (S.nickLocked){ m.innerHTML = '<span style="color:var(--sub)">🔒 선생님께 보낸 뒤에는 별명을 바꿀 수 없어요. 바꾸려면 선생님께 말해요.</span>'; return; }
+  const r = nickCheck(el.value);
+  m.innerHTML = r.msg ? `<span style="color:${r.ok ? 'var(--jade)' : 'var(--seal)'};font-weight:700">${esc(r.msg)}</span>` : '';
 }
 
 /* ================= STEP 0: QUIZ ================= */
@@ -871,7 +953,7 @@ function renderQuiz(){
 /* ================= STEP 1 ================= */
 let filterMode = 'all';
 function renderStep1(){
-  $('stClass').value = S.student.cls; $('stNo').value = S.student.no; $('stName').value = S.student.name;
+  $('stClass').value = S.student.cls; $('stNo').value = S.student.no; $('stNick').value = S.student.nick || ''; renderNick();
   $('themeTitle').value = S.theme.title; $('themeWhy').value = S.theme.why;
   $('themes').innerHTML = THEMES.map(t => `<button type="button" class="chip ${S.theme.id===t.id?'on':''}" data-theme="${t.id}">${t.ic} ${esc(t.n)}</button>`).join('');
   renderTray(); renderGrid();
@@ -980,7 +1062,7 @@ function renderNote(){
     <div class="muted" id="srcChk"></div>
 
     <div class="row" style="justify-content:flex-end;margin-top:14px">
-      ${S.active < 2 ? `<button type="button" class="btn sm" data-tab="${S.active+1}">다음 부수 (${esc(S.rads[S.active+1])}) ▶</button>` : `<button type="button" class="btn ghost sm" data-go="5">📮 다 썼으면 선생님께 보내기</button> <button type="button" class="btn jade sm" data-go="3">카드 설계도로 ▶</button>`}
+      ${S.active < NRAD - 1 ? `<button type="button" class="btn sm" data-tab="${S.active+1}">다음 부수 (${esc(S.rads[S.active+1])}) ▶</button>` : `<button type="button" class="btn ghost sm" data-go="5">📮 다 썼으면 선생님께 보내기</button> <button type="button" class="btn jade sm" data-go="3">카드 설계도로 ▶</button>`}
     </div>`;
   refreshNoteChecks();
 }
@@ -1042,7 +1124,7 @@ function sheetUrl(){
 }
 function buildPayload(){
   return {
-    key:'busu2026', cls:String(S.student.cls||'').trim(), no:String(S.student.no||'').trim(), name:String(S.student.name||'').trim(),
+    key:'busu2026', cls:String(S.student.cls||'').trim(), no:String(S.student.no||'').trim(), name:nickCheck(S.student.nick).ok ? S.student.nick.trim() : '-', // 이름 대신 별명 (시트의 '이름' 칸에 저장)
     theme:S.theme.title||'', why:S.theme.why||'',
     rads:S.rads.map(rc => {
       const n = note(rc), p = noteProgress(rc);
@@ -1060,9 +1142,9 @@ function buildPayload(){
 }
 function renderSend(){
   const w = $('sendWho'); if (!w) return;
-  const st = S.student, ok = st.cls && st.no && st.name;
-  w.innerHTML = ok ? `보내는 사람: <b>1학년 ${esc(st.cls)}반 ${esc(st.no)}번 ${esc(st.name)}</b> · 부수 ${S.rads.map(rc => `<span class="hj">${esc(rc)}</span>`).join(' ') || '없음'}`
-    : '먼저 <b>2번 화면</b>에서 반·번호·이름을 써 주세요. <button type="button" class="btn ghost sm" data-go="1">이름 쓰러 가기</button>';
+  const st = S.student, ok = st.cls && st.no && nickCheck(st.nick).ok;
+  w.innerHTML = ok ? `보내는 사람: <b>1학년 ${esc(st.cls)}반 ${esc(st.no)}번 · 별명 ${esc(st.nick)}</b> <span class="muted">(진짜 이름은 보내지 않아요)</span> · 부수 ${S.rads.map(rc => `<span class="hj">${esc(rc)}</span>`).join(' ') || '없음'}`
+    : '먼저 <b>2번 화면</b>에서 반·번호·별명을 써 주세요. <button type="button" class="btn ghost sm" data-go="1">반·번호·별명 쓰러 가기</button>';
   const m = $('sendMsg');
   if (m && S.sentAt && !m.dataset.live) m.innerHTML = `<span class="muted">마지막으로 보낸 시각: ${esc(S.sentAt)}</span>`;
 }
@@ -1070,7 +1152,8 @@ async function sendNote(){
   const m = $('sendMsg'), b = $('sendBtn'), st = S.student;
   const url = sheetUrl();
   if (!url){ m.innerHTML = '<span style="color:var(--seal);font-weight:700">선생님 시트 주소가 아직 연결되지 않았어요. 선생님께 알려 주세요.</span>'; return; }
-  if (!(st.cls && st.no && st.name)){ m.innerHTML = '<span style="color:var(--seal);font-weight:700">반·번호·이름을 먼저 써 주세요.</span>'; return; }
+  if (!(st.cls && st.no)){ m.innerHTML = '<span style="color:var(--seal);font-weight:700">반·번호를 먼저 써 주세요.</span>'; return; }
+  { const nc = nickCheck(st.nick); if (!nc.ok){ m.innerHTML = `<span style="color:var(--seal);font-weight:700">별명을 확인해 주세요. ${esc(nc.msg || '2번 화면에서 별명을 써 주세요.')}</span>`; return; } }
   if (S.rads.length < NRAD){ m.innerHTML = '<span style="color:var(--seal);font-weight:700">부수 2개를 먼저 골라 주세요.</span>'; return; }
   const body = JSON.stringify(buildPayload());
   b.disabled = true; m.dataset.live = '1'; m.innerHTML = '<span class="muted">보내는 중…</span>';
@@ -1084,7 +1167,7 @@ async function sendNote(){
   }
   b.disabled = false;
   if (ok){
-    const now = new Date(); S.sentAt = now.toLocaleString('ko-KR'); save();
+    const now = new Date(); S.sentAt = now.toLocaleString('ko-KR'); S.nickLocked = true; save();
     m.innerHTML = `<span style="color:var(--jade);font-weight:800">보냈어요 ✓</span> <span class="muted">${esc(S.sentAt)}${unsure ? ' · 확인 응답은 못 받았어요. 걱정되면 한 번 더 눌러도 괜찮아요.' : ''}</span>`;
     toast('선생님께 보냈어요!');
   } else {
@@ -1169,7 +1252,7 @@ function renderCanva(){
     : '<div class="callout gold" style="margin-bottom:0">아직 덜 된 칸이 있어요. 캔바로 가도 되지만, 빈 칸은 카드에서도 비어 있게 돼요. <button type="button" class="btn ghost sm" data-go="2">탐구 노트로</button> <button type="button" class="btn ghost sm" data-go="3">캐릭터 설계로</button></div>';
   if (!all3){ $('copyBlocks').innerHTML = '<p class="muted">부수 2개를 고르면 여기에 글이 만들어져요.</p>'; }
   else {
-    const cover = `${S.student.name || '○○○'}의 부수 도감\n1학년 ${S.student.cls||'_'}반 ${S.student.no||'_'}번\n나의 테마: ${S.theme.title || '-'}\n고른 이유: ${S.theme.why || '-'}\n${S.rads.join('  ')}`;
+    const cover = `${nickCheck(S.student.nick).ok ? S.student.nick : '(별명)'}의 부수 도감\n1학년 ${S.student.cls||'_'}반 ${S.student.no||'_'}번\n나의 테마: ${S.theme.title || '-'}\n고른 이유: ${S.theme.why || '-'}\n${S.rads.join('  ')}`;
     const blocks = [{t:'1쪽 · 표지', body:cover, kw:''}].concat(S.rads.map((rc,i) => ({t:`카드 ${i+1} · ${rc}`, body:cardText(rc), kw:CANVA_KW[rc] ? `큰 부수 글자: ${rc} (그대로 크게) · [요소] 검색어: ${CANVA_KW[rc]}` : `큰 부수 글자: ${rc}`})));
     $('copyBlocks').innerHTML = blocks.map((b,i) => `<div class="cblock"><div class="row" style="justify-content:space-between"><b>${esc(b.t)}</b><button type="button" class="btn sm" data-copy="${i}">복사</button></div><pre id="cb${i}">${esc(b.body)}</pre>${b.kw?`<div class="kw">${esc(b.kw)}</div>`:''}</div>`).join('');
   }
@@ -1181,7 +1264,7 @@ function renderCanva(){
 function renderDeck(){
   if (S.rads.length < NRAD) return;
   const cc = COLORS[S.coverColor] || COLORS[0];
-  const who = S.student.name ? esc(S.student.name) : '○○○';
+  const who = nickCheck(S.student.nick).ok ? esc(S.student.nick) : '(별명)';
   let h = `<div class="pc cover" style="--pc:${cc.pc};--pcs:${cc.pcs}"><div class="muted" style="color:#5d574c">${esc(S.student.cls||'_')}반 ${esc(S.student.no||'_')}번</div><div class="ttl">${who}의 부수 도감</div><div class="rads">${S.rads.map(esc).join('')}</div><div style="font-weight:700">테마: ${esc(S.theme.title||'나의 테마')}</div><div class="link">${esc(S.theme.why||'테마를 고른 이유')}</div></div>`;
   S.rads.forEach(rc => {
     const n = note(rc), c = n.char, col = COLORS[c.color] || COLORS[0];
@@ -1205,7 +1288,7 @@ function renderCheck(){
   const progs = all3 ? S.rads.map(noteProgress) : [];
   const forbidOk = all3 && S.rads.every(rc => !FORBIDDEN.some(f => f.c === rc));
   const items = [
-    ['학번과 이름을 썼어요', !!(S.student.cls && S.student.no && S.student.name.trim())],
+    ['반·번호·별명을 썼어요', !!(S.student.cls && S.student.no && nickCheck(S.student.nick).ok)],
     ['나의 테마와 고른 이유를 썼어요', !!(S.theme.title.trim() && S.theme.why.trim())],
     ['금지 부수 없이 부수 2개를 골랐어요', forbidOk],
     ['부수 명칭·획수·본래 의미를 모두 썼어요', all3 && progs.every(p => p.items[0] && p.items[1] && p.items[2])],
@@ -1249,7 +1332,7 @@ async function exportPng(){
 
   text('1학년 한문 수행평가 · 나만의 부수 카드 만들기 (1단계)', P, `700 22px ${SANS}`, C.seal, 34);
   text('부수 탐정 탐구 노트', P, `800 44px ${SANS}`, C.ink, 60);
-  text(`1학년 ${S.student.cls||'_'}반 ${S.student.no||'_'}번  ${S.student.name||'이름 미입력'}`, P, `700 26px ${SANS}`, C.ink, 40);
+  text(`1학년 ${S.student.cls||'_'}반 ${S.student.no||'_'}번${nickCheck(S.student.nick).ok ? ' · 별명 ' + S.student.nick : ''}`, P, `700 26px ${SANS}`, C.ink, 40);
   y += 8; rect(P, y, cw, 2, C.ink); y += 18;
   text(`나의 테마: ${S.theme.title||'-'}`, P, `700 26px ${SANS}`, C.ink, 38);
   text(`고른 이유: ${S.theme.why||'-'}`, P, `400 23px ${SANS}`, C.sub, 34);
@@ -1309,7 +1392,7 @@ async function exportPng(){
   });
   const url = cv.toDataURL('image/png');
   $('exportImg').src = url;
-  const fn = `부수탐구노트_${S.student.cls||''}반${S.student.no||''}번_${(S.student.name||'이름').replace(/\s+/g,'')}.png`;
+  const fn = `부수탐구노트_${S.student.cls||''}반${S.student.no||''}번.png`;
   $('exportDl').href = url; $('exportDl').download = fn;
   $('exportModal').classList.remove('hidden');
 }
@@ -1345,6 +1428,7 @@ function renderAll(){
   if (S.step === 3) renderDesign();
   if (S.step === 4) renderCanva();
   if (S.step === 5) renderCheck();
+  renderLessons();
 }
 
 document.addEventListener('click', e => {
@@ -1419,7 +1503,7 @@ document.addEventListener('input', e => {
   const el = e.target;
   if (el.id === 'stClass'){ S.student.cls = el.value; save(); return; }
   if (el.id === 'stNo'){ S.student.no = el.value; save(); return; }
-  if (el.id === 'stName'){ S.student.name = el.value; save(); return; }
+  if (el.id === 'stNick'){ if (S.nickLocked) return; S.student.nick = el.value.trim(); save(); renderNick(); return; }
   if (el.id === 'themeTitle'){ S.theme.title = el.value; save(); renderSteps(); return; }
   if (el.id === 'themeWhy'){ S.theme.why = el.value; save(); return; }
   if (el.id === 'radSearch'){ renderGrid(); return; }
@@ -1846,6 +1930,7 @@ Object.values(S.custom||{}).forEach(r => NAME_OF[r.c] = r.n);
 tLeft = +$('timerPreset').value; tUpdate();
 renderAll();
 chatInit();
+if (S.step === 0 && !(S.seenLC && S.seenLC[1])) showLesson(1);
 })();
 </script>
 </body>
