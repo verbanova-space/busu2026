@@ -209,6 +209,27 @@ table.ex td{padding:6px 10px;border:1px solid var(--line);background:#fff}
   .tray{grid-template-columns:repeat(3,1fr);gap:6px}
   .slot .hj{font-size:2rem}
 }
+/* 부수 탐정 도우미 (규칙형 챗봇) */
+.chatfab{position:fixed;right:16px;bottom:78px;z-index:30;border:0;border-radius:999px;padding:12px 18px;background:var(--seal);color:#fff;font-weight:800;font-size:.95rem;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.chatpanel{position:fixed;right:16px;bottom:78px;z-index:35;width:min(420px,calc(100vw - 32px));height:min(620px,calc(100vh - 110px));display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--line2);border-radius:16px;box-shadow:0 12px 36px rgba(0,0,0,.22);overflow:hidden}
+.chatpanel.hidden,.chatfab.hidden{display:none}
+.chathead{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:flex-start}
+.chathead b{display:block;font-size:1rem}
+.chathead small{display:block;color:var(--sub);font-size:.76rem;line-height:1.4}
+.chatlog{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
+.cmsg{max-width:88%;padding:9px 12px;border-radius:14px;font-size:.92rem;line-height:1.55;word-break:keep-all;overflow-wrap:anywhere}
+.cmsg.bot{background:var(--paper);border:1px solid var(--line);align-self:flex-start;border-top-left-radius:4px}
+.cmsg.me{background:var(--seal);color:#fff;align-self:flex-end;border-top-right-radius:4px}
+.cmsg .hj{font-size:1.15em}
+.cmsg .ans{display:block;margin-top:6px;padding:7px 9px;border-radius:10px;background:var(--jade-soft)}
+.cmsg .warn{display:block;margin-top:6px;padding:7px 9px;border-radius:10px;background:var(--seal-soft)}
+.cchips{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px 0;background:var(--paper)}
+.cchips:empty{display:none}
+.cchips button{border:1px solid var(--line2);background:var(--bg);color:var(--ink);border-radius:999px;padding:6px 12px;font-size:.86rem;font-weight:700;min-height:34px}
+.cchips button.hjc{font-family:'Noto Serif KR',serif;font-weight:900;font-size:1.05rem}
+.chatin{display:flex;gap:6px;padding:8px 12px 12px;background:var(--paper)}
+.chatin input{flex:1;min-width:0;border:1px solid var(--line2);border-radius:10px;padding:9px 11px;font-size:.95rem;background:var(--bg);color:var(--ink)}
+@media (max-width:640px){.chatpanel{left:8px;right:8px;bottom:8px;top:8px;width:auto;height:auto}}
 </style>
 </head>
 <body>
@@ -490,6 +511,19 @@ table.ex td{padding:6px 10px;border:1px solid var(--line);background:#fff}
     <img id="exportImg" alt="탐구 노트 미리보기">
   </div>
 </div>
+
+<!-- 부수 탐정 도우미 -->
+<button class="chatfab" type="button" id="chatFab" aria-controls="chatPanel">🔍 부수 탐정 도우미</button>
+<section class="chatpanel hidden" id="chatPanel" role="dialog" aria-label="부수 탐정 도우미">
+  <div class="chathead">
+    <div style="flex:1"><b>🔍 부수 탐정 도우미</b><small>선생님이 만든 도우미예요 (생성형 AI 아님) · 바로 답을 알려 주지 않아요. <b style="display:inline;font-size:inherit">내 생각을 먼저 말하면</b> 답이 열려요!</small></div>
+    <button class="btn ghost sm" type="button" id="chatRestart">처음</button>
+    <button class="btn ghost sm" type="button" id="chatClose">닫기</button>
+  </div>
+  <div class="chatlog" id="chatLog" aria-live="polite"></div>
+  <div class="cchips" id="chatChips"></div>
+  <form class="chatin" id="chatForm" autocomplete="off"><input id="chatInput" placeholder="여기에 내 생각을 써요" aria-label="도우미에게 보낼 말"><button class="btn seal sm" type="submit">보내기</button></form>
+</section>
 
 <div class="toast hidden" id="toast" role="status"></div>
 
@@ -915,6 +949,7 @@ function renderNote(){
 
     <div class="sec-title"><h3>연결 문장: 왜 이 한자에 이 부수가 들어 있을까?</h3></div>
     <div class="linkhow"><div><b>①</b> 가족 한자 하나 고르고 <b>뜻</b> 떠올리기<span>蹴 = 차다</span></div><div><b>②</b> 부수의 <b>뜻</b> 떠올리기<span>足 = 발</span></div><div><b>③</b> 두 뜻을 이어 <b>까닭</b> 쓰기<span>차는 일은 발로 하니까!</span></div></div>
+    <div style="margin:0 0 10px"><button class="btn ghost sm" type="button" data-chatopen="${esc(S.rads[S.active])}">🔍 막히면 부수 탐정 도우미에게 물어보기</button></div>
     <details class="exbox whybox"><summary>🔎 까닭이 안 떠올라요? 까닭 찾는 법 보기</summary>
       <ol>
         <li>사전에서 한자를 눌러 <b>뜻</b>을 읽어요. <b>[자원·글자 풀이]</b>가 있으면 꼭 읽기<br><span class="muted"><span class="hj">蹴</span> = <span class="hj">足</span>(뜻을 맡음) + <span class="hj">就</span>(소리를 맡음) → <b>부수 쪽이 뜻의 힌트!</b></span></li>
@@ -1426,6 +1461,375 @@ function refreshLinkOptions(){
   sel.innerHTML = '<option value="">고르기</option>' + opts.map(c => `<option value="${esc(c)}" ${n.link.h===c?'selected':''}>${esc(c)}</option>`).join('');
 }
 
+/* ================= 부수 탐정 도우미 (규칙형 챗봇 · 생성형 AI 아님) ================= */
+// o: 본래 의미, k: 확인용 핵심어, p: 주로 들어가는 자리
+// f: [한자, 뜻 음, 낱말 한자, 낱말 읽기, 낱말 뜻, 연결 까닭(“~ 때문이다” 앞에 들어갈 말)]
+const HELP = {
+'刀':{o:'칼의 모양을 본뜬 글자예요. 자르기·나누기·새기기와 관련 있어요.',k:'칼|자르|잘라|베|나누|새기',p:'오른쪽',f:[['分','나눌 분','分類','분류','종류에 따라 나눔','칼로 물건을 나누기'],['切','끊을 절','切斷','절단','끊어서 자름','칼로 끊어 내기'],['刻','새길 각','彫刻','조각','재료를 새기거나 깎아 모양을 만듦','칼로 새기기']]},
+'力':{o:'팔에 힘을 주어 근육이 불룩해진 모양(또는 밭 가는 쟁기)이에요. 힘·애쓰기와 관련 있어요.',k:'힘|근육|애쓰|노력|세',p:'오른쪽이나 아래',f:[['動','움직일 동','運動','운동','몸을 움직이는 일','움직이려면 힘이 필요하기'],['勇','날랠 용','勇氣','용기','씩씩하고 굳센 기운','용감하게 나서려면 힘(굳센 마음)이 필요하기'],['助','도울 조','助言','조언','도움이 되도록 말로 거듦','남을 도우려면 힘을 보태야 하기']]},
+'又':{o:'오른손 모양을 본뜬 글자예요. 손으로 하는 일과 관련 있어요.',k:'손|오른손|잡',p:'오른쪽이나 아래',f:[['友','벗 우','友情','우정','친구 사이의 정','친구끼리 손을 맞잡기'],['取','가질 취','取得','취득','자기 것으로 가짐','손으로 잡아서 갖기'],['受','받을 수','受賞','수상','상을 받음','손으로 건네받기']]},
+'囗':{o:'사방을 둘러싼 울타리 모양이에요. 둘레·에워싸기와 관련 있어요.',k:'둘러|울타리|둘레|에워|테두리|감싸|담',p:'바깥 둘레',f:[['國','나라 국','國家','국가','나라','나라는 국경으로 둘러싸여 있기'],['園','동산 원','公園','공원','여러 사람이 쉬고 놀 수 있게 만든 동산','동산(정원)은 울타리로 둘러싸여 있기'],['圖','그림 도','地圖','지도','땅의 모습을 줄여 그린 그림','그림은 테두리 안에 그리기']]},
+'土':{o:'땅 위에 흙이 쌓인 모양이에요. 흙·땅과 관련 있어요.',k:'흙|땅',p:'왼쪽이나 아래',f:[['地','땅 지','地球','지구','우리가 사는 별','땅은 흙으로 되어 있기'],['場','마당 장','運動場','운동장','운동할 수 있게 만든 넓은 마당','마당은 흙으로 된 넓은 땅이기'],['城','성 성','山城','산성','산 위에 쌓은 성','옛날 성은 흙을 쌓아 만들었기']]},
+'夕':{o:'초승달 모양이에요. 저녁·밤과 관련 있어요.',k:'저녁|밤|달|어두',p:'위나 아래',f:[['夜','밤 야','夜景','야경','밤의 경치','밤은 저녁 뒤에 오는 어두운 때이기'],['夢','꿈 몽','惡夢','악몽','무서운 꿈','꿈은 밤에 자면서 꾸기'],['多','많을 다','多數','다수','수가 많음','저녁(날)이 겹겹이 쌓이면 많아지기']]},
+'大':{o:'사람이 팔다리를 크게 벌리고 선 모양이에요. 크다·사람과 관련 있어요.',k:'크|큰|사람|팔',p:'위나 아래',f:[['天','하늘 천','天地','천지','하늘과 땅','사람(大) 머리 위에 있는 큰 것이 하늘이기'],['太','클 태','太陽','태양','해','大보다 더 큰 것을 나타내기'],['夫','지아비 부','農夫','농부','농사짓는 사람','다 자란 큰 사람(어른)을 나타내기']]},
+'女':{o:'여자가 무릎을 꿇고 앉은 모양이에요. 여자·여성과 관련 있어요.',k:'여자|여성|엄마|어머니|딸|누나|언니',p:'왼쪽',f:[['妹','누이 매','姉妹','자매','언니와 여동생','여동생은 여자이기'],['婦','며느리 부','夫婦','부부','남편과 아내','아내(며느리)는 여자이기'],['好','좋을 호','好感','호감','좋게 여기는 마음','여자(어머니)가 아이를 안고 있는 모습이 좋기']]},
+'子':{o:'두 팔을 벌린 아기 모양이에요. 아이·자식과 관련 있어요.',k:'아이|아기|자식|아들|어린',p:'왼쪽이나 아래',f:[['孫','손자 손','子孫','자손','자식과 손자','손자는 아이의 아이이기'],['學','배울 학','學校','학교','학생이 배우는 곳','아이가 배우기'],['孝','효도 효','孝道','효도','부모를 잘 섬기는 일','자식(아이)이 부모를 업고 섬기는 모습이기']]},
+'宀':{o:'지붕이 덮인 집 모양이에요. 집·건물·방과 관련 있어요.',k:'집|지붕|건물|방',p:'위',f:[['家','집 가','家族','가족','한집에 사는 사람들','가족은 한집에 살기'],['室','집 실','敎室','교실','수업을 하는 방','방은 집 안에 있기'],['安','편안 안','安全','안전','위험하지 않음','집 안에 있으면 편안하기']]},
+'寸':{o:'손목에 맥 짚는 자리를 표시한 모양이에요. 손·마디·법도와 관련 있어요.',k:'손|마디|법',p:'오른쪽이나 아래',f:[['射','쏠 사','發射','발사','활이나 총을 쏨','손으로 활을 당겨 쏘기'],['尊','높을 존','尊敬','존경','높이 받들어 공경함','두 손으로 술통을 높이 받들기'],['導','인도할 도','指導','지도','가르쳐 이끎','손으로 이끌어 길을 안내하기']]},
+'山':{o:'봉우리 세 개가 솟은 산 모양이에요. 산과 관련 있어요.',k:'산|봉우리|높',p:'위나 왼쪽',f:[['島','섬 도','獨島','독도','우리나라 동쪽 끝의 섬','섬은 바다 위로 솟은 산이기'],['岩','바위 암','岩石','암석','바위','바위는 산에 있는 큰 돌이기'],['峰','봉우리 봉','最高峰','최고봉','가장 높은 봉우리','봉우리는 산의 꼭대기이기']]},
+'巾':{o:'막대에 걸린 천(수건) 모양이에요. 천·옷감과 관련 있어요.',k:'천|수건|옷감|헝겊',p:'아래나 왼쪽',f:[['布','베 포','毛布','모포','털로 짠 담요','베는 천의 한 종류이기'],['帽','모자 모','帽子','모자','머리에 쓰는 것','모자는 천으로 만들기'],['席','자리 석','座席','좌석','앉는 자리','옛날에는 천(돗자리)을 깔아 자리를 만들었기']]},
+'广':{o:'한쪽 벽에 기대어 지은 집 모양이에요. 집·건물과 관련 있어요.',k:'집|건물|지붕',p:'위와 왼쪽을 감싸는 자리',f:[['店','가게 점','書店','서점','책을 파는 가게','가게는 건물 안에 있기'],['庫','곳집 고','倉庫','창고','물건을 넣어 두는 건물','창고는 물건을 보관하는 건물이기'],['庭','뜰 정','家庭','가정','한 가족이 사는 집','뜰은 집에 딸린 마당이기']]},
+'弓':{o:'활 모양이에요. 활·당기기와 관련 있어요.',k:'활|당기|쏘',p:'왼쪽',f:[['引','끌 인','引力','인력','끌어당기는 힘','활시위를 끌어당기기'],['強','강할 강','強力','강력','힘이나 영향이 강함','튼튼하고 센 활을 나타내기'],['張','베풀 장','主張','주장','자기 생각을 내세움','활시위를 팽팽하게 당겨 넓히기']]},
+'彳':{o:'길(사거리)의 왼쪽 반을 본뜬 모양이에요. 길·걷기와 관련 있어요.',k:'길|걷|걸|가',p:'왼쪽',f:[['往','갈 왕','往復','왕복','갔다가 돌아옴','가려면 길을 걸어야 하기'],['徒','걸을 도','徒步','도보','걸어서 감','길을 걸어가기'],['待','기다릴 대','期待','기대','바라고 기다림','길에서 사람을 기다리기']]},
+'心':{o:'심장 모양이에요. 마음·감정·생각과 관련 있어요.',k:'마음|심장|감정|생각|느낌|기분',p:'왼쪽(忄)이나 아래',f:[['思','생각 사','思考','사고','생각하고 궁리함','생각은 마음으로 하기'],['愛','사랑 애','愛情','애정','사랑하는 마음','사랑은 마음으로 하기'],['情','뜻 정','感情','감정','기쁨·슬픔 같은 느낌','감정은 마음에서 생기기']]},
+'戈':{o:'긴 자루 끝에 날이 달린 창 모양이에요. 무기·싸움과 관련 있어요.',k:'창|무기|싸움|싸우|전쟁|지키',p:'오른쪽',f:[['戰','싸움 전','戰爭','전쟁','나라끼리 무기로 싸움','싸울 때 창을 들기'],['戒','경계할 계','警戒','경계','잘못되지 않게 조심함','두 손으로 창을 들고 지키기'],['成','이룰 성','成功','성공','목적을 이룸','창을 들고 싸워 뜻을 이루기']]},
+'手':{o:'손가락을 편 손 모양이에요. 손·손으로 하는 일과 관련 있어요.',k:'손|손가락|잡|던지|치',p:'왼쪽(扌)',f:[['打','칠 타','打者','타자','야구에서 공을 치는 선수','손으로 치기'],['投','던질 투','投手','투수','야구에서 공을 던지는 선수','손으로 던지기'],['指','가리킬 지','指紋','지문','손가락 끝의 무늬','손가락으로 가리키기']]},
+'攴':{o:'손에 막대기를 들고 치는 모양이에요. 치기·시키기와 관련 있어요.',k:'치|막대|때리|두드리|시키|회초리',p:'오른쪽(攵)',f:[['改','고칠 개','改善','개선','나쁜 점을 고쳐 좋게 함','회초리로 쳐서 바르게 고치게 하기'],['敎','가르칠 교','敎育','교육','가르치고 기름','옛날에는 회초리를 들고 가르쳤기'],['放','놓을 방','放學','방학','학교 수업을 쉬는 기간','쳐서 멀리 내보내기(놓아주기)']]},
+'日':{o:'둥근 해 모양이에요. 해·날·시간·밝음과 관련 있어요.',k:'해|날|햇|시간|밝|빛|낮',p:'왼쪽이나 위',f:[['明','밝을 명','明暗','명암','밝음과 어두움','해가 비추면 밝기'],['時','때 시','時間','시간','어떤 때부터 어떤 때까지','해가 움직이는 것을 보고 때를 알기'],['春','봄 춘','立春','입춘','봄이 시작되는 날','봄은 햇볕이 따뜻해지는 계절이기']]},
+'曰':{o:'입에서 말이 나오는 모양이에요. 말하기와 관련 있어요.',k:'말|입|이야기',p:'위나 아래',f:[['書','글 서','敎科書','교과서','학교에서 배우는 책','말을 붓으로 적은 것이 글이기'],['會','모일 회','會議','회의','모여서 의논함','모여서 말을 주고받기']]},
+'月':{o:'초승달 모양이에요. 달·밤·시간(한 달)과 관련 있어요.',k:'달|밤|시간|한달|보름',p:'오른쪽',f:[['朝','아침 조','朝食','조식','아침밥','달이 지고 해가 뜨는 때가 아침이기'],['期','기약할 기','期間','기간','어느 때부터 어느 때까지','달이 차고 기우는 것으로 날을 세기'],['望','바랄 망','希望','희망','앞일을 바람','보름달을 바라보며 소원을 빌기']]},
+'木':{o:'뿌리와 가지가 있는 나무 모양이에요. 나무·식물과 관련 있어요.',k:'나무|식물|목재|숲|가지|뿌리',p:'왼쪽이나 아래',f:[['林','수풀 림','山林','산림','산과 숲','나무가 모이면 수풀이 되기'],['根','뿌리 근','根本','근본','사물의 밑바탕','뿌리는 나무의 아랫부분이기'],['橋','다리 교','陸橋','육교','찻길 위로 사람이 건너게 놓은 다리','옛날 다리는 나무로 만들었기']]},
+'欠':{o:'사람이 입을 크게 벌리고 하품하는 모양이에요. 입 벌리기·숨과 관련 있어요.',k:'입|하품|숨|벌리|소리',p:'오른쪽',f:[['歌','노래 가','歌手','가수','노래를 부르는 사람','노래는 입을 크게 벌리고 부르기'],['歡','기쁠 환','歡呼','환호','기뻐서 크게 소리 지름','기쁘면 입을 크게 벌려 소리치기']]},
+'止':{o:'발(발자국) 모양이에요. 발·멈추기·걷기와 관련 있어요.',k:'발|멈|걷|걸|서',p:'아래나 왼쪽',f:[['步','걸음 보','步道','보도','사람이 걸어 다니는 길','걸음은 발을 번갈아 내딛는 것이기'],['正','바를 정','正直','정직','거짓 없이 바름','목표를 향해 발이 곧게 나아가기'],['歸','돌아갈 귀','歸國','귀국','자기 나라로 돌아옴','발로 걸어서 돌아가기']]},
+'水':{o:'물이 흐르는 모양이에요. 물·강·바다와 관련 있어요.',k:'물|강|바다|흐르|액체|씻',p:'왼쪽(氵)이나 아래',f:[['海','바다 해','海洋','해양','넓고 큰 바다','바다는 물로 가득하기'],['江','강 강','江山','강산','강과 산','강은 물이 흐르는 곳이기'],['洗','씻을 세','洗手','세수','손이나 얼굴을 씻음','물로 씻기']]},
+'火':{o:'불꽃이 타오르는 모양이에요. 불·열과 관련 있어요.',k:'불|뜨거|열|타|더',p:'왼쪽이나 아래(灬)',f:[['熱','더울 열','熱氣','열기','뜨거운 기운','불은 뜨겁기'],['燈','등 등','電燈','전등','전기로 켜는 등','옛날 등은 불을 붙여 밝혔기'],['災','재앙 재','火災','화재','불이 나는 재앙','불이 나면 큰 재앙이 생기기']]},
+'牛':{o:'뿔 달린 소의 머리 모양이에요. 소·가축과 관련 있어요.',k:'소|가축|뿔|목장',p:'왼쪽(牜)',f:[['牧','칠 목','牧場','목장','소나 말을 기르는 곳','소를 기르기'],['物','물건 물','動物','동물','움직이며 사는 생물','옛날에는 소가 가장 귀한 재산(물건)이었기'],['特','특별할 특','特別','특별','보통과 다름','크고 뛰어난 수소를 특별히 여겼기']]},
+'犬':{o:'개가 서 있는 모양이에요. 개·짐승과 관련 있어요.',k:'개|짐승|동물|강아지|사나',p:'왼쪽(犭)',f:[['獸','짐승 수','猛獸','맹수','사나운 짐승','짐승은 개 같은 동물이기'],['犯','범할 범','犯人','범인','죄를 지은 사람','개가 사람에게 덤벼들듯 법을 어기기'],['獨','홀로 독','獨立','독립','남에게 기대지 않고 섬','개는 따로따로 다니는 모습을 보이기']]},
+'玉':{o:'구슬 세 개를 꿴 모양이에요. 구슬·보석과 관련 있어요.',k:'구슬|보석|옥|귀|빛',p:'왼쪽(王)',f:[['珍','보배 진','珍品','진품','귀하고 좋은 물건','보배는 구슬처럼 귀하기'],['球','공 구','野球','야구','공을 치고 달리는 운동','공은 구슬처럼 둥글기'],['現','나타날 현','現在','현재','지금','옥이 빛을 내며 드러나기']]},
+'田':{o:'논밭의 경계가 나뉜 모양이에요. 밭·농사와 관련 있어요.',k:'밭|농사|논|땅|경계',p:'위·아래·왼쪽',f:[['男','사내 남','男子','남자','남성인 사람','밭에서 힘써 일하는 사람이기'],['界','지경 계','世界','세계','온 세상','밭과 밭 사이의 경계를 나타내기'],['畫','그림 화','畫家','화가','그림을 그리는 사람','붓으로 밭의 경계를 긋듯 그리기']]},
+'疒':{o:'아픈 사람이 침대에 누운 모양이에요. 병·아픔과 관련 있어요.',k:'병|아프|아픔|침대|누워|눕',p:'위와 왼쪽을 감싸는 자리',f:[['病','병 병','病院','병원','병을 고치는 곳','병이 나면 침대에 눕기'],['痛','아플 통','頭痛','두통','머리가 아픔','아프면 누워 있어야 하기'],['疲','피곤할 피','疲勞','피로','지쳐서 고단함','피곤하면 아픈 것처럼 눕고 싶기']]},
+'白':{o:'햇빛(또는 쌀알)의 흰빛을 나타낸 모양이에요. 희다·밝다와 관련 있어요.',k:'희|흰|하얀|하얗|밝|빛',p:'왼쪽이나 위',f:[['的','과녁 적','目的','목적','이루려는 목표','과녁은 눈에 잘 띄게 하얗게 칠했기'],['皇','임금 황','皇帝','황제','나라를 다스리는 임금','빛나는 왕을 나타내기']]},
+'目':{o:'사람 눈 모양이에요. 눈·보기와 관련 있어요.',k:'눈|보|봐|감',p:'왼쪽이나 아래',f:[['看','볼 간','看護','간호','아픈 사람을 보살핌','눈 위에 손을 얹고 살펴보기'],['眼','눈 안','眼鏡','안경','눈을 보호하거나 잘 보이게 쓰는 것','눈 그 자체를 나타내기'],['睡','잘 수','睡眠','수면','잠을 잠','잘 때 눈을 감기']]},
+'石':{o:'언덕 아래 돌덩이 모양이에요. 돌·광물과 관련 있어요.',k:'돌|바위|광물|단단',p:'왼쪽',f:[['破','깨뜨릴 파','破壞','파괴','깨뜨려 부숨','돌로 쳐서 깨뜨리기'],['碑','비석 비','碑石','비석','글을 새겨 세운 돌','비석은 돌로 만들기'],['確','굳을 확','確實','확실','틀림없이 그러함','돌처럼 단단하고 굳기']]},
+'示':{o:'신에게 제물을 올리는 제단 모양이에요. 신·제사·복과 관련 있어요.',k:'신|제사|제단|하늘|복|빌|기도',p:'왼쪽(礻)',f:[['神','귀신 신','神話','신화','신에 관한 옛이야기','신은 제단에 모시기'],['祝','빌 축','祝賀','축하','좋은 일을 기뻐하고 인사함','제단 앞에서 좋은 일을 빌기'],['福','복 복','幸福','행복','만족하고 기쁜 상태','신에게 빌어 복을 받기']]},
+'禾':{o:'이삭이 고개 숙인 벼 모양이에요. 벼·곡식과 관련 있어요.',k:'벼|곡식|쌀|농사|이삭',p:'왼쪽',f:[['秋','가을 추','秋夕','추석','음력 팔월 보름 명절','가을에 벼를 거두기'],['科','과목 과','科學','과학','자연을 연구하는 학문','벼(곡식)를 말로 재어 종류별로 나누기'],['稅','세금 세','稅金','세금','나라에 내는 돈','옛날에는 벼로 세금을 냈기']]},
+'立':{o:'사람이 땅 위에 서 있는 모양이에요. 서다와 관련 있어요.',k:'서|일어|땅',p:'왼쪽이나 위',f:[['競','다툴 경','競技','경기','재주를 겨룸','두 사람이 나란히 서서 겨루기'],['端','끝 단','端正','단정','깔끔하고 바름','바르게 서 있는 모습이기']]},
+'竹':{o:'대나무 잎과 줄기 모양이에요. 대나무와 관련 있어요.',k:'대나무|대|마디',p:'위(⺮)',f:[['筆','붓 필','筆記','필기','글씨를 씀','붓대는 대나무로 만들기'],['節','마디 절','季節','계절','봄·여름·가을·겨울','대나무에 마디가 있기'],['算','셈 산','計算','계산','수를 셈','옛날에는 대나무 막대로 셈을 했기']]},
+'米':{o:'쌀알이 흩어진 모양이에요. 쌀·곡식과 관련 있어요.',k:'쌀|곡식|가루|밥',p:'왼쪽',f:[['粉','가루 분','粉食','분식','밀가루 등으로 만든 음식','쌀을 빻으면 가루가 되기'],['糖','엿 당','糖分','당분','단맛을 내는 성분','엿은 쌀로 만들기'],['糧','양식 량','食糧','식량','먹을거리','쌀이 가장 중요한 양식이기']]},
+'糸':{o:'실타래 모양이에요. 실·옷감·잇기와 관련 있어요.',k:'실|옷감|잇|묶|줄|천',p:'왼쪽이나 아래',f:[['紙','종이 지','休紙','휴지','닦는 데 쓰는 얇은 종이','옛날 종이는 실 같은 섬유로 만들었기'],['線','줄 선','直線','직선','곧은 줄','줄은 실처럼 가늘고 길기'],['結','맺을 결','結婚','결혼','부부가 됨','실을 묶어 매듭을 맺기']]},
+'羊':{o:'뿔이 굽은 양의 머리 모양이에요. 양·좋은 것과 관련 있어요.',k:'양|좋|아름|착',p:'위',f:[['美','아름다울 미','美術','미술','그림·조각 같은 예술','크고 살진 양을 아름답고 좋은 것으로 여겼기'],['群','무리 군','群衆','군중','많이 모인 사람들','양은 무리 지어 다니기'],['義','옳을 의','正義','정의','바르고 옳은 도리','양처럼 착하고 옳은 것을 나타내기']]},
+'羽':{o:'새의 두 날개(깃털) 모양이에요. 깃털·날기와 관련 있어요.',k:'깃|날개|깃털|날',p:'위나 왼쪽',f:[['習','익힐 습','練習','연습','되풀이하여 익힘','어린 새가 날개를 퍼덕이며 나는 법을 익히기'],['翼','날개 익','','','','날개는 깃털로 되어 있기']]},
+'耳':{o:'귀 모양이에요. 귀·듣기와 관련 있어요.',k:'귀|듣|들|소리',p:'왼쪽이나 아래',f:[['聞','들을 문','新聞','신문','새 소식을 알리는 인쇄물','듣는 일은 귀로 하기'],['聲','소리 성','音聲','음성','사람의 목소리','소리는 귀로 듣기'],['聽','들을 청','聽力','청력','소리를 듣는 힘','귀로 듣기']]},
+'肉':{o:'고깃덩어리 모양이에요. 고기·몸과 관련 있어요.',k:'고기|몸|살|근육|신체',p:'왼쪽이나 아래(月)',f:[['胃','밥통 위','胃腸','위장','위와 창자','위는 몸속 기관이기'],['腦','뇌 뇌','頭腦','두뇌','머릿속 뇌','뇌는 몸의 일부이기'],['育','기를 육','體育','체육','몸을 튼튼하게 하는 교육','몸(살)을 튼튼하게 기르기']]},
+'舟':{o:'통나무 배 모양이에요. 배와 관련 있어요.',k:'배|물|바다|노',p:'왼쪽',f:[['船','배 선','船長','선장','배를 책임지는 사람','배 그 자체를 나타내기'],['航','배 항','航海','항해','배를 타고 바다를 건넘','배를 타고 물을 건너기']]},
+'艸':{o:'풀 두 포기가 돋아난 모양이에요. 풀·식물과 관련 있어요.',k:'풀|식물|꽃|잎|나물|새싹',p:'위(艹)',f:[['花','꽃 화','花草','화초','꽃이 피는 풀','꽃은 식물이기'],['茶','차 차','綠茶','녹차','푸른 찻잎으로 만든 차','차는 찻잎(식물)으로 만들기'],['葉','잎 엽','落葉','낙엽','떨어진 잎','잎은 식물의 한 부분이기']]},
+'虫':{o:'뱀(벌레)이 몸을 구부린 모양이에요. 벌레·곤충과 관련 있어요.',k:'벌레|곤충|뱀',p:'왼쪽',f:[['蝶','나비 접','蝶泳','접영','나비처럼 두 팔을 함께 젓는 수영','나비는 곤충이기'],['蜂','벌 봉','養蜂','양봉','꿀을 얻으려고 벌을 기름','벌은 곤충이기'],['蟲','벌레 충','害蟲','해충','해로운 벌레','벌레가 여럿 모인 모습이기']]},
+'衣':{o:'옷깃이 여며진 윗옷 모양이에요. 옷과 관련 있어요.',k:'옷|입|천',p:'왼쪽(衤)이나 아래',f:[['製','지을 제','製作','제작','물건을 만듦','옷감을 마름질해 옷을 짓기'],['裝','꾸밀 장','服裝','복장','옷차림','옷으로 몸을 꾸미기'],['補','기울 보','補充','보충','모자란 것을 채움','해진 옷을 깁기']]},
+'見':{o:'큰 눈을 가진 사람 모양이에요. 보기와 관련 있어요.',k:'보|봐|눈',p:'오른쪽',f:[['視','볼 시','視力','시력','눈으로 보는 힘','눈으로 보기'],['觀','볼 관','觀光','관광','다른 곳의 경치를 구경함','구경하며 보기'],['親','친할 친','親舊','친구','가깝게 지내는 사람','가까이서 자주 보는 사이이기']]},
+'言':{o:'입에서 말이 나오는 모양이에요. 말·말하기와 관련 있어요.',k:'말|이야기|말하|글|읽',p:'왼쪽',f:[['話','말씀 화','對話','대화','마주 보고 이야기함','말을 주고받기'],['語','말씀 어','國語','국어','나라의 말','말 그 자체를 나타내기'],['讀','읽을 독','讀書','독서','책을 읽음','소리 내어 말하듯 읽기']]},
+'貝':{o:'조개 모양이에요. 옛날에는 조개껍데기를 돈으로 써서 돈·재물과 관련 있어요.',k:'조개|돈|재물|값|보물|사|팔',p:'왼쪽이나 아래',f:[['買','살 매','購買','구매','물건을 사들임','옛날에는 조개(돈)를 내고 물건을 샀기'],['財','재물 재','財産','재산','가지고 있는 돈이나 물건','옛날에는 조개가 돈(재물)이었기'],['貨','재물 화','貨幣','화폐','돈','조개껍데기가 돈으로 쓰였기']]},
+'走':{o:'사람이 팔을 휘두르며 달리는 모양(아래는 발)이에요. 달리기와 관련 있어요.',k:'달리|뛰|빨리|달려|달린',p:'왼쪽 아래를 받치는 자리',f:[['起','일어날 기','起床','기상','잠자리에서 일어남','달리려면 먼저 일어나야 하기'],['超','뛰어넘을 초','超過','초과','정해진 것을 넘음','뛰어넘으려면 힘껏 달려야 하기'],['越','넘을 월','追越','추월','뒤따라가서 앞지름','달려서 앞질러 넘기']]},
+'足':{o:'무릎부터 발까지의 모양이에요. 발·걷기·뛰기와 관련 있어요.',k:'발|걷|걸|뛰|차',p:'왼쪽(⻊)',f:[['蹴','찰 축','蹴球','축구','공을 발로 차서 겨루는 경기','공을 차는 일은 발로 하는 일이기'],['路','길 로','道路','도로','사람이나 차가 다니는 길','길은 발로 걸어 다니는 곳이기'],['跳','뛸 도','跳躍','도약','뛰어오름','뛰는 일은 발로 하기']]},
+'車':{o:'바퀴 달린 수레 모양이에요. 수레·탈것과 관련 있어요.',k:'수레|바퀴|차|탈것|구르',p:'왼쪽',f:[['軍','군사 군','軍人','군인','군대에서 일하는 사람','옛날 군대는 수레(전차)를 둘러싸고 움직였기'],['轉','구를 전','運轉','운전','차를 움직여 몲','수레바퀴가 구르기'],['輪','바퀴 륜','車輪','차륜','수레바퀴','바퀴는 수레의 한 부분이기']]},
+'辵':{o:'길을 걸어가는 모양(길+발)이에요. 가기·오기·길과 관련 있어요.',k:'가|길|걷|걸|오|움직|빠르',p:'왼쪽 아래를 받치는 자리(辶)',f:[['道','길 도','車道','차도','차가 다니는 길','길을 따라 가기'],['速','빠를 속','速度','속도','빠르기','빠르게 가기'],['送','보낼 송','放送','방송','소식을 널리 보냄','멀리 가게 보내기']]},
+'金':{o:'땅속에 묻힌 광물(쇠) 모양이에요. 쇠·금속과 관련 있어요.',k:'쇠|금속|금|돈|철',p:'왼쪽',f:[['銀','은 은','銀行','은행','돈을 맡기고 빌리는 곳','은은 금속이기'],['鐵','쇠 철','鐵道','철도','기차가 다니는 쇠 길','쇠 그 자체를 나타내기'],['鏡','거울 경','望遠鏡','망원경','멀리 있는 것을 크게 보는 기구','옛날 거울은 쇠(구리)를 갈아 만들었기']]},
+'門':{o:'두 짝 문 모양이에요. 문·드나들기와 관련 있어요.',k:'문|드나|열|닫',p:'바깥 둘레',f:[['開','열 개','開學','개학','방학이 끝나고 수업을 시작함','문을 열기'],['閉','닫을 폐','閉會','폐회','모임을 마침','문을 닫기'],['間','사이 간','空間','공간','비어 있는 자리','문틈 사이로 햇빛이 비치는 모습이기']]},
+'阜':{o:'층층이 쌓인 언덕(계단) 모양이에요. 언덕·높낮이와 관련 있어요.',k:'언덕|계단|높|오르|내리|층',p:'왼쪽(阝)',f:[['陸','뭍 륙','陸地','육지','물에 덮이지 않은 땅','언덕이 이어진 땅이기'],['降','내릴 강','下降','하강','아래로 내려감','언덕을 내려오기'],['階','섬돌 계','階段','계단','오르내리게 만든 층층대','언덕처럼 층층이 오르는 곳이기']]},
+'隹':{o:'꽁지가 짧은 새 모양이에요. 새와 관련 있어요.',k:'새|날개|날',p:'오른쪽',f:[['集','모을 집','集合','집합','한곳에 모임','새들이 나무 위에 모여 앉기'],['雄','수컷 웅','英雄','영웅','뛰어난 사람','새의 수컷을 나타내기'],['雀','참새 작','孔雀','공작','꼬리가 화려한 새','참새는 새이기']]},
+'雨':{o:'하늘(구름)에서 빗방울이 떨어지는 모양이에요. 비·날씨와 관련 있어요.',k:'비|하늘|구름|날씨|물|내리',p:'위',f:[['雪','눈 설','暴雪','폭설','갑자기 많이 내리는 눈','눈도 비처럼 하늘에서 내리기'],['雲','구름 운','白雲','백운','흰 구름','구름에서 비가 내리기'],['電','번개 전','電氣','전기','빛·열을 내는 에너지','비 오는 날 번개가 치기']]},
+'頁':{o:'사람의 머리를 크게 강조한 모양이에요. 머리·얼굴과 관련 있어요.',k:'머리|얼굴|이마|목',p:'오른쪽',f:[['頭','머리 두','先頭','선두','맨 앞','머리 그 자체를 나타내기'],['顔','얼굴 안','顔面','안면','얼굴','얼굴은 머리의 앞쪽이기'],['題','제목 제','問題','문제','풀어야 할 물음','이마(머리)처럼 맨 앞에 오는 것이 제목이기']]},
+'食':{o:'그릇에 음식을 담고 뚜껑을 덮은 모양이에요. 밥·먹기와 관련 있어요.',k:'밥|먹|음식|마시',p:'왼쪽(飠)',f:[['飯','밥 반','飯饌','반찬','밥과 함께 먹는 음식','밥과 함께 먹는 것이기'],['飮','마실 음','飮食','음식','먹고 마시는 것','마시는 것도 먹는 일이기'],['養','기를 양','營養','영양','몸에 필요한 것을 먹어 기름','밥을 먹여 기르기']]},
+'馬':{o:'갈기와 네 다리가 있는 말 모양이에요. 말과 관련 있어요.',k:'말|타|달리',p:'왼쪽',f:[['騎','말 탈 기','騎手','기수','경마에서 말을 타는 사람','말을 타기'],['驛','역 역','驛前','역전','역 앞','옛날에는 말을 갈아타던 곳이 역이었기'],['驚','놀랄 경','驚歎','경탄','몹시 놀라며 감탄함','말이 잘 놀라기']]},
+'魚':{o:'물고기 모양이에요. 물고기와 관련 있어요.',k:'물고기|생선|바다|비늘',p:'왼쪽',f:[['鮮','고울 선','生鮮','생선','먹으려고 잡은 물고기','싱싱한 물고기를 나타내기'],['鯨','고래 경','捕鯨','포경','고래잡이','옛날에는 고래를 물고기로 여겼기'],['鯉','잉어 리','','','','잉어는 물고기이기']]},
+'鳥':{o:'새 모양이에요. 새와 관련 있어요.',k:'새|날개|울|날',p:'오른쪽이나 아래',f:[['鳴','울 명','悲鳴','비명','놀라거나 무서워 지르는 소리','새가 우는 소리이기'],['鶴','학 학','白鶴','백학','흰 학','학은 새이기'],['鷄','닭 계','鷄卵','계란','닭의 알','닭은 새이기']]}
+};
+// 부수 함정용 한자 뜻·음 (부수는 RADICAL_OF에서)
+const EXTRA_READ = {'休':'쉴 휴','問':'물을 문','字':'글자 자','相':'서로 상','想':'생각 상','東':'동녘 동','最':'가장 최','和':'화할 화','無':'없을 무','然':'그럴 연','李':'오얏 리','季':'계절 계','信':'믿을 신','息':'쉴 식','加':'더할 가','功':'공 공','星':'별 성','姓':'성씨 성','性':'성품 성','晴':'갤 청','請':'청할 청','精':'정할 정','洋':'큰바다 양','名':'이름 명','主':'주인 주','意':'뜻 의','章':'글 장','初':'처음 초','前':'앞 전','數':'셈 수','促':'재촉할 촉','作':'지을 작','使':'하여금 사','住':'살 주','位':'자리 위','味':'맛 미','品':'물건 품','古':'옛 고','右':'오른쪽 우','同':'한가지 동','向':'향할 향','三':'석 삼','上':'윗 상','下':'아래 하','兄':'형 형','光':'빛 광','先':'먼저 선','元':'으뜸 원','京':'서울 경','交':'사귈 교','事':'일 사','九':'아홉 구','五':'다섯 오','今':'이제 금','代':'대신할 대','便':'편할 편','保':'지킬 보'};
+RADICAL_OF['促'] = '人';
+const READ = {}; // 한자 → {rc, m}
+Object.keys(EXTRA_READ).forEach(ch => { if (RADICAL_OF[ch]) READ[ch] = {rc:RADICAL_OF[ch], m:EXTRA_READ[ch]}; });
+Object.keys(HELP).forEach(rc => HELP[rc].f.forEach(e => { READ[e[0]] = {rc, m:e[1], e}; RADICAL_OF[e[0]] = rc; }));
+
+const C = {mode:'idle', rc:null, target:null, tries:0, cur:null, onThought:null, opened:false};
+const chatLog = () => $('chatLog');
+const cz = s => String(s||'').replace(/[\s.,!?~'"“”‘’()·\-]/g,'');
+const hjs = c => `<span class="hj">${esc(c)}</span>`;
+const rName = rc => (RAD_BY[rc] && RAD_BY[rc].n) || NAME_OF[rc] || '';
+const rLabel = rc => `${hjs(rc)}(${esc(rName(rc))})`;
+const meanOf = rc => { const p = rName(rc).split(' '); return p.length > 1 ? p.slice(0,-1).join(' ') : rName(rc); };
+const helpOf = rc => HELP[rc] || null;
+function chatSave(){ save(); }
+function found(rc){ S.chatFound = S.chatFound || {}; return (S.chatFound[rc] = S.chatFound[rc] || []); }
+function doneSet(rc, k){ S.chatDone = S.chatDone || {}; (S.chatDone[rc] = S.chatDone[rc] || {})[k] = 1; chatSave(); }
+function isDone(rc, k){ return !!(S.chatDone && S.chatDone[rc] && S.chatDone[rc][k]); }
+
+function botSay(html){ const d = document.createElement('div'); d.className = 'cmsg bot'; d.innerHTML = html; chatLog().appendChild(d); chatLog().scrollTop = chatLog().scrollHeight; }
+function meSay(t){ const d = document.createElement('div'); d.className = 'cmsg me'; d.textContent = t; chatLog().appendChild(d); chatLog().scrollTop = chatLog().scrollHeight; }
+function chips(list){ $('chatChips').innerHTML = (list||[]).map(c => `<button type="button" class="${c.hj?'hjc':''}" data-cact="${esc(c.a)}">${c.html || esc(c.t)}</button>`).join(''); }
+
+// 짧게라도 '자기 생각'인지 확인
+function isThought(t){
+  const s = cz(t);
+  const hangul = (s.match(/[가-힣]/g) || []).length;
+  if (hangul < 5) return false;
+  if (s.length < 14 && /(몰라|모름|모르겠|글쎄|알려줘|알려주세요|답알려|정답|그냥|아무거나|없어|없음)/.test(s)) return false;
+  if (/^(ㅋ|ㅎ|ㅇ|ㄴ)+$/.test(s)) return false;
+  return true;
+}
+const NUDGE = '짧게라도 <b>네 생각</b>을 먼저 말해 줘야 답을 알려 줄 수 있어! 🙂<br><span class="muted">예: "발로 하는 일과 관련 있을 것 같아", "물이랑 관련된 뜻일 것 같아"</span>';
+function askThought(q, onReveal){ C.mode = 'think'; C.onThought = onReveal; botSay(q); chips([]); }
+function praise(t, rc){
+  const h = helpOf(rc); const ks = h ? h.k.split('|') : [];
+  const hit = ks.find(k => t.includes(k));
+  return hit ? `오! <b>‘${esc(hit)}’</b>까지 떠올렸구나. 아주 좋은 생각이야 👍` : '좋은 생각이야! 이제 정답이랑 비교해 볼까?';
+}
+
+// 부수 찾기 (뜻·음·명칭으로)
+function radCandidates(t){
+  const s = cz(t).replace(/(부수|이에요|예요|입니다|이야|이요|요)$/,'').replace(/(.)부$/,'$1');
+  if (!s) return [];
+  const all = RADS.map(r => ({c:r.c, n:r.n, a:r.a||[], bad:false})).concat(FORBIDDEN.map(f => ({c:f.c, n:f.n, a:[], bad:true})));
+  const out = [];
+  all.forEach(r => {
+    const full = cz(r.n), p = r.n.split(' '), sound = p.length > 1 ? p[p.length-1] : '', mean = p.length > 1 ? cz(p.slice(0,-1).join('')) : '';
+    let sc = 0;
+    if (s === full || r.a.some(a => cz(a) === s)) sc = 3;
+    else if (s.includes(full) && full.length >= 2) sc = 3;
+    else if (sound && s === sound) sc = 2;
+    else if (mean && s === mean) sc = 2;
+    if (sc) out.push({c:r.c, bad:r.bad, sc});
+  });
+  const best = Math.max(0, ...out.map(o => o.sc));
+  return out.filter(o => o.sc === best);
+}
+function readingMatchesRad(t, rc){
+  const s = cz(t).replace(/(부수|이에요|예요|입니다|이야|이요|요)$/,'');
+  const r = RAD_BY[rc]; const n = rName(rc); if (!n) return false;
+  const p = n.split(' '), full = cz(n), sound = p.length > 1 ? p[p.length-1] : '', mean = p.length > 1 ? cz(p.slice(0,-1).join('')) : '';
+  if (s === full || s.includes(full)) return true;
+  if (r && r.a && r.a.some(a => s.includes(cz(a)))) return true;
+  if (sound && (s === sound || s.endsWith(sound) && s.length <= sound.length + 4 && mean && s.startsWith(mean.slice(0,1)))) return true;
+  if (mean && (s === mean || s.startsWith(mean))) return true;
+  return false;
+}
+function radFromChar(ch){ if (VAR[ch]) return VAR[ch]; if (RAD_BY[ch] || NAME_OF[ch]) return ch; return null; }
+
+function chatStart(){
+  chatLog().innerHTML = ''; C.mode = 'rad'; C.rc = null; C.tries = 0;
+  botSay('안녕! 나는 <b>부수 탐정 도우미</b>야 🔍<br>정답을 바로 알려 주지는 않아. <b>네가 먼저 생각을 말하면</b> 그다음에 정확한 답을 알려 줄게.');
+  if (S.rads && S.rads.length){
+    botSay('탐구할 부수를 눌러 봐. 누르면 먼저 그 부수의 <b>뜻이나 음</b>을 물어볼 거야.<br><span class="muted">부수의 뜻이나 음을 바로 써도 돼요. (예: 발 족)</span>');
+    chips(S.rads.map((rc,i) => ({a:'pick:'+rc, t:rc, hj:true})).concat([{a:'other', t:'다른 부수'}]));
+  } else {
+    botSay('탐구할 부수의 <b>뜻이나 음</b>을 써 줘. (예: 발 족, 물 수)');
+    chips([]);
+  }
+}
+function askRadReading(rc){
+  C.mode = 'radAsk'; C.target = rc; C.tries = 0;
+  botSay(`좋아, ${hjs(rc)}! 이 부수의 <b>뜻이나 음</b>은 뭘까? 부수표(학습지 1쪽)나 사전에서 확인하고 말해 줘.`);
+  chips([]);
+}
+function setRad(rc, how){
+  C.rc = rc; C.tries = 0;
+  const i = (S.rads||[]).indexOf(rc);
+  botSay(`${how || '맞아!'} ${rLabel(rc)} ✓${i >= 0 ? ` <span class="muted">(네가 고른 ${i+1}번 부수)</span>` : ''}`);
+  if (!helpOf(rc)) botSay('이 부수는 내 자료에 없어서 정답을 알려 주긴 어려워. <b>네이버 한자사전</b>에서 함께 확인해 보자! 아래 단계대로 생각을 정리해 봐.');
+  menu();
+}
+function menu(){
+  C.mode = 'menu'; const rc = C.rc;
+  const items = [['o','① 본래 의미'],['v','② 변신 모습'],['f','③ 가족 한자'],['w','④ 생활 속 낱말'],['l','⑤ 연결 문장']];
+  botSay(`${rLabel(rc)} 부수로 무엇을 탐구할까? <b>①부터 차례대로</b> 하면 좋아.`);
+  chips(items.map(([k,t]) => ({a:'topic:'+k, t:(isDone(rc,k)?'✓ ':'')+t})).concat([{a:'restart', t:'다른 부수'}]));
+}
+
+function topic(k){
+  const rc = C.rc, h = helpOf(rc), r = RAD_BY[rc] || {};
+  if (k === 'o'){
+    askThought(`${hjs(rc)} 글자는 <b>무엇의 모양</b>을 본떴을까? 또 어떤 뜻과 관련 있을까? 짧게라도 네 생각을 말해 줘.`, t => {
+      botSay(praise(t, rc) + (h ? `<span class="ans"><b>정답</b> · ${hjs(rc)}(${esc(rName(rc))}): ${esc(h.o)}</span>` : '<span class="ans">사전에서 이 부수를 눌러 <b>[자원·글자 풀이]</b>를 읽어 봐. 무엇을 본뜬 글자인지 나와 있어요.</span>') + '노트의 <b>본래 의미</b> 칸에 <b>네 말로</b> 정리해 봐!');
+      doneSet(rc,'o'); menu();
+    });
+  } else if (k === 'v'){
+    askThought(`${hjs(rc)} 부수가 다른 한자 속에 들어가면 <b>모양이 바뀔까, 그대로일까?</b> 어디(왼쪽·위·아래…)에 자주 들어갈 것 같아? 네 생각을 말해 줘.<br><span class="muted">힌트: 사전에서 가족 한자의 모양을 살펴봐!</span>`, t => {
+      const ex = h ? h.f.map(e => hjs(e[0])).join(' · ') : '';
+      let ans;
+      if (r.v) ans = `${hjs(rc)} 부수는 <b>${esc(r.v)}</b> 모양으로 변신해요.${ex ? ' 예: ' + ex : ''}`;
+      else if (h) ans = `${hjs(rc)} 부수는 크게 변신하지 않아요. 주로 한자의 <b>${esc(h.p)}</b>에 들어가고, 이때 폭이 좁아지거나 납작해질 뿐 모양은 거의 그대로예요. 예: ${ex}`;
+      else ans = '사전에서 가족 한자 여러 개를 비교해 봐. 부수가 들어간 자리와 모양이 보여요.';
+      botSay((/바뀌|변하|변신|달라|그대로|왼|위|아래|오른/.test(t) ? '자리와 모양까지 생각했구나, 좋아! ' : '좋은 생각이야! ') + `<span class="ans"><b>정답</b> · ${ans}</span>노트의 <b>변신 모습</b> 칸에 적어 봐!`);
+      doneSet(rc,'v'); menu();
+    });
+  } else if (k === 'f'){
+    famPrompt();
+  } else if (k === 'w'){
+    pickHanja('word', '어떤 가족 한자로 <b>생활 속 낱말</b>을 찾아볼까?');
+  } else if (k === 'l'){
+    pickHanja('link', '어떤 가족 한자로 <b>연결 문장</b>을 써 볼까?');
+  }
+}
+
+// 가족 한자
+function famPrompt(){
+  const rc = C.rc, f = found(rc);
+  C.mode = 'fam';
+  botSay(`사전에서 ${hjs(rc)} 부수에 속한 한자를 찾아서, 그 한자의 <b>뜻이나 음</b>을 말해 줘. <span class="muted">(예: 찰 축)</span>${f.length ? `<br>지금까지 찾은 가족 한자: ${f.map(x => hjs(x)).join(' ')} (${Math.min(f.length,2)}/2)` : ''}`);
+  chips([{a:'famhint', t:'힌트가 필요해'},{a:'menu', t:'메뉴로'}]);
+}
+function matchReading(t, entries){ // entries: [{ch, m}]
+  const s = cz(t);
+  const exact = entries.filter(e => s.includes(e.ch) || s === cz(e.m) || s.includes(cz(e.m)));
+  if (exact.length) return {hit:exact};
+  const bySound = entries.filter(e => { const p = e.m.split(' '); return s === p[p.length-1]; });
+  const byMean = entries.filter(e => { const p = e.m.split(' '); return p.length > 1 && s === cz(p.slice(0,-1).join('')); });
+  const m = bySound.concat(byMean.filter(x => !bySound.includes(x)));
+  return {hit:m, loose:true};
+}
+function famInput(t){
+  const rc = C.rc, h = helpOf(rc);
+  const mine = h ? h.f.map(e => ({ch:e[0], m:e[1], e})) : [];
+  let r = matchReading(t, mine);
+  if (r.hit.length > 1){ botSay(`음이나 뜻이 같은 한자가 여러 개야. <b>뜻과 음을 함께</b> 말해 줄래? <span class="muted">(예: 찰 축)</span>`); return; }
+  if (r.hit.length === 1) return famOk(r.hit[0].ch, r.hit[0].m, r.hit[0].e);
+  // 다른 부수 한자인지
+  const others = Object.keys(READ).filter(ch => READ[ch].rc !== rc).map(ch => ({ch, m:READ[ch].m}));
+  const s = cz(t);
+  const wrong = others.filter(e => s.includes(e.ch) || s === cz(e.m) || s.includes(cz(e.m)));
+  if (wrong.length === 1){
+    const w = wrong[0], act = READ[w.ch].rc;
+    logTrap({c:w.ch, chose:rc, act});
+    botSay(`앗! ${hjs(w.ch)}(${esc(w.m)}) — ${hjs(rc)}부가 아니라 <b>${rLabel(act)}부</b>야.${TRAP_HINT[w.ch] ? `<span class="warn">${esc(TRAP_HINT[w.ch])}</span>` : ''}착각한 한자로 기록해 둘게. 노트의 <b>착각한 한자</b> 칸에도 써 봐! 다른 한자를 찾아볼까?`);
+    return;
+  }
+  if (!CJK.test(t) && (cz(t).length < 2 || cz(t).length > 7)){ botSay('지금은 <b>가족 한자 찾기</b> 중이야. 찾은 한자의 <b>뜻과 음</b>만 짧게 말해 줘. <span class="muted">(예: 찰 축)</span><br>다른 단계로 가려면 [메뉴로]를 눌러.'); chips([{a:'famhint', t:'힌트가 필요해'},{a:'menu', t:'메뉴로'}]); return; }
+  C.pendingFam = t.trim().slice(0,20);
+  botSay(`${esc(C.pendingFam)}… 내 자료에는 없는 한자야. 사전에서 그 한자를 눌러 <b>부수가 ${hjs(rc)}인지</b> 확인했니?`);
+  chips([{a:'famyes', t:'확인했어, 맞아'},{a:'famno', t:'다시 찾을게'},{a:'famhint', t:'힌트가 필요해'}]);
+}
+function famOk(ch, m, e){
+  const rc = C.rc, f = found(rc);
+  if (!f.includes(ch)){ f.push(ch); chatSave(); }
+  botSay(`맞아! ${hjs(ch)}(${esc(m)}) — ${hjs(rc)}부 한자가 맞아 ✓ <span class="muted">(${Math.min(f.length,2)}/2)</span>`);
+  askThought(`그럼 ${hjs(ch)}(${esc(m)})의 뜻은 ${hjs(rc)}(${esc(meanOf(rc))}) 부수와 <b>어떻게 이어질까?</b> 짧게 네 생각을 말해 줘.`, t => {
+    botSay(praise(t, rc) + `<span class="ans"><b>정답</b> · ${hjs(ch)} ${esc(m)} — ${hjs(rc)}부<br>까닭: ${esc(e ? e[5] : '')} 때문이에요.</span>노트 <b>가족 한자</b> 칸에 <b>모양·뜻·음</b>을 모두 써!`);
+    if (found(rc).length >= 2){ botSay('🎉 가족 한자 2개를 찾았어! 다음은 <b>④ 생활 속 낱말</b>이야.'); doneSet(rc,'f'); menu(); }
+    else famPrompt();
+  });
+}
+
+// 낱말·연결 문장: 한자 고르기
+function pickHanja(kind, q){
+  const rc = C.rc, h = helpOf(rc);
+  if (!h){ botSay('이 부수는 내 자료에 없어. 사전 한자 화면 아래 [단어] 목록을 이용해 봐!'); menu(); return; }
+  const f = found(rc);
+  let list = h.f.filter(e => f.includes(e[0]));
+  if (kind === 'word') list = list.filter(e => e[2]);
+  if (!list.length){
+    botSay('먼저 <b>③ 가족 한자</b>를 찾아야 해. 네가 찾은 한자로 이어서 할 수 있어!');
+    chips([{a:'topic:f', t:'③ 가족 한자 찾기'},{a:'menu', t:'메뉴로'}]); C.mode = 'menu'; return;
+  }
+  C.mode = kind + 'Pick';
+  botSay(q);
+  chips(list.map(e => ({a:kind + ':' + e[0], html:`<span class="hj">${esc(e[0])}</span> ${esc(e[1])}`})).concat([{a:'menu', t:'메뉴로'}]));
+}
+function wordStart(ch){
+  const e = READ[ch].e; C.cur = e; C.mode = 'word'; C.tries = 0;
+  botSay(`${hjs(e[0])}(${esc(e[1])}) 한자가 들어간 <b>낱말</b>을 떠올려 볼래? 아는 낱말을 말하거나, 어떤 낱말이 있을지 네 생각을 말해 줘.<br><span class="muted">힌트: 낱말 속에 ‘${esc(e[1].split(' ').pop())}’ 소리가 들어가요.</span>`);
+  chips([{a:'menu', t:'메뉴로'}]);
+}
+function wordInput(t){
+  const e = C.cur, rc = C.rc, s = cz(t), sound = e[1].split(' ').pop();
+  const ansHtml = `<span class="ans"><b>정답</b> · ${hjs(e[2])}(${esc(e[3])}) - ${esc(e[4])}</span>`;
+  if (s.includes(cz(e[3])) || s.includes(e[2])){
+    botSay(`정답이야! 🎉${ansHtml}노트에 <b>한자어(읽기) - 뜻</b> 순서로 써.`); doneSet(rc,'w'); menu(); return;
+  }
+  const guess = (s.match(/[가-힣]/g)||[]).length >= 2 && s.includes(sound);
+  if (!guess && !isThought(t)){ botSay(NUDGE); return; }
+  botSay((guess ? `‘${esc(sound)}’ 소리가 들어간 좋은 추측이야! 사전 [단어] 목록에서 맞는지 꼭 확인해 봐.` : '좋은 생각이야!') + ` 내가 아는 낱말은 이거야.${ansHtml}노트에 <b>한자어(읽기) - 뜻</b> 순서로 써.`);
+  doneSet(rc,'w'); menu();
+}
+function linkStart(ch){
+  const e = READ[ch].e, rc = C.rc; C.cur = e; C.mode = 'link'; C.tries = 0;
+  botSay(`${hjs(e[0])}(${esc(e[1])})에 ${hjs(rc)}(${esc(meanOf(rc))}) 부수가 들어간 <b>까닭</b>을 네 말로 써 봐.<br><span class="muted">질문 카드: 무엇으로 해요? · 어떤 움직임에서 나와요? · 무엇의 한 종류예요? · 무엇으로 만들어요?</span>`);
+  chips([{a:'menu', t:'메뉴로'}]);
+}
+function linkInput(t){
+  const e = C.cur, rc = C.rc, h = helpOf(rc), ks = h.k.split('|').filter(k => !cz(e[1]).includes(k)); // 한자 자기 뜻(예: 강)은 빼고 부수 뜻만 확인
+  if (!isThought(t)){ botSay(NUDGE); return; }
+  const body = t.replace(/[^\s]+\s*부수(이기|라서|여서|이어서|니까|이니까|가|를|는)?/g, ' '); // "물 부수라서" 같은 되풀이는 빼고 확인
+  const hasK = ks.some(k => body.includes(k));
+  const circular = /부수(이기|라서|여서|이어서|니까|이니까)/.test(cz(t)) && !hasK;
+  if (circular && C.tries === 0){ C.tries++; botSay(`음… <b>"부수이기 때문"</b>은 까닭이 아니야. 같은 말을 되풀이한 거야! ${hjs(e[0])}의 뜻(${esc(e[1].split(' ').slice(0,-1).join(' '))})과 부수의 뜻(${esc(meanOf(rc))})을 이어서 다시 생각해 볼래?`); return; }
+  const model = `${e[0]}에 ${rc} 부수가 들어간 까닭은 ${e[5]} 때문이다.`;
+  botSay((hasK ? `부수의 뜻이 잘 들어갔어 ✓ 멋진 까닭이야!` : `좋은 생각이야! 부수의 뜻 <b>‘${esc(meanOf(rc))}’</b>을(를) 넣으면 까닭이 더 분명해져.`) + `<span class="ans"><b>예시 연결 문장</b> · ${esc(model)}</span>내 문장과 비교해서, <b>내 말로</b> 노트에 써 봐!`);
+  doneSet(rc,'l'); menu();
+}
+
+function chatInput(raw){
+  const t = String(raw||'').trim(); if (!t) return;
+  meSay(t);
+  if (/^(처음|다시|다른부수|다른 부수)$/.test(t)){ chatStart(); return; }
+  if (/^(메뉴|메뉴로)$/.test(t) && C.rc){ menu(); return; }
+  switch (C.mode){
+    case 'think':
+      if (!isThought(t)){ botSay(NUDGE); return; }
+      { const fn = C.onThought; C.onThought = null; C.mode = 'idle'; fn(t); } return;
+    case 'radAsk':
+      if (readingMatchesRad(t, C.target)) return setRad(C.target, '맞아!');
+      C.tries++;
+      if (C.tries < 2){ const r = RAD_BY[C.target]; botSay(`음… 다시 확인해 볼까? 힌트: ${r && r.s ? `<b>${r.s}획</b> 부수야. ` : ''}부수표(학습지 1쪽)나 사전에서 이름을 찾아봐.`); return; }
+      return setRad(C.target, `괜찮아! 이 부수의 이름은 이거야. 다음엔 부수표에서 꼭 확인해 보자.`);
+    case 'rad': case 'idle': case 'menu': {
+      if (C.mode === 'menu'){
+        const tp = /의미|본뜬/.test(t) ? 'o' : /변신|모양/.test(t) ? 'v' : /가족/.test(t) ? 'f' : /낱말|단어/.test(t) ? 'w' : /연결|까닭/.test(t) ? 'l' : null;
+        if (tp) return topic(tp);
+        if (cz(t).length > 7){ botSay('아래 버튼에서 탐구할 <b>단계</b>를 골라 줘 🙂'); menu(); return; }
+      }
+      const chs = [...t].map(radFromChar).filter(Boolean);
+      if (chs.length && cz(t).length <= 2) return askRadReading(chs[0]);
+      const cands = radCandidates(t);
+      if (!cands.length){ botSay('그런 이름의 부수는 내 목록에 없어. 부수표(학습지 1쪽)에서 이름을 다시 확인해 줘. <span class="muted">(예: 발 족, 물 수)</span>'); return; }
+      const pref = cands.filter(c => (S.rads||[]).includes(c.c));
+      if (cands.length > 1 && pref.length !== 1){
+        botSay('같은 음이나 뜻을 가진 부수가 여러 개야. 어느 부수니?');
+        chips(cands.map(c => ({a:'choose:' + c.c, html:`<span class="hj">${esc(c.c)}</span> ${esc(NAME_OF[c.c]||'')}`}))); return;
+      }
+      const c = pref.length === 1 ? pref[0] : cands[0];
+      if (c.bad){ const fb = FORBIDDEN.find(f => f.c === c.c); botSay(`${rLabel(c.c)} 부수는 이번 수행평가에서 <b>쓸 수 없는 부수</b>야.<span class="warn">${esc(fb ? fb.why : '')}</span>다른 부수를 골라 볼까?`); chips([]); return; }
+      return setRad(c.c, (S.rads||[]).includes(c.c) ? '맞아!' : '찾았다!');
+    }
+    case 'fam': return famInput(t);
+    case 'word': return wordInput(t);
+    case 'link': return linkInput(t);
+    default: botSay('아래 버튼을 눌러 줘 🙂');
+  }
+}
+function chatAction(a){
+  const [k, v] = a.split(':');
+  if (k === 'pick') return askRadReading(v);
+  if (k === 'choose'){ const fb = FORBIDDEN.find(f => f.c === v); if (fb){ botSay(`${rLabel(v)} 부수는 이번 수행평가에서 <b>쓸 수 없는 부수</b>야.<span class="warn">${esc(fb.why)}</span>`); return; } return setRad(v, '좋아!'); }
+  if (k === 'other' || k === 'restart'){ C.mode = 'rad'; C.rc = null; botSay('탐구할 부수의 <b>뜻이나 음</b>을 써 줘. (예: 발 족, 물 수)'); chips([]); return; }
+  if (k === 'menu') return menu();
+  if (k === 'topic') return topic(v);
+  if (k === 'famhint'){
+    const rc = C.rc, h = helpOf(rc);
+    askThought(`힌트 전에 먼저! ${hjs(rc)}(${esc(meanOf(rc))}) 부수가 들어간 한자는 <b>어떤 뜻</b>을 가질 것 같아? 네 생각을 말해 줘.`, t => {
+      botSay(praise(t, rc) + (h ? `<span class="ans"><b>${hjs(rc)}부 가족 한자 예</b> · ${h.f.map(e => `${hjs(e[0])} ${esc(e[1])}`).join(', ')}</span>사전에서 <b>직접 눌러 부수를 확인</b>하고, 찾은 한자의 뜻이나 음을 나한테 말해 줘!` : '<span class="ans">사전에서 부수 검색 → [부수·모양자] → [● 부수]를 누르면 가족 한자 목록이 나와요.</span>'));
+      C.mode = 'fam'; chips([{a:'menu', t:'메뉴로'}]);
+    });
+    return;
+  }
+  if (k === 'famyes'){ const rc = C.rc, f = found(rc); const v2 = C.pendingFam || ''; if (v2 && !f.includes(v2)){ f.push(v2); chatSave(); } botSay(`좋아! 노트에 적고, 선생님께 한 번 더 확인받자. (${Math.min(f.length,2)}/2)`); if (f.length >= 2){ doneSet(rc,'f'); menu(); } else famPrompt(); return; }
+  if (k === 'famno') return famPrompt();
+  if (k === 'word') return wordStart(v);
+  if (k === 'link') return linkStart(v);
+}
+function chatOpen(rc){
+  $('chatPanel').classList.remove('hidden'); $('chatFab').classList.add('hidden');
+  if (!C.opened){ C.opened = true; chatStart(); }
+  if (rc && RAD_BY[rc] && C.rc !== rc){ botSay(`탐구 노트에서 왔구나! ${hjs(rc)} 부수를 함께 탐구해 보자.`); askRadReading(rc); }
+  setTimeout(() => $('chatInput').focus(), 50);
+}
+function chatInit(){
+  $('chatFab').addEventListener('click', () => chatOpen());
+  $('chatClose').addEventListener('click', () => { $('chatPanel').classList.add('hidden'); $('chatFab').classList.remove('hidden'); });
+  $('chatRestart').addEventListener('click', () => chatStart());
+  $('chatForm').addEventListener('submit', e => { e.preventDefault(); const v = $('chatInput').value; $('chatInput').value = ''; chatInput(v); });
+  $('chatChips').addEventListener('click', e => { const b = e.target.closest('[data-cact]'); if (!b) return; meSay(b.textContent.trim()); chatAction(b.dataset.cact); });
+  document.addEventListener('click', e => { const b = e.target.closest('[data-chatopen]'); if (b) chatOpen(b.dataset.chatopen); });
+}
+
 /* ================= INIT ================= */
 load();
 // 저장된 직접 추가 부수 이름 복원
@@ -1438,6 +1842,7 @@ Object.values(S.custom||{}).forEach(r => NAME_OF[r.c] = r.n);
 })();
 tLeft = +$('timerPreset').value; tUpdate();
 renderAll();
+chatInit();
 })();
 </script>
 </body>
