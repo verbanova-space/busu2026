@@ -1884,9 +1884,25 @@ const GUIDE = {
 const howTo = rows => `<span class="ans"><b>✍️ 이렇게 적어요</b><br>${rows.map(([k, v]) => `<b>「${esc(k)}」</b> 칸 → ${v}`).join('<br>')}</span>`;
 const quick = t => /^(몰라|모름|모르겠|글쎄|알려|정답|답)/.test(cz(t)) ? '괜찮아, 같이 보자! ' : '좋아! ';
 const oSummary = o => o.replace(/(이에요|예요)\.\s*/, ' → ').replace(/있어요\.?$/, '있음').replace(/\s*→\s*$/, '').trim();
+const menuChip = () => chips([{a:'menu', t:'메뉴로'}]);
+const meanPart = m => m.split(' ').slice(0, -1).join(' ');
+const soundPart = m => m.split(' ').pop();
+
+// 대답 방식: 바로 정답 / 단계별 정답 / 힌트 먼저 → 다음 말에 정답 (무작위)
+function respond(kind, t, hintHtml, directFn, stepsFn){
+  if (C.hintWait === kind){ C.hintWait = null; return directFn(t, '좋아, 이제 정답이야! '); }
+  const st = ['direct', 'steps', 'hint'][Math.floor(Math.random() * 3)];
+  if (st === 'hint' && hintHtml){
+    C.hintWait = kind;
+    botSay(`${quick(t)}💡 <b>힌트</b> · ${hintHtml}<br>한 번 더 짧게 말해 볼래?`);
+    return menuChip();
+  }
+  if (st === 'steps' && stepsFn) return stepsFn(t);
+  return directFn(t, quick(t));
+}
 
 function chatStart(){
-  chatLog().innerHTML = ''; C.mode = 'rad'; C.rc = null;
+  chatLog().innerHTML = ''; C.mode = 'rad'; C.rc = null; C.hintWait = null;
   botSay('안녕! 나는 <b>부수 탐정 도우미</b>야 🔍<br>탐구 노트 <b>칸마다 무엇을 어떻게 쓰는지</b> 알려 줄게. 짧게 대답해도 괜찮아!');
   if (S.rads && S.rads.length){
     botSay('도움이 필요한 <b>부수</b>를 눌러 줘.');
@@ -1899,22 +1915,22 @@ function setRad(rc){
   botSay(`좋아, ${rLabel(rc)} 부수를 같이 해 보자!${i >= 0 ? ` <span class="muted">(네가 고른 ${i+1}번 부수)</span>` : ''}`);
   if (!helpOf(rc)) botSay('이 부수는 내 자료가 없어서 <b>쓰는 법</b>만 알려 줄게. 내용은 <b>네이버 한자사전</b>에서 찾아봐!');
   else if (HARD_RADS.has(rc)) botSay(`<span class="warn">⚠️ ${hjs(rc)}는 <b>가족 한자가 아주 적은 부수</b>야. 사전에서 가족 한자를 찾기 어려우면 다른 부수로 바꾸는 것도 좋아.</span>`);
+  if (C.wantTopic){ const tp = C.wantTopic; C.wantTopic = null; return answerTopic(tp); }
   menu();
 }
 function menu(){
-  C.mode = 'menu'; const rc = C.rc;
-  botSay(`${rLabel(rc)} — 어떤 칸을 도와줄까?`);
+  C.mode = 'menu'; C.hintWait = null; const rc = C.rc;
+  botSay(`${rLabel(rc)} — 어떤 칸을 도와줄까? <span class="muted">(버튼이 안 보이면 "본래 의미가 뭐야?", "가족 한자 알려줘"처럼 물어봐도 돼)</span>`);
   const items = [['o','① 본래 의미'],['v','② 변신 모습'],['f','③ 가족 한자'],['w','④ 생활 속 낱말'],['l','⑤ 연결 문장']];
   chips(items.map(([k, t]) => ({a:'topic:' + k, t:(isDone(rc, k) ? '✓ ' : '') + t})).concat([{a:'other', t:'다른 부수'}]));
 }
-function answerChips(){ chips([{a:'show', t:'👀 정답 보기'},{a:'menu', t:'메뉴로'}]); }
 
 function topic(k){
   const rc = C.rc, h = helpOf(rc);
-  C.topic = k;
-  if (k === 'o'){ botSay(GUIDE.o); botSay(`${hjs(rc)}는 무엇을 본뜬 글자일까? 짧게 써 보거나 <b>[정답 보기]</b>를 눌러!`); C.mode = 'ask'; answerChips(); return; }
-  if (k === 'v'){ botSay(GUIDE.v); botSay(`${hjs(rc)}는 다른 한자 속에서 모양이 바뀔까? 짧게 써 보거나 <b>[정답 보기]</b>를 눌러!`); C.mode = 'ask'; answerChips(); return; }
-  if (k === 'f'){ botSay(GUIDE.f); botSay('사전에서 찾은 한자의 <b>뜻이나 음</b>을 써 줘. (예: 찰 축) 아직 못 찾았으면 <b>[예시 보기]</b>!'); C.mode = 'fam'; chips([{a:'famex', t:'👀 예시 보기'},{a:'menu', t:'메뉴로'}]); return; }
+  C.topic = k; C.hintWait = null;
+  if (k === 'o'){ botSay(GUIDE.o); botSay(`${hjs(rc)}는 무엇을 본뜬 글자일까? <b>짧게라도 써 줘!</b> <span class="muted">(예: 사람, 물, 모르겠어)</span>`); C.mode = 'ask'; return menuChip(); }
+  if (k === 'v'){ botSay(GUIDE.v); botSay(`${hjs(rc)}는 다른 한자 속에서 모양이 바뀔까? <b>짧게라도 써 줘!</b> <span class="muted">(예: 바뀐다, 왼쪽, 모르겠어)</span>`); C.mode = 'ask'; return menuChip(); }
+  if (k === 'f'){ botSay(GUIDE.f); botSay('사전에서 찾은 한자의 <b>뜻이나 음</b>을 써 줘. <span class="muted">(예: 찰 축 / 아직 못 찾았으면 "몰라"라고 써도 돼)</span>'); C.mode = 'fam'; return menuChip(); }
   if (k === 'w' || k === 'l'){
     botSay(GUIDE[k]);
     if (!h || !h.f.length){ botSay('이 부수는 내 자료에 가족 한자가 없어. 사전에서 찾은 가족 한자로 직접 써 봐!'); return menu(); }
@@ -1925,107 +1941,161 @@ function topic(k){
     chips(list.map(e => ({a:k + ':' + e[0], html:`<span class="hj">${esc(e[0])}</span> ${esc(e[1])}`})).concat([{a:'menu', t:'메뉴로'}]));
   }
 }
-// 본래 의미·변신 모습 정답
+
+/* ① 본래 의미 */
+function oDirect(t, lead){
+  const rc = C.rc, h = helpOf(rc);
+  if (!h){ botSay((lead || '') + '사전에서 이 부수를 눌러 <b>[자원·글자 풀이]</b>를 읽어 봐. 무엇을 본뜬 글자인지 나와요.' + howTo([['본래 의미', '무엇을 본뜬 글자인지 + 어떤 뜻과 관련 있는지']])); doneSet(rc, 'o'); return menu(); }
+  botSay(`${lead || ''}<span class="ans"><b>정답</b> · ${hjs(rc)}(${esc(rName(rc))}): ${esc(h.o)}</span>` + howTo([['본래 의미', esc(oSummary(h.o)) + ' <span class="muted">(내 말로 줄여 써도 돼요)</span>']]));
+  doneSet(rc, 'o'); menu();
+}
+function oSteps(t){
+  const rc = C.rc, h = helpOf(rc);
+  if (!h) return oDirect(t, quick(t));
+  const parts = h.o.split(/(?<=요\.)\s*/).filter(Boolean);
+  const ex = h.f.length ? h.f.map(e => `${hjs(e[0])}(${esc(meanPart(e[1]))})`).join(', ') : '';
+  botSay(`${quick(t)}단계별로 알아보자!<br>1️⃣ <b>모양</b> · ${esc(parts[0] || h.o)}<br>${ex ? `2️⃣ <b>가족 한자 뜻</b> · ${ex}<br>` : ''}${parts[1] ? `${ex ? '3️⃣' : '2️⃣'} <b>그래서</b> · ${esc(parts.slice(1).join(' '))}` : ''}` + howTo([['본래 의미', esc(oSummary(h.o))]]));
+  doneSet(rc, 'o'); menu();
+}
+function oHint(){
+  const h = helpOf(C.rc); if (!h) return '';
+  const ex = h.f.length ? h.f.map(e => `${hjs(e[0])}(${esc(meanPart(e[1]))})`).join(', ') : '';
+  return ex ? `이 부수가 들어간 한자 ${ex}의 뜻을 봐. 모두 <b>무엇</b>과 관련 있을까?` : `글자 모양을 그림처럼 보면 무엇이 떠오르니?`;
+}
+/* ② 변신 모습 */
+function vInfo(){
+  const rc = C.rc, h = helpOf(rc), r = RAD_BY[rc] || {};
+  const ex = h && h.f.length ? h.f.map(e => hjs(e[0])).join(' · ') : '';
+  if (r.v){ const sh = r.v.split(' ')[0], pos = (r.v.match(/·\s*([^)]+)\)/) || [])[1] || (h ? h.p : ''); return {changed:true, sh, pos, ex, text:`${hjs(rc)}는 <b>${esc(r.v)}</b> 모양으로 변신해요.`}; }
+  if (h) return {changed:false, pos:h.p || '여러 자리', ex, text:`${hjs(rc)}는 크게 변신하지 않아요. 주로 한자의 <b>${esc(h.p || '여러 자리')}</b>에 들어가요.`};
+  return null;
+}
+function vRows(v){ return v.changed ? [['변신 모습', esc(v.sh)], ['위치', esc(v.pos) + '에 맞는 것 고르기']] : [['변신 모습', '비워 둬도 돼요'], ['위치', esc(v.pos) + '에 맞는 것 고르기']]; }
+function vDirect(t, lead){
+  const rc = C.rc, v = vInfo();
+  if (!v){ botSay((lead || '') + '사전에서 가족 한자 여러 개를 비교해 봐. 부수가 들어간 자리와 모양이 보여요.' + howTo([['변신 모습', '바뀐 모양이 있으면 쓰기'], ['위치', '들어간 자리 고르기']])); doneSet(rc, 'v'); return menu(); }
+  botSay(`${lead || ''}<span class="ans"><b>정답</b> · ${v.text}${v.ex ? ' 예: ' + v.ex : ''}</span>` + howTo(vRows(v)));
+  doneSet(rc, 'v'); menu();
+}
+function vSteps(t){
+  const rc = C.rc, v = vInfo();
+  if (!v) return vDirect(t, quick(t));
+  botSay(`${quick(t)}단계별로 알아보자!<br>${v.ex ? `1️⃣ <b>가족 한자 보기</b> · ${v.ex}<br>` : ''}${v.ex ? '2️⃣' : '1️⃣'} <b>자리</b> · 주로 ${esc(v.pos)}<br>${v.ex ? '3️⃣' : '2️⃣'} <b>모양</b> · ${v.changed ? `${esc(v.sh)} 모양으로 바뀌어요` : '모양은 거의 그대로예요'}` + howTo(vRows(v)));
+  doneSet(rc, 'v'); menu();
+}
+function vHint(){ const v = vInfo(); if (!v || !v.ex) return ''; return `${v.ex} 한자에서 ${hjs(C.rc)}가 <b>어디에</b>, <b>어떤 모양</b>으로 들어 있는지 찾아봐!`; }
 function reveal(t){
-  const rc = C.rc, h = helpOf(rc), r = RAD_BY[rc] || {}, k = C.topic;
-  const lead = t ? quick(t) : '';
-  if (k === 'o'){
-    if (!h){ botSay(lead + '사전에서 이 부수를 눌러 <b>[자원·글자 풀이]</b>를 읽어 봐. 무엇을 본뜬 글자인지 나와요.' + howTo([['본래 의미', '무엇을 본뜬 글자인지 + 어떤 뜻과 관련 있는지']])); doneSet(rc, 'o'); return menu(); }
-    const hit = t && h.k.split('|').find(x => t.includes(x));
-    botSay(`${hit ? `‘${esc(hit)}’ 맞았어! 👍 ` : lead}<span class="ans"><b>정답</b> · ${hjs(rc)}(${esc(rName(rc))}): ${esc(h.o)}</span>` + howTo([['본래 의미', esc(oSummary(h.o)) + ' <span class="muted">(내 말로 줄여 써도 돼요)</span>']]));
-    doneSet(rc, 'o'); return menu();
+  const rc = C.rc, h = helpOf(rc);
+  if (C.topic === 'o'){
+    const hit = h && h.k.split('|').find(x => t.includes(x));
+    if (hit && C.hintWait !== 'o') return oDirect(t, `‘${esc(hit)}’ 맞았어! 👍 `);
+    return respond('o', t, oHint(), oDirect, oSteps);
   }
-  if (k === 'v'){
-    const ex = h && h.f.length ? h.f.map(e => hjs(e[0])).join(' · ') : '';
-    let ans, rows;
-    if (r.v){
-      const sh = r.v.split(' ')[0], pos = (r.v.match(/·\s*([^)]+)\)/) || [])[1] || (h ? h.p : '');
-      ans = `${hjs(rc)}는 <b>${esc(r.v)}</b> 모양으로 변신해요.${ex ? ' 예: ' + ex : ''}`;
-      rows = [['변신 모습', esc(sh)], ['위치', esc(pos) + '에 맞는 것 고르기']];
-    } else if (h){
-      ans = `${hjs(rc)}는 크게 변신하지 않아요. 주로 한자의 <b>${esc(h.p || '여러 자리')}</b>에 들어가요.${ex ? ' 예: ' + ex : ''}`;
-      rows = [['변신 모습', '비워 둬도 돼요'], ['위치', esc(h.p || '들어간 자리') + '에 맞는 것 고르기']];
-    } else {
-      ans = '사전에서 가족 한자 여러 개를 비교해 봐. 부수가 들어간 자리와 모양이 보여요.';
-      rows = [['변신 모습', '바뀐 모양이 있으면 쓰기'], ['위치', '들어간 자리 고르기']];
-    }
-    botSay(`${lead}<span class="ans"><b>정답</b> · ${ans}</span>` + howTo(rows));
-    doneSet(rc, 'v'); return menu();
-  }
+  if (C.topic === 'v') return respond('v', t, vHint(), vDirect, vSteps);
   menu();
 }
-// 가족 한자
+
+/* ③ 가족 한자 */
 function matchReading(t, entries){
   const s = cz(t);
   const exact = entries.filter(e => s.includes(e.ch) || s === cz(e.m) || s.includes(cz(e.m)));
   if (exact.length) return {hit:exact};
-  const bySound = entries.filter(e => { const p = e.m.split(' '); return s === p[p.length-1]; });
-  const byMean = entries.filter(e => { const p = e.m.split(' '); return p.length > 1 && s === cz(p.slice(0,-1).join('')); });
+  const bySound = entries.filter(e => s === soundPart(e.m));
+  const byMean = entries.filter(e => { const mp = cz(meanPart(e.m)); return mp && s === mp; });
   return {hit: bySound.concat(byMean.filter(x => !bySound.includes(x)))};
 }
 function famShow(e, lead){
   const rc = C.rc, f = found(rc);
   if (!f.includes(e[0])){ f.push(e[0]); chatSave(); }
-  const p = e[1].split(' '), sound = p.pop(), mean = p.join(' ');
-  botSay(`${lead || ''}<span class="ans">${hjs(e[0])}(${esc(e[1])}) — ${hjs(rc)}부 한자가 맞아 ✓<br>까닭: ${esc(e[5])} 때문이에요.</span>` + howTo([['한자', hjs(e[0])], ['뜻', esc(mean)], ['음', esc(sound)]]) + '<span class="muted">학습지 2쪽 「가족 한자」 칸에도 한자를 크게 쓰고, 옆 칸에 뜻·음을 써요.</span>');
+  botSay(`${lead || ''}<span class="ans">${hjs(e[0])}(${esc(e[1])}) — ${hjs(rc)}부 한자가 맞아 ✓<br>까닭: ${esc(e[5])} 때문이에요.</span>` + howTo([['한자', hjs(e[0])], ['뜻', esc(meanPart(e[1]))], ['음', esc(soundPart(e[1]))]]) + '<span class="muted">학습지 2쪽 「가족 한자」 칸에도 한자를 크게 쓰고, 옆 칸에 뜻·음을 써요.</span>');
   doneSet(rc, 'f'); menu();
 }
-function famExample(){
-  const rc = C.rc, h = helpOf(rc);
-  C.mode = 'fam';
-  if (!h || !h.f.length){ botSay('이 부수는 내 자료에 가족 한자가 없어. 사전에서 부수 검색 → [부수·모양자] → [● 부수]를 누르면 가족 한자 목록이 나와요.'); chips([{a:'menu', t:'메뉴로'}]); return; }
-  botSay(`<span class="ans"><b>${hjs(rc)}부 가족 한자 예</b><br>${h.f.map(e => `${hjs(e[0])} ${esc(e[1])}`).join('<br>')}</span>아래에서 하나를 눌러 봐. 사전에서도 한 번 확인하면 더 좋아!`);
-  chips(h.f.map(e => ({a:'famsel:' + e[0], html:`<span class="hj">${esc(e[0])}</span> ${esc(e[1])}`})).concat([{a:'menu', t:'메뉴로'}]));
+function famChoices(){ const h = helpOf(C.rc); chips(h.f.map(e => ({a:'famsel:' + e[0], html:`<span class="hj">${esc(e[0])}</span> ${esc(e[1])}`})).concat([{a:'menu', t:'메뉴로'}])); }
+function famDirect(t, lead){
+  const rc = C.rc, h = helpOf(rc); C.mode = 'fam';
+  if (!h || !h.f.length){ botSay((lead || '') + '이 부수는 내 자료에 가족 한자가 없어. 사전에서 부수 검색 → [부수·모양자] → [● 부수]를 누르면 가족 한자 목록이 나와요.'); return menuChip(); }
+  botSay(`${lead || ''}<span class="ans"><b>${hjs(rc)}부 가족 한자 예</b><br>${h.f.map(e => `${hjs(e[0])} ${esc(e[1])}`).join('<br>')}</span>노트에 쓸 한자를 아래에서 골라 봐. 사전에서도 한 번 확인하면 더 좋아!`);
+  famChoices();
 }
+function famSteps(t){
+  const rc = C.rc, h = helpOf(rc); C.mode = 'fam';
+  if (!h || !h.f.length) return famDirect(t, quick(t));
+  const e = h.f[0];
+  botSay(`${quick(t)}단계별로 찾아보자!<br>1️⃣ <b>부수 뜻</b> · ${hjs(rc)} = ${esc(meanOf(rc))}<br>2️⃣ <b>그 뜻과 관련된 한자</b> · 예를 들어 ‘${esc(meanPart(e[1]))}’이라는 뜻의 ${hjs(e[0])}<br>3️⃣ <b>가족 한자 예</b> · ${h.f.map(x => `${hjs(x[0])} ${esc(x[1])}`).join(', ')}<br>노트에 쓸 한자를 아래에서 골라 봐!`);
+  famChoices();
+}
+function famHint(){ const h = helpOf(C.rc); if (!h || !h.f.length) return ''; return `${hjs(C.rc)}(${esc(meanOf(C.rc))})의 뜻과 관련된 한자를 떠올려 봐. 예를 들면 ‘${esc(meanPart(h.f[0][1]))}’이라는 뜻의 한자가 있어. 그 한자의 <b>음</b>은 무엇일까?`; }
 function famInput(t){
   const rc = C.rc, h = helpOf(rc);
-  if (/^(몰라|모름|모르겠|글쎄|알려|정답|답|예시)/.test(cz(t))) return famExample();
   const mine = h ? h.f.map(e => ({ch:e[0], m:e[1], e})) : [];
   const r = matchReading(t, mine);
-  if (r.hit.length > 1){ botSay(`같은 음이나 뜻을 가진 한자가 여러 개야: ${r.hit.map(x => `${hjs(x.ch)} ${esc(x.m)}`).join(', ')}. 아래에서 눌러 줘!`); chips(r.hit.map(x => ({a:'famsel:' + x.ch, html:`<span class="hj">${esc(x.ch)}</span> ${esc(x.m)}`})).concat([{a:'menu', t:'메뉴로'}])); return; }
-  if (r.hit.length === 1) return famShow(r.hit[0].e, '맞았어! 👍 ');
+  if (r.hit.length > 1){ C.hintWait = null; botSay(`같은 음이나 뜻을 가진 한자가 여러 개야: ${r.hit.map(x => `${hjs(x.ch)} ${esc(x.m)}`).join(', ')}. 아래에서 골라 줘!`); chips(r.hit.map(x => ({a:'famsel:' + x.ch, html:`<span class="hj">${esc(x.ch)}</span> ${esc(x.m)}`})).concat([{a:'menu', t:'메뉴로'}])); return; }
+  if (r.hit.length === 1){ C.hintWait = null; return famShow(r.hit[0].e, '맞았어! 👍 '); }
   const s = cz(t);
   const others = Object.keys(READ).filter(ch => READ[ch].rc !== rc).map(ch => ({ch, m:READ[ch].m}));
   const wrong = others.filter(e => s.includes(e.ch) || s === cz(e.m) || s.includes(cz(e.m)));
   if (wrong.length === 1){
     const w = wrong[0], act = READ[w.ch].rc;
     logTrap({c:w.ch, chose:rc, act});
-    botSay(`앗! ${hjs(w.ch)}(${esc(w.m)})는 ${hjs(rc)}부가 아니라 <b>${rLabel(act)}부</b>야.${TRAP_HINT[w.ch] ? `<span class="warn">${esc(TRAP_HINT[w.ch])}</span>` : ''}다른 한자를 찾아보거나 <b>[예시 보기]</b>를 눌러.`);
-    chips([{a:'famex', t:'👀 예시 보기'},{a:'menu', t:'메뉴로'}]); return;
+    botSay(`앗! ${hjs(w.ch)}(${esc(w.m)})는 ${hjs(rc)}부가 아니라 <b>${rLabel(act)}부</b>야.${TRAP_HINT[w.ch] ? `<span class="warn">${esc(TRAP_HINT[w.ch])}</span>` : ''}다른 한자를 찾아서 다시 말해 줘!`);
+    return menuChip();
   }
-  C.pendingFam = t.trim().slice(0, 20);
-  botSay(`"${esc(C.pendingFam)}"는 내 자료에 없는 한자야. 사전에서 그 한자를 눌러 <b>부수가 ${hjs(rc)}인지</b> 확인했다면 노트에 써도 돼!` + howTo([['한자', '찾은 한자'], ['뜻', '사전에 나온 뜻'], ['음', '사전에 나온 음']]));
-  chips([{a:'famyes', t:'확인했어'},{a:'famex', t:'👀 예시 보기'},{a:'menu', t:'메뉴로'}]);
+  const looksHanja = CJK.test(t) || (/^[가-힣]{1,3}\s?[가-힣]$/.test(t.trim()) && !/^(몰라|모름|글쎄|알려|정답)/.test(cz(t)));
+  if (looksHanja && !/^(몰라|모름|모르겠|글쎄|알려|정답|답)/.test(cz(t)) && cz(t).length >= 2){
+    C.pendingFam = t.trim().slice(0, 20);
+    botSay(`"${esc(C.pendingFam)}"는 내 자료에 없는 한자야. 사전에서 그 한자를 눌러 <b>부수가 ${hjs(rc)}인지</b> 확인했다면 노트에 써도 돼!` + howTo([['한자', '찾은 한자'], ['뜻', '사전에 나온 뜻'], ['음', '사전에 나온 음']]));
+    chips([{a:'famyes', t:'확인했어'},{a:'menu', t:'메뉴로'}]); return;
+  }
+  return respond('f', t, famHint(), famDirect, famSteps);
 }
-// 생활 속 낱말
+
+/* ④ 생활 속 낱말 */
 function wordStart(ch){
-  const e = READ[ch].e; C.cur = e; C.mode = 'word';
-  botSay(`${hjs(e[0])}(${esc(e[1])}) 한자가 들어간 낱말을 알면 써 줘. 모르면 <b>[정답 보기]</b>!<br><span class="muted">힌트: 낱말에 ‘${esc(e[1].split(' ').pop())}’ 소리가 들어가요.</span>`);
-  answerChips();
+  const e = READ[ch].e; C.cur = e; C.mode = 'word'; C.hintWait = null;
+  botSay(`${hjs(e[0])}(${esc(e[1])}) 한자가 들어간 낱말을 <b>짧게라도 써 줘!</b> <span class="muted">(아는 낱말 / 모르면 "몰라")</span>`);
+  menuChip();
 }
-function wordShow(t){
-  const e = C.cur, rc = C.rc, s = cz(t || '');
-  const right = t && (s.includes(cz(e[3])) || s.includes(e[2]));
-  botSay(`${right ? '정답이야! 🎉 ' : (t ? quick(t) + '내가 아는 낱말은 이거야. ' : '')}<span class="ans"><b>정답</b> · ${hjs(e[2])}(${esc(e[3])}) - ${esc(e[4])}</span>` + howTo([['한자어', hjs(e[2])], ['읽기', esc(e[3])], ['뜻', esc(e[4])]]));
+function wDirect(t, lead){
+  const e = C.cur, rc = C.rc;
+  botSay(`${lead || ''}<span class="ans"><b>정답</b> · ${hjs(e[2])}(${esc(e[3])}) - ${esc(e[4])}</span>` + howTo([['한자어', hjs(e[2])], ['읽기', esc(e[3])], ['뜻', esc(e[4])]]));
   doneSet(rc, 'w'); menu();
 }
-// 연결 문장
+function wSteps(t){
+  const e = C.cur, rc = C.rc;
+  botSay(`${quick(t)}단계별로 알아보자!<br>1️⃣ <b>소리</b> · 낱말 속에 ‘${esc(soundPart(e[1]))}’ 소리가 들어가요<br>2️⃣ <b>뜻</b> · ${esc(e[4])}<br>3️⃣ <b>낱말</b> · ${hjs(e[2])}(${esc(e[3])})` + howTo([['한자어', hjs(e[2])], ['읽기', esc(e[3])], ['뜻', esc(e[4])]]));
+  doneSet(rc, 'w'); menu();
+}
+function wordShow(t){
+  const e = C.cur, s = cz(t);
+  if (s.includes(cz(e[3])) || s.includes(e[2])){ C.hintWait = null; return wDirect(t, '정답이야! 🎉 '); }
+  respond('w', t, `‘${esc(soundPart(e[1]))}’ 소리가 들어가는 두 글자 낱말이야. 뜻은 <b>${esc(e[4])}</b>!`, (tt, lead) => wDirect(tt, (lead || '') + '내가 아는 낱말은 이거야. '), wSteps);
+}
+
+/* ⑤ 연결 문장 */
+const LINK_Q = ['무엇으로 해요?', '어떤 움직임에서 나와요?', '무엇의 한 종류예요?', '무엇으로 만들어요?'];
 function linkStart(ch){
-  const e = READ[ch].e, rc = C.rc; C.cur = e; C.mode = 'link';
-  botSay(`<b>${esc(e[0])}에 ${esc(rc)} 부수가 들어간 까닭은 (　　) 때문이다.</b><br>빈칸에 들어갈 말을 짧게 써 봐. ${hjs(e[0])}의 뜻(${esc(e[1].split(' ').slice(0,-1).join(' '))})과 부수의 뜻(${esc(meanOf(rc))})을 이으면 돼! 모르면 <b>[정답 보기]</b>.`);
-  answerChips();
+  const e = READ[ch].e, rc = C.rc; C.cur = e; C.mode = 'link'; C.hintWait = null;
+  botSay(`<b>${esc(e[0])}에 ${esc(rc)} 부수가 들어간 까닭은 (　　) 때문이다.</b><br>빈칸에 들어갈 말을 <b>짧게라도 써 줘!</b> ${hjs(e[0])}의 뜻(${esc(meanPart(e[1]))})과 부수의 뜻(${esc(meanOf(rc))})을 이으면 돼.`);
+  menuChip();
+}
+function lDirect(t, lead){
+  const e = C.cur, rc = C.rc;
+  botSay(`${lead || ''}<span class="ans"><b>예시 연결 문장</b> · ${esc(e[0])}에 ${esc(rc)} 부수가 들어간 까닭은 <b>${esc(e[5])}</b> 때문이다.</span>` + howTo([['한자 고르기', hjs(e[0])], ['까닭', esc(e[5]) + ' <span class="muted">(빈칸 부분만! 내 말로 바꿔 써도 좋아요)</span>']]));
+  doneSet(rc, 'l'); menu();
+}
+function lSteps(t){
+  const e = C.cur, rc = C.rc;
+  botSay(`${quick(t)}단계별로 만들어 보자!<br>1️⃣ <b>한자 뜻</b> · ${hjs(e[0])} = ${esc(meanPart(e[1]))}<br>2️⃣ <b>부수 뜻</b> · ${hjs(rc)} = ${esc(meanOf(rc))}<br>3️⃣ <b>두 뜻 잇기</b> · ${esc(e[5])}<br>✅ ${esc(e[0])}에 ${esc(rc)} 부수가 들어간 까닭은 <b>${esc(e[5])}</b> 때문이다.` + howTo([['한자 고르기', hjs(e[0])], ['까닭', esc(e[5]) + ' <span class="muted">(빈칸 부분만!)</span>']]));
+  doneSet(rc, 'l'); menu();
 }
 function linkShow(t){
   const e = C.cur, rc = C.rc, h = helpOf(rc);
-  let lead = '';
-  if (t){
-    const ks = h.k.split('|').filter(k => !cz(e[1]).includes(k));
-    const body = t.replace(/[^\s]+\s*부수(이기|라서|여서|이어서|니까|이니까|가|를|는)?/g, ' ');
-    const hasK = ks.some(k => body.includes(k));
-    lead = hasK ? '부수의 뜻이 잘 들어갔어 ✓ ' : (/부수(이기|라서|니까)/.test(cz(t)) ? '"부수이기 때문"은 까닭이 아니야. 이렇게 고쳐 보자! ' : quick(t) + `부수 뜻 ‘${esc(meanOf(rc))}’을(를) 넣으면 더 좋아. `);
-  }
-  botSay(`${lead}<span class="ans"><b>예시 연결 문장</b> · ${esc(e[0])}에 ${esc(rc)} 부수가 들어간 까닭은 <b>${esc(e[5])}</b> 때문이다.</span>` + howTo([['한자 고르기', hjs(e[0])], ['까닭', esc(e[5]) + ' <span class="muted">(빈칸 부분만! 내 말로 바꿔 써도 좋아요)</span>']]));
-  doneSet(rc, 'l'); menu();
+  const ks = h.k.split('|').filter(k => !cz(e[1]).includes(k));
+  const body = t.replace(/[^\s]+\s*부수(이기|라서|여서|이어서|니까|이니까|가|를|는)?/g, ' ');
+  if (ks.some(k => body.includes(k)) && C.hintWait !== 'l'){ return lDirect(t, '부수의 뜻이 잘 들어갔어 ✓ 멋져! '); }
+  if (/부수(이기|라서|니까)/.test(cz(t))) botSay('"부수이기 때문"은 까닭이 아니야. 같은 말을 되풀이한 거야!');
+  const q = LINK_Q[Math.floor(Math.random() * LINK_Q.length)];
+  respond('l', t, `질문 카드를 써 봐: "${esc(meanPart(e[1]))}"은(는) ${hjs(rc)}(${esc(meanOf(rc))})와 어떤 사이일까? <b>${q}</b>`, lDirect, lSteps);
 }
 
 function chooseRad(rc){
@@ -2033,11 +2103,61 @@ function chooseRad(rc){
   if (fb){ botSay(`${rLabel(rc)} 부수는 이번 수행평가에서 <b>쓸 수 없는 부수</b>야.<span class="warn">${esc(fb.why)}</span>다른 부수를 골라 볼까?`); chips([]); return; }
   setRad(rc);
 }
+/* 버튼 없이 말로 물어봐도 답하기: "본래 의미가 뭐야?", "족 가족 한자 알려줘" */
+function topicOf(t){
+  if (/본래|의미|본뜬/.test(t)) return 'o';
+  if (/변신|변형|모양이 ?바뀌|위치/.test(t)) return 'v';
+  if (/가족/.test(t)) return 'f';
+  if (/낱말|단어|생활/.test(t)) return 'w';
+  if (/연결|까닭|이유/.test(t)) return 'l';
+  return null;
+}
+function radInText(t){
+  const chs = [...t].map(radFromChar).filter(rc => rc && (RAD_BY[rc] || FORBIDDEN.some(f => f.c === rc)));
+  if (chs.length) return chs[0];
+  const s = cz(t);
+  const mine = (S.rads || []).find(rc => { const n = rName(rc); return n && (s.includes(cz(n)) || s.includes(soundPart(n) + '부') || (s.includes(meanPart(n)) && meanPart(n).length >= 1 && s.startsWith(cz(meanPart(n))))); });
+  return mine || null;
+}
+function answerTopic(tp){
+  const rc = C.rc, h = helpOf(rc);
+  C.topic = tp; C.hintWait = null;
+  botSay(GUIDE[tp]);
+  if (tp === 'o') return oDirect('', '');
+  if (tp === 'v') return vDirect('', '');
+  if (tp === 'f') return famDirect('', '');
+  if (!h || !h.f.length){ botSay('이 부수는 내 자료에 가족 한자가 없어. 사전에서 찾은 가족 한자로 직접 써 봐!'); return menu(); }
+  const f = found(rc);
+  const list = h.f.filter(e => tp === 'l' || e[2]);
+  if (!list.length){ botSay('이 부수는 내 자료에 낱말 예시가 없어. 사전 [단어] 목록에서 찾아봐!'); return menu(); }
+  const e = list.find(x => f.includes(x[0])) || list[0];
+  C.cur = e;
+  botSay(`${hjs(e[0])}(${esc(e[1])}) 한자로 알려 줄게. <span class="muted">(다른 가족 한자로 보고 싶으면 "${tp === 'w' ? '낱말' : '연결 문장'}" 버튼을 눌러)</span>`);
+  return tp === 'w' ? wDirect('', '') : lDirect('', '');
+}
 function chatInput(raw){
   const t = String(raw || '').trim(); if (!t) return;
   meSay(t);
   if (/^(처음|다시|다른부수|다른 부수)$/.test(t)){ chatStart(); return; }
   if (/^(메뉴|메뉴로)$/.test(t) && C.rc){ menu(); return; }
+  { // 질문으로 물어본 경우 (버튼이 안 보일 때도 쓸 수 있게)
+    const tp = topicOf(t), isQ = /(뭐|뭔|무엇|무슨|알려|어떻게|궁금|가르쳐|모르겠|\?)/.test(t);
+    if (tp && (isQ || C.mode === 'menu' || C.mode === 'rad' || C.mode === 'pick')){
+      const rcIn = radInText(t);
+      if (rcIn && rcIn !== C.rc){
+        const fb = FORBIDDEN.find(f => f.c === rcIn);
+        if (fb){ botSay(`${rLabel(rcIn)} 부수는 이번 수행평가에서 <b>쓸 수 없는 부수</b>야.<span class="warn">${esc(fb.why)}</span>`); return; }
+        C.rc = rcIn; botSay(`${rLabel(rcIn)} 부수로 알려 줄게!`);
+      }
+      if (!C.rc){
+        C.wantTopic = tp;
+        botSay('어떤 부수인지 먼저 알려 줘! 부수 이름을 써 줘. <span class="muted">(예: 발 족, 물 수, 足)</span>');
+        if (S.rads && S.rads.length) chips(S.rads.map(rc => ({a:'choose:' + rc, html:`<span class="hj">${esc(rc)}</span> ${esc(rName(rc))}`})));
+        C.mode = 'rad'; return;
+      }
+      return answerTopic(tp);
+    }
+  }
   if (C.mode === 'ask') return reveal(t);
   if (C.mode === 'fam') return famInput(t);
   if (C.mode === 'word') return wordShow(t);
@@ -2066,9 +2186,7 @@ function chatAction(a){
   if (k === 'other'){ C.mode = 'rad'; C.rc = null; botSay('도움이 필요한 부수의 <b>이름</b>을 써 줘. (예: 발 족, 물 수, 足)'); chips([]); return; }
   if (k === 'menu') return menu();
   if (k === 'topic') return topic(v);
-  if (k === 'show'){ if (C.mode === 'ask') return reveal(''); if (C.mode === 'word') return wordShow(''); if (C.mode === 'link') return linkShow(''); return menu(); }
-  if (k === 'famex') return famExample();
-  if (k === 'famsel'){ const r = READ[v]; if (r && r.e) return famShow(r.e, ''); return; }
+  if (k === 'famsel'){ const r = READ[v]; if (r && r.e){ C.hintWait = null; return famShow(r.e, ''); } return; }
   if (k === 'famyes'){ const rc = C.rc, f = found(rc); const v2 = C.pendingFam || ''; if (v2 && !f.includes(v2)){ f.push(v2); chatSave(); } botSay('좋아! 노트에 적고, 선생님께 한 번 더 확인받자. 👍'); doneSet(rc, 'f'); return menu(); }
   if (k === 'word' || k === 'w') return wordStart(v);
   if (k === 'link' || k === 'l') return linkStart(v);
