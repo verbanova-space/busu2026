@@ -383,7 +383,7 @@ table.ex td{padding:6px 10px;border:1px solid var(--line);background:#fff}
     <div class="card">
       <span class="pill p-green">3차시 · 2단계 준비</span>
       <h2>캐릭터 설계: 캔바 열기 전에 정하기</h2>
-      <p class="lead">캐릭터 이름·소개·그림 아이디어를 정하면, 앱이 <b>캔바로 만들 수 있는 아이디어인지</b> 점검하고 캔바 검색어를 알려 줘요. 아래 미리보기는 배치 참고용이에요.</p>
+      <p class="lead">캐릭터 이름·소개·그림 아이디어를 정하면, 앱이 <b>캔바로 만들 수 있는 아이디어인지</b> 점검하고 캔바 검색어를 알려 줘요. 그림은 <b>캔바 [요소]</b>로 꾸미거나 <b>✏️ 손그림</b>을 찍어 넣어도 돼요. 아래 미리보기는 배치 참고용이에요.</p>
       <div id="designForm"></div>
     </div>
     <div class="card">
@@ -396,10 +396,11 @@ table.ex td{padding:6px 10px;border:1px solid var(--line);background:#fff}
     <div class="card">
       <h3>캔바 규칙</h3>
       <div class="grid2">
-        <div class="callout green"><b>써도 돼요</b><br>일반 요소(도형·스티커·선), 그리기 도구, 글꼴·색 바꾸기, 내가 찍은 사진</div>
-        <div class="callout red"><b>안 돼요</b><br>매직 미디어(AI 이미지)·매직 라이트(AI 글쓰기) 등 AI 기능, 인터넷의 부수 그림 통째로 가져오기, 부수 글자 빼기</div>
+        <div class="callout green"><b>써도 돼요</b><br>일반 요소(도형·스티커·선), 그리기 도구, 글꼴·색 바꾸기, 내가 찍은 사진, <b>✏️ 내가 그린 손그림 사진</b></div>
+        <div class="callout red"><b>안 돼요</b><br>제미나이·매직 미디어 등 <b>AI로 그림 만들기</b>, 매직 라이트(AI 글쓰기), 인터넷의 부수 그림 통째로 가져오기, 부수 글자 빼기</div>
       </div>
-      <p class="muted" style="margin:6px 0 0">부수 글자는 꼭 <b>텍스트로 크게</b> 넣고, 그 글자 위에 의미가 보이는 요소를 얹어요. 다 만들면 <b>구글 클래스룸 과제</b> 화면으로 돌아가 <b>[제출]</b>을 눌러요.</p>
+      <div class="callout gold" style="margin:8px 0 0"><b>✏️ 손그림으로 하고 싶다면?</b><br>① 흰 종이에 <b>부수 글자가 잘 보이게</b> 캐릭터를 진하게 그려요 (사인펜·색연필)<br>② 태블릿으로 사진을 찍어요 (그림만 꽉 차게, 그림자 없이)<br>③ 캔바 왼쪽 <b>[업로드]</b> → <b>[파일 업로드]</b> → 사진을 카드 오른쪽 <b>「내 캐릭터 칸」</b>에 넣고 크기 조절<br>④ 손그림 사진은 <b>「캐릭터 설계」 클래스룸 과제</b>에도 첨부해요</div>
+      <p class="muted" style="margin:6px 0 0">부수 글자는 꼭 <b>크게 보이게</b> 넣고(텍스트나 손그림), 그 글자 위에 의미가 보이는 꾸밈을 얹어요. 다 만들면 <b>구글 클래스룸 과제</b> 화면으로 돌아가 <b>[제출]</b>을 눌러요.</p>
     </div>
   </section>
 
@@ -418,7 +419,7 @@ table.ex td{padding:6px 10px;border:1px solid var(--line);background:#fff}
         <div><b>1</b><b>구글 클래스룸</b> → 「수업 과제」 → 「한문 부수 도감」 과제 → 첨부된 <b>캔바 디자인</b>을 누르면 내 디자인이 생겨요</div>
         <div><b>2</b><b>1쪽 표지</b>: 이름, 테마, 이유, 부수 2개 (5분) · <b>2쪽 예시</b>(사람 인 亻)를 보고 방법 익히기</div>
         <div><b>3</b><b>카드 1~2쪽</b>: 한 쪽에 부수 1개씩! 회색 글자를 지우고 아래 글을 붙여 넣기</div>
-        <div><b>4</b>큰 부수 글자 위에 [요소]에서 찾은 그림을 얹어 꾸미기 (카드당 8분)</div>
+        <div><b>4</b>그림 칸 <b>왼쪽</b>은 원래 부수 글자 그대로, <b>오른쪽</b> 「내 캐릭터 칸」에 부수 글자 + [요소] 또는 ✏️ 손그림 사진 (카드당 8분)</div>
         <div><b>5</b><b>예시 쪽 삭제</b>(3쪽만 남기기) → <b>클래스룸 과제</b> 화면에서 <b>[제출]</b></div>
       </div>
     </div>
@@ -929,7 +930,7 @@ function go(i){
 const LESSONS = [
   {n:1, d:'11월 11일 (수)', t:'부수 탐정이 되자!', c:'var(--seal)', start:0, ev:'', todo:['① 탐정 훈련 — 진짜 부수를 맞혀요', '② 테마·부수 — 반·번호·별명, 나만의 테마, 부수 2개', '사전 연습 — 가족 한자 1개를 찾아봐요']},
   {n:2, d:'11월 18일 (수)', t:'부수 탐정 탐구 노트', c:'var(--gold)', start:2, ev:'★ 평가: 자료의 적절성', todo:['③ 탐구 노트 — 부수 2개 모두 7/7 채우기', '막히면 🔍 부수 탐정 도우미에게 물어봐요', '📮 선생님께 보내기 — 다음 주(11/25)는 수업이 없어요!']},
-  {n:3, d:'12월 2일 (수)', t:'부수를 캐릭터로!', c:'var(--jade)', start:3, ev:'', todo:['④ 캐릭터 설계 — 이름·소개·그림 아이디어', '⑤ 캔바로 출발 — 클래스룸 과제에서 캔바 열기', '표지 + 카드 1 만들기']},
+  {n:3, d:'12월 2일 (수)', t:'부수를 캐릭터로!', c:'var(--jade)', start:3, ev:'', todo:['④ 캐릭터 설계 — 이름·소개·그림 아이디어 (캔바 요소 또는 ✏️ 손그림)', '⑤ 캔바로 출발 — 클래스룸 과제에서 캔바 열기', '표지 + 카드 1 만들기']},
   {n:4, d:'12월 9일 (수)', t:'카드뉴스 완성 · 제출', c:'var(--blue)', start:4, ev:'★ 평가: 내용 구성력 · 표현력', todo:['⑤ 캔바 — 카드 2 완성, 예시 쪽 삭제', '클래스룸 과제에서 [제출]', '⑥ 점검·제출 — 성찰 쓰고 📮 선생님께 보내기']}
 ];
 function curLesson(){ if (S.curLesson) return S.curLesson; return S.step <= 1 ? 1 : (S.step === 2 ? 2 : (S.step === 5 ? 4 : 3)); }
@@ -1231,7 +1232,7 @@ function renderDesign(){
         <div class="swatches">${COLORS.map((cc,j) => `<button type="button" class="sw ${c.color===j?'on':''}" style="background:${cc.pc}" data-color="${i}:${j}" aria-label="색 ${j+1}"></button>`).join('')}</div></div>
       <div class="fgrid">
         <div class="span2"><label class="f">캐릭터 이름</label><input class="in" data-c="${i}" data-ck="name" value="${esc(c.name)}" placeholder="예: 물방울 삼총사"></div>
-        <div class="span2"><label class="f">그림 아이디어 (부수 글자 어디에 무엇을?)</label><input class="in" data-c="${i}" data-ck="idea" value="${esc(c.idea)}" placeholder="예: 氵의 세 점을 물방울 얼굴로"><div class="feas" id="feas${i}"></div></div>
+        <div class="span2"><label class="f">그림 아이디어 (부수 글자 어디에 무엇을?)</label><input class="in" data-c="${i}" data-ck="idea" value="${esc(c.idea)}" placeholder="예: 氵의 세 점을 물방울 얼굴로 / 손그림으로 足에 축구화 그리기"><div class="feas" id="feas${i}"></div></div>
         <div class="span4"><label class="f">캐릭터 소개 한 줄 (부수의 의미가 드러나게)</label>
           <div class="row"><input class="in" data-c="${i}" data-ck="intro" value="${esc(c.intro)}" placeholder="예: 나는 氵! 강·바다·눈물까지 물과 관련된 뜻을 데려와." style="flex:1;min-width:200px">
           <button type="button" class="btn ghost sm" data-introhelp="${i}">내 탐구로 첫 문장 만들기</button></div></div>
@@ -1245,11 +1246,12 @@ function feasibility(rc, c){
   const kw = CANVA_KW[VAR[rc]||rc];
   if (!idea){ out.push(['q','부수 글자 위에 무엇을 얹을지 한 줄로 써 보세요.']); }
   else {
-    if (/AI|인공지능|매직|생성|챗GPT|제미나이/i.test(idea)) out.push(['bad','AI로 그림을 만드는 것은 안 돼요. 캔바 일반 요소나 그리기 도구를 써요.']);
+    if (/AI|인공지능|매직|생성|챗GPT|제미나이|gemini/i.test(idea)) out.push(['bad','AI로 그림을 만드는 것은 안 돼요. 캔바 일반 요소나 그리기 도구, 손그림을 써요.']);
+    if (/손그림|손으로|직접 ?그|종이|색연필|사인펜|그려서|그려 ?넣/.test(idea)) out.push(['hand','✏️ 손그림 좋아요! 흰 종이에 부수 글자가 보이게 진하게 그리고, 사진을 찍어 캔바 [업로드]로 넣어요.']);
     if (/인터넷|구글|퍼오|캡처|캡쳐|다운/.test(idea)) out.push(['bad','인터넷 그림을 통째로 가져오면 안 돼요. 캔바 [요소]에서 골라 내가 배치해요.']);
     if (/(빼|지우|없애)/.test(idea) && /(글자|부수)/.test(idea)) out.push(['bad','부수 글자는 지우면 안 돼요! 글자 위에 꾸미기를 얹어요.']);
     if (idea.length < 6) out.push(['q','조금 더 자세히: 글자의 어느 부분을 무엇으로 바꿀까요?']);
-    if (!out.some(x => x[0]==='bad') && idea.length >= 6) out.push(['ok','캔바로 만들 수 있는 아이디어예요 ✓']);
+    if (!out.some(x => x[0]==='bad') && idea.length >= 6) out.push(['ok', out.some(x => x[0]==='hand') ? '손그림으로 만들 수 있는 아이디어예요 ✓' : '캔바로 만들 수 있는 아이디어예요 ✓']);
   }
   if (kw) out.push(['kw',`캔바 [요소] 검색어 추천: ${kw}`]);
   return out;
@@ -1294,7 +1296,7 @@ function renderCanva(){
   if (!all3){ $('copyBlocks').innerHTML = '<p class="muted">부수 2개를 고르면 여기에 글이 만들어져요.</p>'; }
   else {
     const cover = `${nickCheck(S.student.nick).ok ? S.student.nick : '(별명)'}의 부수 도감\n1학년 ${S.student.cls||'_'}반 ${S.student.no||'_'}번\n나의 테마: ${S.theme.title || '-'}\n고른 이유: ${S.theme.why || '-'}\n${S.rads.join('  ')}`;
-    const blocks = [{t:'1쪽 · 표지', body:cover, kw:''}].concat(S.rads.map((rc,i) => ({t:`카드 ${i+1} · ${rc}`, body:cardText(rc), kw:CANVA_KW[rc] ? `큰 부수 글자: ${rc} (그대로 크게) · [요소] 검색어: ${CANVA_KW[rc]}` : `큰 부수 글자: ${rc}`})));
+    const blocks = [{t:'1쪽 · 표지', body:cover, kw:''}].concat(S.rads.map((rc,i) => ({t:`카드 ${i+1} · ${rc}`, body:cardText(rc), kw:CANVA_KW[rc] ? `왼쪽 칸: 원래 부수 ${rc} (그대로) · 오른쪽 캐릭터 칸 [요소] 검색어: ${CANVA_KW[rc]}` : `왼쪽 칸: 원래 부수 ${rc} (그대로) · 오른쪽: 내 캐릭터`})));
     $('copyBlocks').innerHTML = blocks.map((b,i) => `<div class="cblock"><div class="row" style="justify-content:space-between"><b>${esc(b.t)}</b><button type="button" class="btn sm" data-copy="${i}">복사</button></div><pre id="cb${i}">${esc(b.body)}</pre>${b.kw?`<div class="kw">${esc(b.kw)}</div>`:''}</div>`).join('');
   }
   $('launchRads').textContent = all3 ? S.rads.join('') : '部';
