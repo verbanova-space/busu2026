@@ -266,6 +266,7 @@ body.hot{background-color:#FFE4E4}
      매번 붙여 넣지 않아도 되고, 학생이 방 코드만 입력해도 들어와요.
    - rounds: 미리 준비한 제시어. { topic: 주제, chosung: 초성, examples: 예시 단어 }
      (예시 단어는 '가상 친구'가 쓰고, 판이 끝나면 "이런 단어도 있었어요"로 보여 줘요)
+   - dictFile: 표준국어대사전 표제어 목록(words.txt). 판 설정에서 '사전에 있는 단어만'을 켜면 사용해요.
    - penalties / prizes / questions / samhaengsi: 화면의 📝 버튼으로도 고칠 수 있어요.
      '질문'이 들어간 벌칙은 questions에서, '삼행시'가 들어간 벌칙은 samhaengsi에서 하나를 뽑아요.
    =================================================================== */
@@ -335,6 +336,8 @@ const GAME_DATA = {
   nickAnimal: ["토끼","수달","펭귄","햄스터","고양이","강아지","판다","다람쥐","병아리","코알라","여우","오리","곰돌이","고슴도치","알파카","부엉이"],
   emojis: ["🐰","🦦","🐧","🐹","🐱","🐶","🐼","🐿️","🐥","🐨","🦊","🦆","🐻","🦔","🦙","🐸","🐯","🐷","🐮","🦄","🐙","🐳","🦖","🐝"],
   badWords: ["씨발","시발","씨빨","ㅅㅂ","ㅆㅂ","병신","븅신","ㅂㅅ","개새","새끼","존나","졸라","좆","지랄","ㅈㄹ","미친","ㅁㅊ","닥쳐","꺼져","엿먹","느금","니애미","애미","애비","등신","쌍년","fuck","shit","sex","섹스","야동","자살","죽어","죽을래"],
+  // 표준국어대사전 표제어 목록 파일(이 html과 같은 폴더). 한 줄에 단어 하나. 없으면 사전 검사 없이 진행해요.
+  dictFile: "words.txt",
   bannedChosung: ["ㅅㅂ","ㅂㅅ","ㅈㄹ","ㅁㅊ","ㅈㄴ","ㅆㅂ","ㄱㅅㄲ","ㅅㄲ","ㄷㅊ","ㄲㅈ"]
 };
 
@@ -361,7 +364,8 @@ const Logic = (() => {
   }
   const normBad = s => String(s || "").toLowerCase().replace(/[^가-힣ㄱ-ㅎa-z]/g, "");
   function isBad(s, list) { const n = normBad(s); return !!n && (list || []).some(b => { const k = normBad(b); return k && n.includes(k); }); }
-  function checkWord(raw, target, used, bad) {
+  // dict: 표준국어대사전 단어 모음(Set). null이면 사전 검사를 하지 않음
+  function checkWord(raw, target, used, bad, dict) {
     const w = clean(raw);
     if (!w) return { ok: false, reason: "empty", w };
     if (![...w].every(isSyl)) return { ok: false, reason: "notHangul", w };
@@ -369,6 +373,7 @@ const Logic = (() => {
     if (w.length !== target.length) return { ok: false, reason: "length", w };
     const cho = toChosung(w);
     if (cho !== target) return { ok: false, reason: "mismatch", w, cho };
+    if (dict && !dict.has(w)) return { ok: false, reason: "notInDict", w };
     if (used && (used.has ? used.has(w) : used.includes(w))) return { ok: false, reason: "dup", w };
     return { ok: true, w };
   }
@@ -450,6 +455,17 @@ const Logic = (() => {
   }
   function fmtClock(ms) { const d = new Date(ms); const p = n => String(n).padStart(2, "0"); return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; }
   function makeRoomCode(rand = Math.random) { const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let s = ""; for (let i = 0; i < 5; i++) s += A[Math.floor(rand() * A.length)]; return s; }
+  // 사전 글(한 줄에 한 단어)에서 한글 단어만 모으기
+  function parseDict(text) {
+    const set = new Set();
+    for (const line of String(text || "").split(/\r?\n/)) { const w = line.trim(); if (w && /^[가-힣]+$/.test(w)) set.add(w); }
+    return set;
+  }
+  function wordsFor(dict, cho) {
+    const out = []; if (!dict || !cho) return out;
+    for (const w of dict) if (w.length === cho.length && toChosung(w) === cho) out.push(w);
+    return out;
+  }
   function randomChosung(banned, rand = Math.random) {
     const F = "ㄱㄴㄷㅁㅂㅅㅇㅈㅊㅎ", S = "ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅎ";
     for (let i = 0; i < 50; i++) { const c = pick([...F], rand) + pick([...S], rand); if (!(banned || []).includes(c)) return c; }
@@ -472,7 +488,7 @@ const Logic = (() => {
     return cfg;
   }
   return { CHO, isSyl, clean, toChosung, parseTarget, isBad, checkWord, checkNick, shuffle, pick, randomNick, pickNext, bombSeconds, bpm,
-    spinTo, landed, buildWheel, splitItem, detailKind, applyUpdates, fmtClock, makeRoomCode, randomChosung, parseFbConfig };
+    spinTo, landed, buildWheel, splitItem, detailKind, applyUpdates, fmtClock, makeRoomCode, randomChosung, parseFbConfig, parseDict, wordsFor };
 })();
 // LOGIC END
 
@@ -526,7 +542,7 @@ const REASON = {
   empty: "단어를 입력해 주세요", notHangul: "한글 완성 글자로만 써 주세요 (자음만은 안 돼요)", bad: "바르고 고운 말을 써 주세요 🙏",
   length: "글자 수가 달라요", mismatch: "초성이 맞지 않아요", dup: "이미 나온 단어예요! 다른 단어를 찾아봐요",
   notPlaying: "지금은 단어를 보낼 수 없어요", paused: "잠깐 멈춤 중이에요", tooFast: "너무 빨라요! 천천히 보내 주세요",
-  timeout: "연결이 느려요. 다시 보내 볼까요?"
+  timeout: "연결이 느려요. 다시 보내 볼까요?", notInDict: "표준국어대사전에 없는 단어예요 📖"
 };
 const NICK_REASON = { empty: "별명을 적어 주세요", long: "별명은 10글자까지예요", symbol: "@ # < > 같은 기호는 쓸 수 없어요", digits: "숫자는 2개까지만 쓸 수 있어요 (학번·전화번호 금지)", bad: "바르고 고운 별명을 써 주세요" };
 
@@ -790,12 +806,12 @@ function hostSetup(errMsg) {
 }
 
 /* ===================== 진행자 — 게임 ===================== */
-const DEFAULT_SET = { presetIdx: 0, custom: "", customTopic: "", useCustom: false, time: "normal", showTimer: false, catchKind: "penalty", style: "wheel" };
+const DEFAULT_SET = { presetIdx: 0, custom: "", customTopic: "", useCustom: false, time: "normal", showTimer: false, catchKind: "penalty", style: "wheel", dictOnly: true };
 const H = {
   net: null, mode: "", room: "", joinUrl: "", players: new Map(), view: "lobby",
   meta: { status: "lobby", round: 0, chosung: "", topic: "", holder: null, showTimer: false },
   round: null, words: [], used: new Set(), seq: 0, timer: { total: 0, endAt: 0, remain: 0 }, lastSec: -1,
-  set: null, lists: null, loop: null, boomTimer: null, draw: null, rot: 0, raf: 0, drawTimers: [], botSeq: 0, shownCho: null
+  dict: null, dictState: "none", set: null, lists: null, loop: null, boomTimer: null, draw: null, rot: 0, raf: 0, drawTimers: [], botSeq: 0, shownCho: null
 };
 function loadLists() {
   const d = { penalties: GAME_DATA.penalties, prizes: GAME_DATA.prizes, questions: GAME_DATA.questions, samhaengsi: GAME_DATA.samhaengsi };
@@ -808,7 +824,7 @@ const pubP = p => { const o = { n: p.n, e: p.e, s: p.score }; if (p.bot) o.b = 1
 function pubMeta() {
   const m = H.meta, h = m.holder && H.players.get(m.holder);
   return { status: m.status, round: m.round, chosung: m.chosung || "", topic: m.topic || "", holder: m.holder || null,
-    holderN: h ? h.n : "", holderE: h ? h.e : "", showTimer: !!m.showTimer,
+    holderN: h ? h.n : "", holderE: h ? h.e : "", showTimer: !!m.showTimer, dict: !!(H.round && H.round.dict),
     endsIn: m.showTimer && m.status === "playing" ? Math.max(0, H.timer.endAt - Date.now()) : 0 };
 }
 function pubDraw() {
@@ -833,11 +849,30 @@ async function hostCreate(mode, cfg) {
   if (mode === "local") url += "&local=1";
   else { const fileCfg = Logic.parseFbConfig(GAME_DATA.firebaseDbUrl); if (!fileCfg || fileCfg.databaseURL !== cfg.databaseURL) url += "&db=" + encodeURIComponent(cfg.databaseURL); }
   H.joinUrl = url;
+  loadDict();
   renderHostRoom();
   pushMeta();
   H.loop = setInterval(hostLoop, 200);
   Snd.bgmStart("calm");
   window.addEventListener("beforeunload", e => { if (H.net) { e.preventDefault(); e.returnValue = ""; } });
+}
+// 표준국어대사전 표제어 목록 불러오기 (같은 사이트의 파일만 읽고, 아무것도 밖으로 보내지 않음)
+async function loadDict() {
+  if (!GAME_DATA.dictFile || H.dict) return;
+  H.dictState = "loading";
+  try {
+    const res = await fetch(new URL(GAME_DATA.dictFile, BASE_URL).href, { cache: "force-cache" });
+    if (!res.ok) throw new Error(res.status);
+    const set = Logic.parseDict(await res.text());
+    if (set.size < 1000) throw new Error("too small");
+    H.dict = set; H.dictState = "ok";
+  } catch (e) { H.dict = null; H.dictState = "none"; }
+  const el = document.querySelector("#sDictInfo"); if (el) el.outerHTML = dictInfoHtml();
+}
+function dictInfoHtml() {
+  const on = H.set.dictOnly && H.dict;
+  const msg = H.dictState === "ok" ? `📖 사전 준비 완료 (단어 ${H.dict.size.toLocaleString()}개 · 출처: 국립국어원 표준국어대사전)` : H.dictState === "loading" ? "📖 사전을 불러오는 중…" : "📖 사전 파일이 없어서 초성만 확인해요";
+  return `<div id="sDictInfo"><label class="chk"><input type="checkbox" id="sDict" ${on ? "checked" : ""} ${H.dictState === "ok" ? "" : "disabled"}> 표준국어대사전에 있는 단어만 인정</label><div class="small sub">${msg}</div></div>`;
 }
 function qrHtml(text, cell) {
   try { if (typeof qrcode === "function") { const q = qrcode(0, "M"); q.addData(text); q.make(); return q.createSvgTag({ cellSize: cell || 6, margin: 2, scalable: true }); } } catch (e) {}
@@ -948,7 +983,7 @@ function renderStage() {
   const m = H.meta;
   if (H.shownCho !== m.chosung + "|" + m.round) { H.shownCho = m.chosung + "|" + m.round; $("#gTiles").innerHTML = tilesHtml(m.chosung); fitTiles($("#gTiles"), m.chosung, true); }
   $("#gTopic").textContent = m.topic ? "주제: " + m.topic : "";
-  $("#gRound").textContent = m.round ? `${m.round}번째 판 · ${m.chosung.length}글자` : "";
+  $("#gRound").textContent = m.round ? `${m.round}번째 판 · ${m.chosung.length}글자${H.round && H.round.dict ? " · 📖 사전에 있는 단어만" : ""}` : "";
   const h = m.holder && H.players.get(m.holder);
   $("#gHolder").innerHTML = h ? `💣 지금 폭탄: <span class="em">${esc(h.e)}</span> ${esc(h.n)}` : (m.status === "playing" ? "💣 폭탄을 받을 친구를 기다려요" : "");
   const box = $("#bombBox"); box.classList.toggle("paused", m.status === "paused"); box.classList.toggle("idle", !(m.status === "playing" || m.status === "paused"));
@@ -1024,7 +1059,7 @@ function hostWord(pid, raw, id) {
   if (H.meta.status !== "playing") return fb({ ok: false, reason: H.meta.status === "paused" ? "paused" : "notPlaying" });
   if (now - (p.lastAt || 0) < 500) return fb({ ok: false, reason: "tooFast" });
   p.lastAt = now;
-  const r = Logic.checkWord(raw, H.meta.chosung, H.used, GAME_DATA.badWords);
+  const r = Logic.checkWord(raw, H.meta.chosung, H.used, GAME_DATA.badWords, H.round && H.round.dict);
   if (!r.ok) return fb({ ok: false, reason: r.reason, w: r.w || "", cho: r.cho || "" });
   H.used.add(r.w); p.score++; p.rc++;
   let passed = false;
@@ -1071,7 +1106,7 @@ function addBots(k) {
 function removeBots() { for (const [id, p] of H.players) if (p.bot && p.online) hostOnLeave(id); }
 function botsAct(now) {
   if (!H.round) return;
-  const ex = H.round.examples.filter(w => !H.used.has(w));
+  const ex = H.round.examples.concat(H.round.more || []).filter(w => !H.used.has(w));
   for (const [pid, p] of H.players) {
     if (!p.bot || !p.online) continue;
     const holder = H.meta.holder === pid;
@@ -1111,6 +1146,10 @@ function startRound() {
   if (!tg) { toast("초성 또는 한글 단어를 넣어 주세요"); return; }
   store.set("cs-host-set", H.set);
   clearDrawAnim(); clearTimeout(H.boomTimer);
+  tg.dict = H.set.dictOnly && H.dict ? H.dict : null;
+  if (H.dict) { const extra = Logic.shuffle(Logic.wordsFor(H.dict, tg.cho).filter(w => !tg.examples.includes(w))); tg.more = extra.slice(0, 60); }
+  else tg.more = [];
+  if (tg.dict) tg.examples = tg.examples.filter(w => tg.dict.has(w));
   H.round = tg; H.words = []; H.used.clear(); H.seq = 0; H.draw = null; H.lastSec = -1;
   H.players.forEach(p => { p.rc = 0; if (p.bot) p.nextAt = Date.now() + 1500 + Math.random() * 4000; });
   const range = GAME_DATA.bombTimes[H.set.time] || GAME_DATA.bombTimes.normal;
@@ -1213,7 +1252,7 @@ function renderDrawBtns() {
 function roundKing() { let best = null; for (const [id, p] of H.players) if (p.online && p.rc > 0 && (!best || p.rc > best.p.rc)) best = { id, p }; return best; }
 function renderRoundSum() {
   const el = $("#roundSum"); if (!el) return;
-  const king = roundKing(), left = H.round ? H.round.examples.filter(w => !H.used.has(w)).slice(0, 12) : [];
+  const king = roundKing(), left = H.round ? H.round.examples.concat(H.round.more || []).filter(w => !H.used.has(w)).slice(0, 12) : [];
   el.innerHTML = `<div>이번 판에 나온 단어 <b>${H.words.length}</b>개</div>
     ${king ? `<div>🏆 단어왕: ${esc(king.p.e)} ${esc(king.p.n)} (${king.p.rc}개)</div>` : ""}
     ${left.length ? `<div class="small sub">이런 단어도 있었어요: ${left.map(esc).join(", ")}</div>` : ""}`;
@@ -1300,7 +1339,7 @@ function openSettings() {
     <div class="preview" id="sPreview">${previewHtml()}</div>
     <div class="setGrid">
       <div><h3>② 폭탄 시간</h3>${seg("time", Object.entries(GAME_DATA.bombTimes).map(([v, o]) => ({ v, l: `${o.label}<small>${o.min}~${o.max}초 중 몰래</small>` })), s.time)}
-        <label class="chk"><input type="checkbox" id="sShow" ${s.showTimer ? "checked" : ""}> 남은 시간 보여 주기</label></div>
+        <label class="chk"><input type="checkbox" id="sShow" ${s.showTimer ? "checked" : ""}> 남은 시간 보여 주기</label>${dictInfoHtml()}</div>
       <div><h3>③ 폭탄에 걸린 사람은?</h3>${seg("catchKind", [{ v: "penalty", l: "😈 벌칙" }, { v: "prize", l: "🎁 상품" }, { v: "fate", l: "🎲 운명<small>상품+벌칙 섞기</small>" }], s.catchKind)}</div>
       <div><h3>④ 뽑는 방식</h3>${seg("style", [{ v: "wheel", l: "🎡 룰렛" }, { v: "gacha", l: "🥚 캡슐 뽑기" }], s.style)}</div>
     </div>
@@ -1326,6 +1365,7 @@ function onModalInput(e) {
   if (t.id === "sCustom") { H.set.custom = t.value; H.set.useCustom = !!t.value.trim(); }
   else if (t.id === "sTopic") { H.set.customTopic = t.value; if (t.value.trim() && !H.set.custom.trim()) return; }
   else if (t.id === "sShow") { H.set.showTimer = t.checked; return; }
+  else if (t.id === "sDict") { H.set.dictOnly = t.checked; return; }
   else return;
   $("#sPreview").innerHTML = previewHtml();
   $("#sCustomRow").classList.toggle("on", H.set.useCustom);
@@ -1475,7 +1515,7 @@ function renderPlayerState() {
   // 제시어
   const choKey = (m.chosung || "") + "|" + m.round;
   if (P.cho !== choKey) { P.cho = choKey; $("#pTiles").innerHTML = m.chosung ? tilesHtml(m.chosung) : `<span class="sub small">곧 제시어가 나와요</span>`; fitTiles($("#pTiles"), m.chosung, false); }
-  $("#pTopic").textContent = m.topic ? "주제: " + m.topic : (m.round ? `${m.round}번째 판` : "");
+  $("#pTopic").textContent = (m.topic ? "주제: " + m.topic : (m.round ? `${m.round}번째 판` : "")) + (m.dict ? " · 📖 사전에 있는 단어만" : "");
   const sig = JSON.stringify(m);
   if (sig !== P.metaSig) { P.metaSig = sig; P.endsLocal = m.endsIn ? Date.now() + m.endsIn : 0; }
   $("#pStatus").textContent = { lobby: "선생님이 게임을 준비하고 있어요… 🎈", ready: "다음 판을 준비하고 있어요 ⚙️", playing: "초성에 맞는 단어를 보내요!", paused: "⏸ 잠깐 멈춤", boom: "💥 펑!", draw: "🎡 두근두근 뽑기 시간" }[m.status] || "";
