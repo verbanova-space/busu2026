@@ -396,6 +396,16 @@ const Logic = (() => {
     if (!c.length) return ids.includes(current) ? current : null;
     return pick(c, rand);
   }
+  // 적게 낸 학생일수록 뽑힐 확률이 높은 제비뽑기 (무작위는 그대로)
+  // cands: [{ id, n: 낸 단어 수(가중), recent: 방금 폭탄을 들었는지 }]
+  function holderWeight(c) { return (1 / Math.pow(1 + Math.max(0, c.n), 2)) * (c.recent ? 0.35 : 1); }
+  function pickWeighted(cands, rand = Math.random) {
+    if (!cands || !cands.length) return null;
+    const ws = cands.map(holderWeight), total = ws.reduce((a, b) => a + b, 0);
+    let r = rand() * total;
+    for (let i = 0; i < cands.length; i++) { r -= ws[i]; if (r < 0) return cands[i].id; }
+    return cands[cands.length - 1].id;
+  }
   function bombSeconds(range, rand = Math.random) { return Math.round(range.min + rand() * (range.max - range.min)); }
   // 배경음악 빠르기: 시간이 갈수록 조금씩 빨라짐 (전체 시간과 무관 → 남은 시간을 들키지 않음)
   function bpm(elapsedSec) { return Math.min(188, 124 + Math.max(0, elapsedSec) * 0.9); }
@@ -484,7 +494,7 @@ const Logic = (() => {
     if (ak) cfg.apiKey = ak; if (pj) cfg.projectId = pj; if (ap) cfg.appId = ap;
     return cfg;
   }
-  return { CHO, isSyl, clean, toChosung, parseTarget, isBad, checkWord, checkNick, shuffle, pick, randomNick, pickNext, bombSeconds, bpm,
+  return { CHO, isSyl, clean, toChosung, parseTarget, isBad, checkWord, checkNick, shuffle, pick, randomNick, pickNext, pickWeighted, holderWeight, bombSeconds, bpm,
     spinTo, landed, buildWheel, splitItem, detailKind, applyUpdates, fmtClock, makeRoomCode, randomChosung, parseFbConfig, parseDict, wordsFor };
 })();
 // LOGIC END
@@ -809,7 +819,7 @@ const H = {
   net: null, mode: "", room: "", joinUrl: "", players: new Map(), view: "lobby",
   meta: { status: "lobby", round: 0, chosung: "", topic: "", holder: null, showTimer: false },
   round: null, words: [], used: new Set(), seq: 0, timer: { total: 0, endAt: 0, remain: 0 }, lastSec: -1,
-  dict: null, dictState: "none", set: null, lists: null, loop: null, boomTimer: null, draw: null, rot: 0, raf: 0, drawTimers: [], botSeq: 0, shownCho: null
+  dict: null, dictState: "none", recentHolders: [], set: null, lists: null, loop: null, boomTimer: null, draw: null, rot: 0, raf: 0, drawTimers: [], botSeq: 0, shownCho: null
 };
 function loadLists() {
   const d = { penalties: GAME_DATA.penalties, prizes: GAME_DATA.prizes, questions: GAME_DATA.questions, samhaengsi: GAME_DATA.samhaengsi };
@@ -831,6 +841,18 @@ function pubDraw() {
     items: d.items.map(i => i.s), kinds: d.items.map(i => i.k), idx: d.state === "done" ? d.idx : -1, detail: d.detail || "", dk: d.dk || "" };
 }
 const put = u => { if (H.net) H.net.put(u); };
+// 다음 폭탄 주인 정하기: 이번 판에 적게 낸 학생(지난 판까지 점수도 조금 반영)일수록 확률이 높게
+function pickHolder(exclude) {
+  const cands = onlineIds().filter(id => id !== exclude).map(id => {
+    const p = H.players.get(id);
+    return { id, n: p.rc + 0.25 * Math.max(0, p.score - p.rc), recent: H.recentHolders.includes(id) };
+  });
+  return Logic.pickWeighted(cands);
+}
+function setHolder(id) {
+  H.meta.holder = id || null;
+  if (id) { H.recentHolders = H.recentHolders.filter(x => x !== id).concat(id).slice(-2); }
+}
 function pushMeta(extra) { put(Object.assign({ meta: pubMeta() }, extra || {})); renderStage(); }
 function drawLater(fn, ms) { H.drawTimers.push(setTimeout(fn, ms)); }
 function clearDrawAnim() { H.drawTimers.forEach(clearTimeout); H.drawTimers = []; cancelAnimationFrame(H.raf); }
@@ -1034,13 +1056,13 @@ function hostOnJoin(pid, prof) {
   else { p.n = n; p.e = e; p.online = true; }
   put({ ["players/" + pid]: pubP(p) });
   if (fresh) { Snd.sfx.join(); renderPlayersUI(); if (H.view === "game") toast(`${e} ${n} 입장!`); }
-  if (H.meta.status === "playing" && !H.meta.holder) { H.meta.holder = pid; pushMeta(); }
+  if (H.meta.status === "playing" && !H.meta.holder) { setHolder(pid); pushMeta(); }
 }
 function hostOnLeave(pid) {
   const p = H.players.get(pid); if (!p || !p.online) return;
   p.online = false; put({ ["players/" + pid]: null }); renderPlayersUI();
   if (H.meta.holder === pid && ["playing", "paused"].includes(H.meta.status)) {
-    H.meta.holder = Logic.pickNext(onlineIds(), pid); pushMeta();
+    setHolder(pickHolder(pid)); pushMeta();
     if (H.meta.holder) toast(`${p.n} 님이 나가서 폭탄이 넘어갔어요`);
   }
 }
@@ -1064,8 +1086,8 @@ function hostWord(pid, raw, id) {
   H.used.add(r.w); p.score++; p.rc++;
   let passed = false;
   if (H.meta.holder === pid) {
-    const next = Logic.pickNext(onlineIds(), pid);
-    if (next && next !== pid) { H.meta.holder = next; passed = true; const np = H.players.get(next); if (np && np.bot) np.nextAt = now + 2500 + Math.random() * 5000; }
+    const next = pickHolder(pid);
+    if (next && next !== pid) { setHolder(next); passed = true; const np = H.players.get(next); if (np && np.bot) np.nextAt = now + 2500 + Math.random() * 5000; }
   }
   const key = "w" + String(++H.seq).padStart(5, "0");
   const rec = { p: pid, n: p.n, e: p.e, w: r.w, t: now, x: passed ? 1 : 0 };
@@ -1085,7 +1107,7 @@ function hostDeleteWord(key) {
   const u = { ["words/" + key]: null };
   if (p && p.online) u["players/" + w.p] = pubP(p);
   let back = false;
-  if (w.x && ["playing", "paused"].includes(H.meta.status) && p && p.online && H.meta.holder !== w.p) { H.meta.holder = w.p; back = true; }
+  if (w.x && ["playing", "paused"].includes(H.meta.status) && p && p.online && H.meta.holder !== w.p) { setHolder(w.p); back = true; }
   u.meta = pubMeta(); put(u);
   const el = document.querySelector(`.wcard[data-key="${key}"]`); if (el) el.remove();
   $("#wCount").textContent = H.words.length;
@@ -1101,7 +1123,7 @@ function addBots(k) {
     H.players.set(pid, p); put({ ["players/" + pid]: pubP(p) });
   }
   Snd.sfx.join(); renderPlayersUI();
-  if (H.meta.status === "playing" && !H.meta.holder) { H.meta.holder = Logic.pick(onlineIds()); pushMeta(); }
+  if (H.meta.status === "playing" && !H.meta.holder) { setHolder(pickHolder(null)); pushMeta(); }
 }
 function removeBots() { for (const [id, p] of H.players) if (p.bot && p.online) hostOnLeave(id); }
 function botsAct(now) {
@@ -1155,8 +1177,9 @@ function startRound() {
   H.players.forEach(p => { p.rc = 0; if (p.bot) p.nextAt = Date.now() + 1500 + Math.random() * 4000; });
   const range = GAME_DATA.bombTimes[H.set.time] || GAME_DATA.bombTimes.normal;
   H.timer.total = Logic.bombSeconds(range); H.timer.endAt = Date.now() + H.timer.total * 1000;
-  const ids = onlineIds();
-  Object.assign(H.meta, { status: "playing", round: H.meta.round + 1, chosung: tg.cho, topic: tg.topic, holder: ids.length ? Logic.pick(ids) : null, showTimer: !!H.set.showTimer });
+  H.recentHolders = [];
+  Object.assign(H.meta, { status: "playing", round: H.meta.round + 1, chosung: tg.cho, topic: tg.topic, showTimer: !!H.set.showTimer });
+  setHolder(pickHolder(null));
   put({ words: null, draw: null, fb: null, meta: pubMeta() });
   closeModal(); $("#hOv").classList.add("hidden"); $("#hOv").innerHTML = "";
   showView("game"); $("#wall").innerHTML = ""; $("#wCount").textContent = "0";
