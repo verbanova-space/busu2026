@@ -1147,7 +1147,7 @@ function startRound() {
   store.set("cs-host-set", H.set);
   clearDrawAnim(); clearTimeout(H.boomTimer);
   tg.dict = H.set.dictOnly && H.dict ? H.dict : null;
-  if (H.dict) { const extra = Logic.shuffle(Logic.wordsFor(H.dict, tg.cho).filter(w => !tg.examples.includes(w))); tg.more = extra.slice(0, 60); }
+  if (H.dict) { const extra = Logic.shuffle(Logic.wordsFor(H.dict, tg.cho).filter(w => !tg.examples.includes(w) && !Logic.isBad(w, GAME_DATA.badWords))); tg.more = extra.slice(0, 60); }
   else tg.more = [];
   if (tg.dict) tg.examples = tg.examples.filter(w => tg.dict.has(w));
   H.round = tg; H.words = []; H.used.clear(); H.seq = 0; H.draw = null; H.lastSec = -1;
