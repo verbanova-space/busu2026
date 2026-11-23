@@ -1,0 +1,16 @@
+words.txt — 초성 폭탄 게임용 표준국어대사전 표제어 목록
+
+출처: 국립국어원 「표준국어대사전」 (https://stdict.korean.go.kr)
+      2019년 6월 25일 기준 사전 내려받기 자료
+      (https://github.com/spellcheck-ko/korean-dict-nikl-stdict 에 공개된 XML 사용)
+
+라이선스: 크리에이티브 커먼즈 저작자표시-동일조건변경허락 2.0 대한민국 (CC BY-SA 2.0 KR)
+          https://creativecommons.org/licenses/by-sa/2.0/kr/
+          이 목록(words.txt)도 같은 라이선스로 이용할 수 있습니다.
+
+가공 내용:
+- 단어 단위 표제어만 남김 (구·관용구·속담 제외)
+- 조사·어미·접사 제외
+- 동형어 번호(사과01 → 사과), 붙임표(-), 띄어쓰기 표시(^) 제거
+- 한글로만 된 1~8글자 단어만 남김
+- 결과: 285,213개
