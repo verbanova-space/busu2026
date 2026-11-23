@@ -148,7 +148,7 @@ body.shake .host{animation:shake .55s}
 .drawWrap{display:grid;grid-template-columns:minmax(260px,430px) 1fr;gap:24px;align-items:center}
 .drawStage{position:relative}
 .wheelSvg{width:100%;height:auto;display:block}
-.wheelSvg text{font-family:'Jua','Gowun Dodum',sans-serif;font-size:14px;fill:var(--ink)}
+.wheelSvg text{font-family:'Jua','Gowun Dodum',sans-serif;fill:var(--ink)}
 .drawSide{display:grid;gap:14px}
 .resultCard{border:3px dashed var(--line);border-radius:22px;padding:18px;text-align:center;min-height:180px;display:grid;align-content:center;gap:8px}
 .resultCard.placeholder{font-family:'Jua',sans-serif;font-size:1.6rem;color:var(--sub)}
@@ -306,14 +306,11 @@ const GAME_DATA = {
     "🗣️ 이번 초성으로 단어 3개 말하기"
   ],
   prizes: [
-    "🍬 사탕 하나",
-    "🍫 초콜릿 하나",
-    "⭐ 칭찬 스티커",
-    "🎫 다음 벌칙 면제권",
-    "👑 다음 판 제시어 정하기",
-    "🎁 선생님 깜짝 선물",
-    "🍭 젤리 하나",
-    "🏅 모두에게 박수 받기"
+    "🍬 미니 간식 1개",
+    "💯 상점 추가",
+    "👏 박수 1번",
+    "🙌 박수 3번",
+    "🥰 칭찬 듣기"
   ],
   questions: [
     "요즘 가장 좋아하는 노래는?",
@@ -1212,11 +1209,12 @@ function wheelSvg(items) {
     const fill = (it.k === "prize" ? colG : colP)[i % 4];
     g += `<path d="M${C},${C} L${x0.toFixed(2)},${y0.toFixed(2)} A${R},${R} 0 ${seg > 180 ? 1 : 0} 1 ${x1.toFixed(2)},${y1.toFixed(2)} Z" fill="${fill}" stroke="#4A3B5C" stroke-width="3"/>`;
     const { icon, text } = Logic.splitItem(it.s), mid = a0 + seg / 2;
-    const short = [...text].length > 7 ? [...text].slice(0, 6).join("") + "…" : text;
+    const len = [...text].length, short = len > 8 ? [...text].slice(0, 7).join("") + "…" : text;
+    const fs = len <= 5 ? 14 : len <= 7 ? 12.5 : 11; // 긴 이름은 글자를 조금 작게
     const left = mid > 180; // 왼쪽 절반은 글자가 뒤집히지 않게 반대로 배치
     g += left
-      ? `<text x="${C - 34}" y="${C}" text-anchor="end" dominant-baseline="middle" transform="rotate(${(mid - 270).toFixed(2)} ${C} ${C})">${esc(short)} <tspan font-size="20">${esc(icon)}</tspan></text>`
-      : `<text x="${C + 34}" y="${C}" dominant-baseline="middle" transform="rotate(${(mid - 90).toFixed(2)} ${C} ${C})"><tspan font-size="20">${esc(icon)}</tspan> ${esc(short)}</text>`;
+      ? `<text x="${C - 34}" y="${C}" text-anchor="end" dominant-baseline="middle" font-size="${fs}" transform="rotate(${(mid - 270).toFixed(2)} ${C} ${C})">${esc(short)} <tspan font-size="20">${esc(icon)}</tspan></text>`
+      : `<text x="${C + 34}" y="${C}" dominant-baseline="middle" font-size="${fs}" transform="rotate(${(mid - 90).toFixed(2)} ${C} ${C})"><tspan font-size="20">${esc(icon)}</tspan> ${esc(short)}</text>`;
   });
   return `<svg class="wheelSvg" viewBox="0 0 300 320" aria-label="룰렛">
     <g transform="translate(0,14)"><g id="wheelG">${g}</g>
