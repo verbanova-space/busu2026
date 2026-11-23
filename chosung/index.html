@@ -539,7 +539,8 @@ const REASON = {
   empty: "단어를 입력해 주세요", notHangul: "한글 완성 글자로만 써 주세요 (자음만은 안 돼요)", bad: "바르고 고운 말을 써 주세요 🙏",
   length: "글자 수가 달라요", mismatch: "초성이 맞지 않아요", dup: "이미 나온 단어예요! 다른 단어를 찾아봐요",
   notPlaying: "지금은 단어를 보낼 수 없어요", paused: "잠깐 멈춤 중이에요", tooFast: "너무 빨라요! 천천히 보내 주세요",
-  timeout: "연결이 느려요. 다시 보내 볼까요?", notInDict: "표준국어대사전에 없는 단어예요 📖"
+  timeout: "연결이 느려요. 다시 보내 볼까요?", notInDict: "표준국어대사전에 없는 단어예요 📖",
+  notYourTurn: "지금은 내 차례가 아니에요. 폭탄이 오면 보내요!"
 };
 const NICK_REASON = { empty: "별명을 적어 주세요", long: "별명은 10글자까지예요", symbol: "@ # < > 같은 기호는 쓸 수 없어요", digits: "숫자는 2개까지만 쓸 수 있어요 (학번·전화번호 금지)", bad: "바르고 고운 별명을 써 주세요" };
 
@@ -803,7 +804,7 @@ function hostSetup(errMsg) {
 }
 
 /* ===================== 진행자 — 게임 ===================== */
-const DEFAULT_SET = { presetIdx: 0, custom: "", customTopic: "", useCustom: false, time: "normal", showTimer: false, catchKind: "penalty", style: "wheel", dictOnly: true };
+const DEFAULT_SET = { presetIdx: 0, custom: "", customTopic: "", useCustom: false, time: "normal", showTimer: false, catchKind: "penalty", style: "wheel", dictOnly: true, turnOnly: true };
 const H = {
   net: null, mode: "", room: "", joinUrl: "", players: new Map(), view: "lobby",
   meta: { status: "lobby", round: 0, chosung: "", topic: "", holder: null, showTimer: false },
@@ -821,7 +822,7 @@ const pubP = p => { const o = { n: p.n, e: p.e, s: p.score }; if (p.bot) o.b = 1
 function pubMeta() {
   const m = H.meta, h = m.holder && H.players.get(m.holder);
   return { status: m.status, round: m.round, chosung: m.chosung || "", topic: m.topic || "", holder: m.holder || null,
-    holderN: h ? h.n : "", holderE: h ? h.e : "", showTimer: !!m.showTimer, dict: !!(H.round && H.round.dict),
+    holderN: h ? h.n : "", holderE: h ? h.e : "", showTimer: !!m.showTimer, dict: !!(H.round && H.round.dict), turnOnly: !!(H.round && H.round.turnOnly),
     endsIn: m.showTimer && m.status === "playing" ? Math.max(0, H.timer.endAt - Date.now()) : 0 };
 }
 function pubDraw() {
@@ -982,10 +983,11 @@ function renderStage() {
   $("#gTopic").textContent = m.topic ? "주제: " + m.topic : "";
   $("#gRound").textContent = m.round ? `${m.round}번째 판 · ${m.chosung.length}글자${H.round && H.round.dict ? " · 📖 사전에 있는 단어만" : ""}` : "";
   const h = m.holder && H.players.get(m.holder);
-  $("#gHolder").innerHTML = h ? `💣 지금 폭탄: <span class="em">${esc(h.e)}</span> ${esc(h.n)}` : (m.status === "playing" ? "💣 폭탄을 받을 친구를 기다려요" : "");
+  const turn = H.round && H.round.turnOnly;
+  $("#gHolder").innerHTML = h ? `${turn ? "🎯 지금 차례" : "💣 지금 폭탄"}: <span class="em">${esc(h.e)}</span> ${esc(h.n)}` : (m.status === "playing" ? "💣 폭탄을 받을 친구를 기다려요" : "");
   const box = $("#bombBox"); box.classList.toggle("paused", m.status === "paused"); box.classList.toggle("idle", !(m.status === "playing" || m.status === "paused"));
   $("#gTimer").classList.toggle("hidden", !(m.showTimer && (m.status === "playing" || m.status === "paused")));
-  const st = { lobby: "", ready: "⚙️ 다음 판을 준비해요", playing: "초성에 맞는 단어를 보내서 폭탄을 넘기세요!", paused: "⏸ 잠깐 멈춤", boom: "💥 펑!", draw: "🎡 두근두근 뽑기 시간" }[m.status] || "";
+  const st = { lobby: "", ready: "⚙️ 다음 판을 준비해요", playing: turn ? "폭탄을 가진 친구만 단어를 보낼 수 있어요!" : "초성에 맞는 단어를 보내서 폭탄을 넘기세요!", paused: "⏸ 잠깐 멈춤", boom: "💥 펑!", draw: "🎡 두근두근 뽑기 시간" }[m.status] || "";
   $("#gStatus").textContent = st;
   const live = m.status === "playing" || m.status === "paused";
   $("#cPause").classList.toggle("hidden", !live); $("#cBoom").classList.toggle("hidden", !live);
@@ -1054,6 +1056,7 @@ function hostWord(pid, raw, id) {
   const fb = o => { if (id) put({ ["fb/" + pid]: Object.assign({ id }, o) }); };
   const now = Date.now();
   if (H.meta.status !== "playing") return fb({ ok: false, reason: H.meta.status === "paused" ? "paused" : "notPlaying" });
+  if (H.round && H.round.turnOnly && H.meta.holder !== pid) return fb({ ok: false, reason: "notYourTurn" });
   if (now - (p.lastAt || 0) < 500) return fb({ ok: false, reason: "tooFast" });
   p.lastAt = now;
   const r = Logic.checkWord(raw, H.meta.chosung, H.used, GAME_DATA.badWords, H.round && H.round.dict);
@@ -1110,7 +1113,7 @@ function botsAct(now) {
     if (!p.nextAt) p.nextAt = now + 3000 + Math.random() * 6000;
     if (now < p.nextAt) continue;
     p.nextAt = now + (holder ? 2500 + Math.random() * 5000 : 7000 + Math.random() * 12000);
-    if (!ex.length) continue;
+    if (!ex.length || (H.round.turnOnly && !holder)) continue;
     if (holder || Math.random() < 0.5) hostWord(pid, ex.splice(Math.floor(Math.random() * ex.length), 1)[0], null);
     if (H.meta.status !== "playing") return;
   }
@@ -1144,6 +1147,7 @@ function startRound() {
   store.set("cs-host-set", H.set);
   clearDrawAnim(); clearTimeout(H.boomTimer);
   tg.dict = H.set.dictOnly && H.dict ? H.dict : null;
+  tg.turnOnly = !!H.set.turnOnly;
   if (H.dict) { const extra = Logic.shuffle(Logic.wordsFor(H.dict, tg.cho).filter(w => !tg.examples.includes(w) && !Logic.isBad(w, GAME_DATA.badWords))); tg.more = extra.slice(0, 60); }
   else tg.more = [];
   if (tg.dict) tg.examples = tg.examples.filter(w => tg.dict.has(w));
@@ -1340,6 +1344,7 @@ function openSettings() {
         <label class="chk"><input type="checkbox" id="sShow" ${s.showTimer ? "checked" : ""}> 남은 시간 보여 주기</label>${dictInfoHtml()}</div>
       <div><h3>③ 폭탄에 걸린 사람은?</h3>${seg("catchKind", [{ v: "penalty", l: "😈 벌칙" }, { v: "prize", l: "🎁 상품" }, { v: "fate", l: "🎲 운명<small>상품+벌칙 섞기</small>" }], s.catchKind)}</div>
       <div><h3>④ 뽑는 방식</h3>${seg("style", [{ v: "wheel", l: "🎡 룰렛" }, { v: "gacha", l: "🥚 캡슐 뽑기" }], s.style)}</div>
+      <div><h3>⑤ 누가 단어를 보내나요?</h3>${seg("turnOnly", [{ v: "1", l: "🎯 차례대로<small>폭탄 가진 사람만</small>" }, { v: "0", l: "🙌 모두 함께<small>아무나 먼저</small>" }], s.turnOnly ? "1" : "0")}</div>
     </div>
     <div class="row end"><button class="btn" data-act="closeSet">닫기</button><button class="btn pink big" data-act="startRound">💣 시작!</button></div></div>`;
 }
@@ -1348,7 +1353,7 @@ function onModalClick(e) {
   if (e.target.id === "hModal") return;
   const pr = e.target.closest("[data-preset]"), sg = e.target.closest("[data-seg]"), ac = e.target.closest("[data-act]");
   if (pr) { H.set.presetIdx = +pr.dataset.preset; H.set.useCustom = false; Snd.sfx.click(); openSettings(); }
-  else if (sg) { H.set[sg.dataset.seg] = sg.dataset.v; Snd.sfx.click(); openSettings(); }
+  else if (sg) { H.set[sg.dataset.seg] = sg.dataset.seg === "turnOnly" ? sg.dataset.v === "1" : sg.dataset.v; Snd.sfx.click(); openSettings(); }
   else if (ac) {
     const a = ac.dataset.act;
     if (a === "randomCho") { H.set.useCustom = true; H.set.custom = Logic.randomChosung(GAME_DATA.bannedChosung); H.set.customTopic = "아무 단어나"; Snd.sfx.click(); openSettings(); }
@@ -1516,17 +1521,23 @@ function renderPlayerState() {
   $("#pTopic").textContent = (m.topic ? "주제: " + m.topic : (m.round ? `${m.round}번째 판` : "")) + (m.dict ? " · 📖 사전에 있는 단어만" : "");
   const sig = JSON.stringify(m);
   if (sig !== P.metaSig) { P.metaSig = sig; P.endsLocal = m.endsIn ? Date.now() + m.endsIn : 0; }
-  $("#pStatus").textContent = { lobby: "선생님이 게임을 준비하고 있어요… 🎈", ready: "다음 판을 준비하고 있어요 ⚙️", playing: "초성에 맞는 단어를 보내요!", paused: "⏸ 잠깐 멈춤", boom: "💥 펑!", draw: "🎡 두근두근 뽑기 시간" }[m.status] || "";
+  $("#pStatus").textContent = { lobby: "선생님이 게임을 준비하고 있어요… 🎈", ready: "다음 판을 준비하고 있어요 ⚙️", playing: m.turnOnly ? (m.holder === P.pid ? "내 차례! 단어를 보내요!" : "친구 차례예요. 같이 응원해요! 📣") : "초성에 맞는 단어를 보내요!", paused: "⏸ 잠깐 멈춤", boom: "💥 펑!", draw: "🎡 두근두근 뽑기 시간" }[m.status] || "";
   // 폭탄
   const live = m.status === "playing" || m.status === "paused";
   const iHold = live && m.holder === me;
   document.body.classList.toggle("hot", iHold);
   const pb = $("#pBomb");
   pb.className = "pBomb" + (iHold ? " me" : "");
-  pb.innerHTML = !live ? "" : iHold ? "💣 폭탄이 나에게 왔어요!<br>단어를 보내서 빨리 넘기세요!" : m.holder ? `💣 지금 폭탄: ${esc(m.holderE)} ${esc(m.holderN)}` : "";
-  if (iHold && P.lastHolder !== me && m.status === "playing") { Snd.sfx.alarm(); if (navigator.vibrate) navigator.vibrate([200, 100, 200]); }
+  pb.innerHTML = !live ? "" : iHold ? (m.turnOnly ? "💣 내 차례예요!<br>단어를 보내서 폭탄을 넘기세요!" : "💣 폭탄이 나에게 왔어요!<br>단어를 보내서 빨리 넘기세요!")
+    : m.holder ? (m.turnOnly ? `🎯 지금은 ${esc(m.holderE)} ${esc(m.holderN)} 님 차례예요` : `💣 지금 폭탄: ${esc(m.holderE)} ${esc(m.holderN)}`) : "";
+  const newlyMine = iHold && P.lastHolder !== me && m.status === "playing";
+  if (newlyMine) { Snd.sfx.alarm(); if (navigator.vibrate) navigator.vibrate([200, 100, 200]); }
   P.lastHolder = live ? m.holder : null;
-  $("#pInput").disabled = m.status !== "playing"; $("#pSend").disabled = m.status !== "playing";
+  const canSend = m.status === "playing" && (!m.turnOnly || m.holder === me);
+  const inp = $("#pInput");
+  inp.disabled = !canSend; $("#pSend").disabled = !canSend;
+  inp.placeholder = m.status === "playing" && !canSend ? "내 차례를 기다려요…" : "초성에 맞는 단어";
+  if (canSend && m.turnOnly && newlyMine) setTimeout(() => { try { inp.focus(); } catch (e) {} }, 60);
   // 내 단어 결과
   const f = t.fb && t.fb[me];
   if (f && P.pending && f.id === P.pending) {
